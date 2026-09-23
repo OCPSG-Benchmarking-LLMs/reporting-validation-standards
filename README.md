@@ -128,6 +128,43 @@ pipenv run pytest
 
 The provider adapters should not redefine prompt wording. Their job is to translate the frozen prompt and the common `predicted_label` output contract into the provider-specific API mechanism while preserving raw outputs, usage metadata, latency, model identity, and failures.
 
+## OpenAI smoke test
+
+The first provider adapter uses the OpenAI Responses API with the two pinned GPT-5.4 snapshots and the canonical P0 prompt. The smoke test is intentionally small: by default it runs the first five frozen cases once on each model, for ten API calls total.
+
+The adapter:
+
+- requests `reasoning.effort="none"` and `temperature=0`;
+- uses strict JSON Schema structured output for `predicted_label`;
+- sets `store=false`;
+- requests the `default` service tier so the dated standard-pricing configuration applies;
+- disables hidden SDK retries and records explicit retry counts;
+- records returned model identity, response ID, token usage, cache reads/writes, reasoning tokens, latency, timestamps, raw structured output, and failures;
+- calculates cost from `config/pricing/openai_2026-09-23.yaml`; and
+- writes smoke-test artefacts under `runs/`, which is gitignored.
+
+After pulling this stage, refresh the environment and tests:
+
+```bash
+pipenv install --dev
+pipenv lock
+pipenv run pytest
+```
+
+Set `OPENAI_API_KEY` in the environment and then run:
+
+```bash
+pipenv run python code/03_smoke_test_openai.py
+```
+
+For an even smaller connectivity check:
+
+```bash
+pipenv run python code/03_smoke_test_openai.py --n-cases 1
+```
+
+Do not commit API keys or the raw `runs/` directory.
+
 ## Repository structure
 
 ```text
