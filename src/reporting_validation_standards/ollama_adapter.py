@@ -165,6 +165,7 @@ class OllamaClassifier:
         reasoning_setting: str = "thinking_false",
         temperature: float = 0.0,
         max_output_tokens: int = 40,
+        runtime_context_length: int = 8192,
         structured_output_mode: str = "json_schema",
         send_think_false: bool = True,
         keep_alive: str = "5m",
@@ -184,6 +185,7 @@ class OllamaClassifier:
             "options": {
                 "temperature": temperature,
                 "num_predict": max_output_tokens,
+                "num_ctx": runtime_context_length,
             },
             "keep_alive": keep_alive,
         }
@@ -263,6 +265,7 @@ class OllamaClassifier:
                     "successful_attempt_latency_seconds": None,
                     "latency_definition": "end_to_end_including_retries_and_backoff",
                     "think_parameter_sent": send_think_false,
+                    "requested_context_length": runtime_context_length,
                 },
             )
 
@@ -327,6 +330,7 @@ class OllamaClassifier:
                 "thinking_output_present": bool(thinking_output),
                 "thinking_output_chars": len(thinking_output),
                 "think_parameter_sent": send_think_false,
+                "requested_context_length": runtime_context_length,
                 "attempt_count": retries_used + 1,
                 "retry_events": retry_events,
                 "successful_attempt_latency_seconds": successful_attempt_latency_seconds,
