@@ -64,3 +64,12 @@ Gemma 4 31B:
 These measurements confirm substantial partial CPU/GPU residency on the 12 GB RTX 4070 SUPER and help explain why CPU energy exceeds GPU energy in the short CodeCarbon smoke runs. The residency split is recorded from Ollama at runtime rather than inferred from nominal parameter count.
 
 The 4,096-token runtime context should be checked against the full frozen 1,000-case sample before production inference. A preflight script was added for this purpose; production context settings should be frozen only after that check.
+
+
+## 2026-09-23 — Freezing the local runtime context at 8,192 tokens
+
+The initial Ollama smoke tests used the runtime default of 4,096 tokens. A full-sample preflight over the frozen 1,000-speech sample showed that the longest rendered prompts were estimated at approximately 4,018–4,035 input tokens under a conservative empirical token/word ratio calibrated from the successful Ollama smoke records. No case was estimated to exceed 4,096 input tokens, but one or two cases per prompt/model condition reached at least 90% of that context.
+
+Because the estimate is a diagnostic proxy rather than an exact tokenizer count, and because the context must also leave room for the 40-token structured output budget and implementation overhead, 4,096 provides insufficient safety margin. The production local-model configuration therefore explicitly freezes `num_ctx=8192` for both Qwen3.6-35B-A3B and Gemma 4 31B.
+
+This is a pre-analysis infrastructure decision based on the frozen sample's length distribution, not on classification outcomes. The chosen context remains far below the models' advertised maximum context length while providing substantial headroom for the longest sampled parliamentary speech. A targeted longest-case smoke test is used to confirm the setting before production inference.
