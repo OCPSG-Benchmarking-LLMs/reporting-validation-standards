@@ -43,7 +43,7 @@ models:
     adapter: openai_compatible
     snapshot_pinned: false
     structured_output_mode: json_schema
-    reasoning_setting: structured_output_disables_reasoning
+    reasoning_setting: none
 
   - model_key: ollama_qwen36_35b
     provider: ollama
