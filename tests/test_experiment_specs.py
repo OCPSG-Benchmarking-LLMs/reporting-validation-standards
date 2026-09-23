@@ -84,3 +84,17 @@ def test_local_models_freeze_runtime_context():
 
     assert local_models
     assert all(model["runtime_context_length"] == 8192 for model in local_models)
+
+
+def test_local_models_freeze_exact_digests():
+    config = load_model_config(MODELS)
+    lookup = {model["model_key"]: model for model in config["models"]}
+
+    assert (
+        lookup["ollama_qwen36_35b"]["expected_local_digest"]
+        == "096fdbd02fe620fc10cbeb6537e080f8041aece851e5d696aed024d4f70f2e47"
+    )
+    assert (
+        lookup["ollama_gemma4_31b"]["expected_local_digest"]
+        == "6316f0629137b426c9d9b853ffc4c8209589f30ee39aebede6285096c0ff47e7"
+    )
