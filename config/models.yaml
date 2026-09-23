@@ -13,6 +13,8 @@ experiment_policy:
     reasoning. Where the provider exposes an explicit reasoning/thinking switch,
     use the lowest/no-reasoning setting supported by the model.
   output_contract: predicted_label_only
+  schedule_seed: 20260923
+  schedule_algorithm: randomized_cells_pcg64_v1
 
 models:
   - model_key: openai_gpt54
