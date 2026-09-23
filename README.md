@@ -238,7 +238,7 @@ pipenv run python code/05_smoke_test_ollama.py --model-key ollama_qwen36_35b
 pipenv run python code/05_smoke_test_ollama.py --model-key ollama_gemma4_31b
 ```
 
-The script keeps a model resident between cases and sends `keep_alive=0` on the final case so sequential model runs do not remain loaded in VRAM.
+The script keeps a model resident throughout the run, queries Ollama's running-model state after the first successful request to record total resident size and VRAM-resident size, and then explicitly unloads the model after the run. This allows the manifest to document CPU/GPU residency rather than inferring it from nominal model size or GPU capacity.
 
 ### Local energy and carbon measurement
 
