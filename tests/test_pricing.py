@@ -43,3 +43,18 @@ def test_gpt6_luna_cache_write_cost():
         + 100 * 0.50
     ) / 1_000_000
     assert round(estimate.cost_usd, 12) == round(expected, 12)
+
+
+def test_fireworks_deepseek_cost_with_cached_tokens():
+    from reporting_validation_standards.pricing import estimate_fireworks_cost
+
+    estimate = estimate_fireworks_cost(
+        model_id="accounts/fireworks/models/deepseek-v4p1-flash",
+        input_tokens=2000,
+        cached_input_tokens=1000,
+        cache_write_tokens=0,
+        output_tokens=100,
+    )
+
+    expected = (1000 * 0.22 + 1000 * 0.007 + 100 * 0.66) / 1_000_000
+    assert round(estimate.cost_usd, 12) == round(expected, 12)
