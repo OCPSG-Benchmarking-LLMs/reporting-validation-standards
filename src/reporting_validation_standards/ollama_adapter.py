@@ -128,6 +128,28 @@ class OllamaClassifier:
             payload={"model": model_id},
         )
 
+
+    def running_models(self) -> list[dict[str, Any]]:
+        payload = self._request_json(method="GET", path="/api/ps")
+        models = payload.get("models", [])
+        if not isinstance(models, list):
+            raise ValueError("Ollama /api/ps response does not contain a models list.")
+        return [model for model in models if isinstance(model, dict)]
+
+    def resolve_running_model(self, model_id: str) -> dict[str, Any] | None:
+        for model in self.running_models():
+            names = {str(model.get("name", "")), str(model.get("model", ""))}
+            if model_id in names:
+                return model
+        return None
+
+    def unload_model(self, model_id: str) -> None:
+        self._request_json(
+            method="POST",
+            path="/api/generate",
+            payload={"model": model_id, "keep_alive": 0},
+        )
+
     def classify(
         self,
         *,
