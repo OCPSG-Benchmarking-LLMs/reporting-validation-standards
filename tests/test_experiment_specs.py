@@ -63,3 +63,13 @@ def test_p2_is_a_noncanonical_fixed_permutation():
     assert p2["label_order_seed"] == 20260923
     assert p2["label_order"] != config["official_labels"]
     assert set(p2["label_order"]) == set(config["official_labels"])
+
+
+def test_fireworks_reasoning_is_explicitly_disabled():
+    config = load_model_config(MODELS)
+    model = next(
+        model for model in config["models"]
+        if model["model_key"] == "fireworks_deepseek_v41_flash"
+    )
+
+    assert model["reasoning_setting"] == "none"
