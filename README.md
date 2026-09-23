@@ -317,3 +317,39 @@ pipenv run python code/07_run_stability_experiment.py \
 ```
 
 Each invocation creates a session manifest. This permits interrupted local runs to be resumed while preserving separate CodeCarbon segments. The classification records remain model-level and append-only. Do not update local model files, Ollama, the GPU driver, or the Python environment between production sessions unless the resulting infrastructure change is intentionally documented and the affected run is restarted.
+
+
+## Check and finalize a production run
+
+Production runs remain under the gitignored `runs/` directory. Use the combined QA/finalization script to inspect a partial or completed model run:
+
+```bash
+pipenv run python code/08_check_and_finalize_production.py \
+  --model-key <MODEL_KEY>
+```
+
+Check-only mode has no archival side effects and can be used during staged or incomplete runs. It validates the frozen schedule, prompt hashes, model/provider identity, manifest consistency, duplicate or unexpected cells, prompt × repetition coverage, parse outcomes, retries, latency, token usage, returned model identity, and recorded API cost when available.
+
+After all 12,000 scheduled cells for a model are complete, finalize the run explicitly:
+
+```bash
+pipenv run python code/08_check_and_finalize_production.py \
+  --model-key <MODEL_KEY> \
+  --finalize
+```
+
+Finalization is fail-closed: it proceeds only when structural QA and completion QA both pass. It leaves the raw inference and CodeCarbon files under `runs/`, computes SHA-256 hashes for every raw run file, and writes only compact provenance artefacts to the version-controlled path:
+
+```text
+results/
+└── production/
+    └── <MODEL_KEY>/
+        ├── experiment_manifest.json
+        ├── qa_summary.json
+        ├── raw_files_sha256.json
+        └── sessions/
+            └── <SESSION_ID>/
+                └── session_manifest.json
+```
+
+The finalized artefacts are immutable by default. Re-running `--finalize` against unchanged raw data is a no-op; if an already-finalized artefact would change, the script refuses to overwrite it. This keeps source-code provenance in Git while allowing the larger raw production outputs to be released separately as a research-data archive.
