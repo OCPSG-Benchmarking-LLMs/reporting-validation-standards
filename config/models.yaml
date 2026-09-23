@@ -1,0 +1,81 @@
+schema_version: 1
+
+# Model panel for the prompt/inference stability demonstration.
+# Prices are deliberately not stored here because they can change independently
+# of the scientific specification. Pricing is captured at run time from a dated
+# pricing configuration.
+
+experiment_policy:
+  repetitions: 3
+  inference_intent: deterministic_intent
+  reasoning_policy: >
+    Use the model as a classifier. Do not elicit chain-of-thought or explanatory
+    reasoning. Where the provider exposes an explicit reasoning/thinking switch,
+    use the lowest/no-reasoning setting supported by the model.
+  output_contract: predicted_label_only
+
+models:
+  - model_key: openai_gpt54
+    provider: openai
+    model_id: gpt-5.4-2026-03-05
+    stage: core
+    access: api
+    adapter: responses
+    snapshot_pinned: true
+    structured_output_mode: json_schema
+    reasoning_setting: none
+
+  - model_key: openai_gpt54_mini
+    provider: openai
+    model_id: gpt-5.4-mini-2026-03-17
+    stage: core
+    access: api
+    adapter: responses
+    snapshot_pinned: true
+    structured_output_mode: json_schema
+    reasoning_setting: none
+
+  - model_key: fireworks_deepseek_v41_flash
+    provider: fireworks
+    model_id: accounts/fireworks/models/deepseek-v4p1-flash
+    stage: core
+    access: api
+    adapter: openai_compatible
+    snapshot_pinned: false
+    structured_output_mode: function_tool
+    reasoning_setting: no_explicit_reasoning
+
+  - model_key: ollama_qwen36_35b
+    provider: ollama
+    model_id: qwen3.6:35b
+    stage: core
+    access: local
+    adapter: ollama
+    snapshot_pinned: false
+    structured_output_mode: json_schema
+    reasoning_setting: thinking_false
+    local_identity_policy: record_ollama_digest_at_run_time
+
+  - model_key: ollama_gemma4_31b
+    provider: ollama
+    model_id: gemma4:31b
+    stage: core
+    access: local
+    adapter: ollama
+    snapshot_pinned: false
+    structured_output_mode: json_schema
+    reasoning_setting: thinking_false
+    local_identity_policy: record_ollama_digest_at_run_time
+
+  - model_key: openai_gpt6_luna
+    provider: openai
+    model_id: gpt-6-luna
+    stage: secondary
+    access: api
+    adapter: responses
+    snapshot_pinned: false
+    structured_output_mode: json_schema
+    reasoning_setting: none
+    run_condition: >
+      Run after the two pinned GPT-5.4 OpenAI smoke tests succeed. Record the
+      returned model identifier and run date because this is a moving alias.
