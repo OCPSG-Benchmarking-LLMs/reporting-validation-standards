@@ -195,7 +195,7 @@ The Fireworks adapter records returned model identity, response ID, token usage,
 
 ## Ollama smoke test
 
-The local-inference adapter uses Ollama's native `/api/chat` endpoint so the experiment can capture local-specific telemetry that is not exposed through the OpenAI-compatible surface. The adapter sends the frozen system/user prompt, a JSON schema through `format`, `temperature=0`, and `think=false`. It records the Ollama model tag and local digest, token counts, cache reads, model-load time, prompt-evaluation time, generation time, tokens per second, end-to-end latency, retries, and raw structured output.
+The local-inference adapter uses Ollama's native `/api/chat` endpoint so the experiment can capture local-specific telemetry that is not exposed through the OpenAI-compatible surface. The adapter sends the frozen system/user prompt, a JSON schema through `format`, `temperature=0`, and `think=false`. It records the Ollama model tag and local digest, token counts, cache reads, model-load time, prompt-evaluation time, generation time, tokens per second, end-to-end latency, retries, and raw structured output. Local timing is reported explicitly as three components—cold model loading, prompt evaluation, and generation—rather than collapsed into a single latency statistic.
 
 Before running the local smoke tests, install the CodeCarbon dependency and make sure Ollama is running:
 
