@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from pathlib import Path
 
 import pandas as pd
 
 from reporting_validation_standards.sampling import (
+    ALLOCATION_RULE,
+    ALLOCATION_RULE_VERSION,
     SampleMetadata,
     download_country_split,
     draw_stratified_sample,
@@ -42,7 +45,22 @@ def main() -> None:
     args = parse_args()
 
     token = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_HUB_TOKEN")
-    revision = args.revision or resolve_dataset_revision(args.repo_id, token=token)
+
+    # When regenerating an existing provisional sample with --overwrite, preserve
+    # the original immutable dataset revision unless the user explicitly supplies
+    # a different --revision. This prevents a metadata refresh from silently
+    # changing the sampling population if the Hugging Face dataset HEAD moves.
+    existing_metadata_path = Path("data/manifests") / f"{args.stem}_metadata.json"
+    existing_revision = None
+    if args.overwrite and args.revision is None and existing_metadata_path.exists():
+        existing_metadata = json.loads(existing_metadata_path.read_text(encoding="utf-8"))
+        existing_revision = existing_metadata.get("dataset_revision")
+
+    revision = (
+        args.revision
+        or existing_revision
+        or resolve_dataset_revision(args.repo_id, token=token)
+    )
 
     parquet_path = download_country_split(
         repo_id=args.repo_id,
@@ -58,8 +76,13 @@ def main() -> None:
         population,
         label_column=args.label_column,
         id_column=args.id_column,
+        population_n=len(population),
+        population_labels_n=int(population[args.label_column].nunique()),
         target_n=args.target_n,
         minimum_per_label=args.minimum_per_label,
+        allocation_rule=ALLOCATION_RULE,
+        allocation_rule_version=ALLOCATION_RULE_VERSION,
+        random_generator="NumPy PCG64",
         seed=args.seed,
     )
 
@@ -94,8 +117,10 @@ def main() -> None:
 
     print(f"Dataset revision: {revision}")
     print(f"Population N: {len(population):,}")
+    print(f"Population labels: {population[args.label_column].nunique()}")
     print(f"Sample n: {len(sample):,}")
     print(f"Number of strata: {len(strata)}")
+    print(f"Allocation rule: {ALLOCATION_RULE_VERSION}")
     print(f"Sample ID SHA-256: {sample_hash}")
     print("\nStratum allocation:")
     print(
