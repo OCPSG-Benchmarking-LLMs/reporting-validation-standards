@@ -37,6 +37,7 @@ class InferenceRecord:
 
     input_tokens: int | None = None
     cached_input_tokens: int | None = None
+    cache_write_tokens: int | None = None
     output_tokens: int | None = None
     reasoning_tokens: int | None = None
     total_tokens: int | None = None
@@ -51,6 +52,7 @@ class InferenceRecord:
 
     cost_usd: float | None = None
     pricing_config_id: str | None = None
+    service_tier: str | None = None
 
     request_started_utc: str | None = None
     response_received_utc: str | None = None
