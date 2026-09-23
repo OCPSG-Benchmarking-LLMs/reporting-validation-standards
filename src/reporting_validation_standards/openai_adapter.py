@@ -120,6 +120,7 @@ class OpenAIClassifier:
                         }
                     },
                     "store": False,
+                    "service_tier": "default",
                 }
                 if temperature is not None:
                     request["temperature"] = temperature
@@ -152,16 +153,23 @@ class OpenAIClassifier:
 
                 cost_usd = None
                 pricing_config_id = None
+                pricing_error = None
                 if input_tokens is not None and output_tokens is not None:
-                    estimate = estimate_openai_cost(
-                        model_id=model_id,
-                        input_tokens=int(input_tokens),
-                        cached_input_tokens=int(cached_tokens or 0),
-                        cache_write_tokens=int(cache_write_tokens or 0),
-                        output_tokens=int(output_tokens),
-                    )
-                    cost_usd = estimate.cost_usd
-                    pricing_config_id = estimate.pricing_config_id
+                    try:
+                        estimate = estimate_openai_cost(
+                            model_id=model_id,
+                            input_tokens=int(input_tokens),
+                            cached_input_tokens=int(cached_tokens or 0),
+                            cache_write_tokens=int(cache_write_tokens or 0),
+                            output_tokens=int(output_tokens),
+                        )
+                        cost_usd = estimate.cost_usd
+                        pricing_config_id = estimate.pricing_config_id
+                    except Exception as exc:
+                        # Pricing metadata must never invalidate a successful
+                        # classification. Preserve the inference and surface the
+                        # accounting problem for inspection.
+                        pricing_error = f"{type(exc).__name__}: {exc}"
 
                 return InferenceRecord(
                     run_id=run_id,
@@ -197,6 +205,7 @@ class OpenAIClassifier:
                     response_received_utc=received_utc,
                     provider_metadata={
                         "status": getattr(response, "status", None),
+                        "pricing_error": pricing_error,
                     },
                 )
 
