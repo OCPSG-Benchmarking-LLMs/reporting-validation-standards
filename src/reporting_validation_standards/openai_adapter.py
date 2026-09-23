@@ -91,6 +91,8 @@ class OpenAIClassifier:
         retries_used = 0
         response: Any | None = None
         api_error: Exception | None = None
+        retry_events: list[dict[str, Any]] = []
+        successful_attempt_latency_seconds: float | None = None
 
         request: dict[str, Any] = {
             "model": model_id,
@@ -121,16 +123,35 @@ class OpenAIClassifier:
             request["temperature"] = temperature
 
         for attempt in range(self.max_retries + 1):
+            attempt_started = time.perf_counter()
             try:
                 response = self.client.responses.create(**request)
+                successful_attempt_latency_seconds = time.perf_counter() - attempt_started
                 api_error = None
                 break
             except Exception as exc:
                 api_error = exc
-                if attempt >= self.max_retries or not _retryable_exception(exc):
+                attempt_latency = time.perf_counter() - attempt_started
+                retryable = _retryable_exception(exc)
+                status_code = getattr(exc, "status_code", None)
+
+                event: dict[str, Any] = {
+                    "attempt": attempt + 1,
+                    "exception_type": type(exc).__name__,
+                    "status_code": int(status_code) if status_code is not None else None,
+                    "retryable": bool(retryable),
+                    "attempt_latency_seconds": attempt_latency,
+                }
+
+                if attempt >= self.max_retries or not retryable:
+                    retry_events.append(event)
                     break
+
+                backoff_seconds = float(2**attempt)
+                event["backoff_seconds"] = backoff_seconds
+                retry_events.append(event)
                 retries_used += 1
-                time.sleep(2**attempt)
+                time.sleep(backoff_seconds)
 
         received_utc = _utc_now()
         latency = time.perf_counter() - started
@@ -158,6 +179,12 @@ class OpenAIClassifier:
                 response_received_utc=received_utc,
                 error_type=type(api_error).__name__ if api_error else "UnknownAPIError",
                 error_message=str(api_error) if api_error else "Unknown API error",
+                provider_metadata={
+                    "attempt_count": len(retry_events),
+                    "retry_events": retry_events,
+                    "successful_attempt_latency_seconds": None,
+                    "latency_definition": "end_to_end_including_retries_and_backoff",
+                },
             )
 
         raw_output = str(getattr(response, "output_text", "") or "").strip()
@@ -226,6 +253,10 @@ class OpenAIClassifier:
             "provider_metadata": {
                 "status": getattr(response, "status", None),
                 "pricing_error": pricing_error,
+                "attempt_count": retries_used + 1,
+                "retry_events": retry_events,
+                "successful_attempt_latency_seconds": successful_attempt_latency_seconds,
+                "latency_definition": "end_to_end_including_retries_and_backoff",
             },
         }
 
