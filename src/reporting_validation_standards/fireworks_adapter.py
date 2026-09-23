@@ -83,7 +83,7 @@ class FireworksClassifier:
         prompt: RenderedPrompt,
         official_labels: list[str],
         repetition: int = 1,
-        reasoning_setting: str = "structured_output_disables_reasoning",
+        reasoning_setting: str = "none",
         temperature: float | None = 0.0,
         max_output_tokens: int = 40,
         structured_output_mode: str = "json_schema",
@@ -111,6 +111,7 @@ class FireworksClassifier:
                 },
             },
             "max_tokens": max_output_tokens,
+            "reasoning_effort": reasoning_setting,
         }
         if temperature is not None:
             request["temperature"] = temperature
