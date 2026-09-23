@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/reporting-validation-standards/inference-record.schema.json",
+  "title": "Provider-neutral inference record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "observation_id",
+    "provider",
+    "model_key",
+    "requested_model_id",
+    "prompt_id",
+    "prompt_spec_sha256",
+    "repetition",
+    "predicted_label",
+    "parse_status"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string", "minLength": 1},
+    "observation_id": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "enum": ["openai", "fireworks", "ollama"]},
+    "model_key": {"type": "string", "minLength": 1},
+    "requested_model_id": {"type": "string", "minLength": 1},
+    "returned_model_id": {"type": ["string", "null"]},
+    "local_model_digest": {"type": ["string", "null"]},
+    "prompt_id": {"type": "string", "minLength": 1},
+    "prompt_spec_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "repetition": {"type": "integer", "minimum": 1},
+    "predicted_label": {"type": ["string", "null"]},
+    "parse_status": {"type": "string", "enum": ["ok", "error"]},
+    "provider_response_id": {"type": ["string", "null"]},
+    "raw_output": {"type": ["string", "null"]},
+    "input_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "input_tokens": {"type": ["integer", "null"], "minimum": 0},
+    "cached_input_tokens": {"type": ["integer", "null"], "minimum": 0},
+    "output_tokens": {"type": ["integer", "null"], "minimum": 0},
+    "reasoning_tokens": {"type": ["integer", "null"], "minimum": 0},
+    "total_tokens": {"type": ["integer", "null"], "minimum": 0},
+    "latency_seconds": {"type": ["number", "null"], "minimum": 0},
+    "retry_count": {"type": "integer", "minimum": 0},
+    "temperature": {"type": ["number", "null"]},
+    "max_output_tokens": {"type": ["integer", "null"], "minimum": 1},
+    "reasoning_setting": {"type": ["string", "null"]},
+    "structured_output_mode": {"type": ["string", "null"]},
+    "cost_usd": {"type": ["number", "null"], "minimum": 0},
+    "pricing_config_id": {"type": ["string", "null"]},
+    "request_started_utc": {"type": ["string", "null"]},
+    "response_received_utc": {"type": ["string", "null"]},
+    "error_type": {"type": ["string", "null"]},
+    "error_message": {"type": ["string", "null"]},
+    "provider_metadata": {"type": ["object", "null"]}
+  },
+  "additionalProperties": false
+}
