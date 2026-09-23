@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 reporting-validation-standards = {path = ".", editable = true}
+openai = ">=2.0.0"
 
 [dev-packages]
 pytest = ">=8"
