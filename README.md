@@ -32,7 +32,7 @@ OCPSG Silver Standard (Hugging Face)
 
 ## Current stage
 
-The first implemented component is the frozen UK sampling pipeline. It downloads the canonical `GB/test.parquet` split directly from the Hugging Face dataset repository, resolves the current dataset revision to an immutable commit SHA, draws a reproducible label-stratified probability sample, and stores the information needed for design-based estimation.
+The UK sampling stage is frozen, and the prompt/inference-stability experiment specification is now versioned in the repository. The first implemented component is the frozen UK sampling pipeline. It downloads the canonical `GB/test.parquet` split directly from the Hugging Face dataset repository, resolves the current dataset revision to an immutable commit SHA, draws a reproducible label-stratified probability sample, and stores the information needed for design-based estimation.
 
 The default design currently uses:
 
@@ -98,6 +98,35 @@ pipenv run python code/01_freeze_uk_sample.py --overwrite
 ```
 
 When `--overwrite` is used and an existing metadata manifest is present, the script preserves its recorded immutable Hugging Face revision unless a different `--revision` is explicitly supplied. With the same revision, seed, and design parameters, the sample membership should therefore remain unchanged while the richer metadata fields are added.
+
+
+## Frozen prompt-stability specification
+
+The experiment specification is stored separately from provider code:
+
+- `config/models.yaml` — five core models plus the secondary GPT-6 Luna efficiency model;
+- `config/prompts.yaml` — the canonical CapBench prompt and three semantically equivalent perturbations;
+- `schemas/inference_record.schema.json` — provider-neutral per-observation inference contract;
+- `src/reporting_validation_standards/experiment_specs.py` — configuration validation and prompt rendering;
+- `src/reporting_validation_standards/inference.py` — Python representation of the inference record.
+
+The four frozen prompt conditions are:
+
+1. `p0_capbench_canonical` — exact CapBench reference wording;
+2. `p1_lexical_paraphrase` — surface-wording perturbation;
+3. `p2_label_order_permutation` — fixed permutation of the official label order;
+4. `p3_structural_format` — layout/format perturbation with unchanged substantive instructions.
+
+The model panel contains the two pinned GPT-5.4 snapshots, Fireworks DeepSeek V4.1 Flash, local Qwen3.6 35B and Gemma 4 31B, plus `gpt-6-luna` as a secondary moving-alias run after the OpenAI smoke tests succeed.
+
+Validate the frozen specifications locally with:
+
+```bash
+pipenv run python code/02_validate_experiment_specs.py
+pipenv run pytest
+```
+
+The provider adapters should not redefine prompt wording. Their job is to translate the frozen prompt and the common `predicted_label` output contract into the provider-specific API mechanism while preserving raw outputs, usage metadata, latency, model identity, and failures.
 
 ## Repository structure
 
