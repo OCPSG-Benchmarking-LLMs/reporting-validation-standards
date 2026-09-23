@@ -1,0 +1,19 @@
+{
+  "allocation_rule": "Stratify on the silver-standard reference label. Give each stratum min(minimum_per_label, N_h) observations; allocate all remaining sample slots approximately in proportion to N_h among strata with remaining capacity using iterative floor allocation followed by a largest-remainder step with a stable lexical tie-break; then draw n_h observations without replacement within each stratum using NumPy PCG64 with the recorded random seed.",
+  "allocation_rule_version": "label_stratified_minimum_plus_proportional_v1",
+  "country_code": "GB",
+  "dataset_repo": "OCPSG-Benchmarking-LLMs/ocpsg-silver-standard-parliamentary-speeches",
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "id_column": "id",
+  "label_column": "predicted_label",
+  "minimum_per_label": 25,
+  "n_strata": 17,
+  "population_labels_n": 17,
+  "population_n": 28978,
+  "random_generator": "NumPy PCG64",
+  "realised_n": 1000,
+  "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+  "seed": 20260923,
+  "split": "test",
+  "target_n": 1000
+}
