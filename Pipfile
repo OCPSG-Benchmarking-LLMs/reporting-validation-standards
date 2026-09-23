@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 reporting-validation-standards = {path = ".", editable = true}
 openai = ">=2.0.0"
+codecarbon = ">=3.2.2"
 
 [dev-packages]
 pytest = ">=8"
