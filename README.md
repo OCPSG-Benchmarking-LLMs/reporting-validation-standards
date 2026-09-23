@@ -265,7 +265,14 @@ pipenv run python code/06_preflight_stability_experiment.py
 
 The script verifies the frozen sample, reports text and rendered-prompt length distributions, lists the longest sampled speeches, confirms the planned 12,000 decisions per model / 72,000 decisions overall, and uses successful Ollama smoke records to construct an empirical prompt-token proxy. When recent Ollama residency manifests are available, it compares those estimates with the runtime context length.
 
-The token proxy is diagnostic rather than tokenizer-exact. Its purpose is to determine whether the 4,096-token smoke-test context is plausibly sufficient before the local production configuration is frozen. The generated preflight JSON is written below `outputs/` and is therefore not committed.
+The token proxy is diagnostic rather than tokenizer-exact. The completed preflight showed that the longest rendered prompts approach the 4,096-token smoke-test context too closely to leave a defensible safety margin. The production configuration therefore freezes `num_ctx=8192` for both local models. The generated preflight JSON is written below `outputs/` and is therefore not committed.
+
+The longest frozen speech can be used for a targeted context test before production:
+
+```bash
+pipenv run python code/05_smoke_test_ollama.py --observation-id ParlaMint-GB_2016-06-08-lords.u126 --model-key ollama_qwen36_35b
+pipenv run python code/05_smoke_test_ollama.py --observation-id ParlaMint-GB_2016-06-08-lords.u126 --model-key ollama_gemma4_31b
+```
 
 ## Repository structure
 
