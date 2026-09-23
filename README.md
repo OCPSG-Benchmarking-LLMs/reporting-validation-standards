@@ -42,7 +42,7 @@ The default design currently uses:
 - remainder: allocated approximately proportional to population stratum size;
 - random seed: 20260923.
 
-These defaults are explicit parameters rather than final methodological commitments. The allocation rule should be reviewed against the actual GB test-set label distribution before the sample is formally frozen.
+The GB test-set distribution has now been reviewed and this allocation rule is the approved sampling design for the 1,000-case demonstration. The metadata manifest records the full test-population size, number of represented labels, immutable Hugging Face revision, allocation-rule version, random generator, seed, and sample-membership hash.
 
 ## Setup with Pipenv
 
@@ -90,6 +90,14 @@ The script writes:
 - `data/generated/uk_test_1000.parquet` — full sampled observations for local analysis (gitignored).
 
 Do not redraw the sample after it is formally frozen. Changes to the design should create a new explicitly versioned sample rather than silently overwrite the registered one.
+
+If provisional manifests already exist from an earlier run, pull the latest code and regenerate them once with:
+
+```bash
+pipenv run python code/01_freeze_uk_sample.py --overwrite
+```
+
+When `--overwrite` is used and an existing metadata manifest is present, the script preserves its recorded immutable Hugging Face revision unless a different `--revision` is explicitly supplied. With the same revision, seed, and design parameters, the sample membership should therefore remain unchanged while the richer metadata fields are added.
 
 ## Repository structure
 
