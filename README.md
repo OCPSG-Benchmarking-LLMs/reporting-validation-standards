@@ -138,8 +138,8 @@ The adapter:
 - uses strict JSON Schema structured output for `predicted_label`;
 - sets `store=false`;
 - requests the `default` service tier so the dated standard-pricing configuration applies;
-- disables hidden SDK retries and records explicit retry counts;
-- records returned model identity, response ID, token usage, cache reads/writes, reasoning tokens, latency, timestamps, raw structured output, and failures;
+- disables hidden SDK retries and records explicit retry counts, failed-attempt status/type, backoff time, and successful-attempt latency;
+- records returned model identity, response ID, token usage, cache reads/writes, reasoning tokens, end-to-end latency, successful-attempt latency, timestamps, raw structured output, and failures;
 - calculates cost from `config/pricing/openai_2026-09-23.yaml`; and
 - writes smoke-test artefacts under `runs/`, which is gitignored.
 
