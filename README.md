@@ -290,3 +290,30 @@ Using `code/` rather than `scripts/` is intentional: this repository is primaril
 
 - OCPSG `capbench`: benchmarking infrastructure and provider templates.
 - OCPSG Silver Standard: source benchmark and benchmark-construction workflow.
+
+
+## Production stability runner
+
+After smoke testing and the full-sample context preflight, run the frozen stability experiment one model at a time with:
+
+```bash
+pipenv run python code/07_run_stability_experiment.py --model-key <MODEL_KEY>
+```
+
+The runner uses the same deterministic randomized 12,000-cell schedule for every model (1,000 observations × four prompts × three repetitions), appends each completed inference record immediately, validates the frozen experiment manifest on resume, and skips every decision cell already present. Use `--plan-only` to inspect a model run without sending requests. Use `--max-decisions N` for a staged launch; rerunning the same command later resumes the identical schedule.
+
+For local Ollama production runs, energy tracking is required:
+
+```bash
+pipenv run python code/07_run_stability_experiment.py \
+  --model-key ollama_qwen36_35b \
+  --track-carbon \
+  --country-iso-code NLD
+
+pipenv run python code/07_run_stability_experiment.py \
+  --model-key ollama_gemma4_31b \
+  --track-carbon \
+  --country-iso-code NLD
+```
+
+Each invocation creates a session manifest. This permits interrupted local runs to be resumed while preserving separate CodeCarbon segments. The classification records remain model-level and append-only. Do not update local model files, Ollama, the GPU driver, or the Python environment between production sessions unless the resulting infrastructure change is intentionally documented and the affected run is restarted.
