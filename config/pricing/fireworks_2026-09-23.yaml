@@ -1,0 +1,15 @@
+pricing_config_id: fireworks_serverless_2026-09-23
+checked_date: 2026-09-23
+currency: USD
+unit: per_1m_tokens
+access_mode: serverless
+
+sources:
+  deepseek-v4p1-flash: https://fireworks.ai/models/deepseek-ai/deepseek-v4p1-flash
+
+models:
+  accounts/fireworks/models/deepseek-v4p1-flash:
+    input_per_million: 0.22
+    cached_input_per_million: 0.007
+    cache_write_per_million: null
+    output_per_million: 0.66
