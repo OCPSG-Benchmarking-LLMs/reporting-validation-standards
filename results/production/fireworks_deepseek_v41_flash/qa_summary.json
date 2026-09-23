@@ -1,0 +1,73 @@
+{
+  "completion_qa_pass": true,
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "duplicate_cells": 0,
+  "expected_decisions": 12000,
+  "latency_seconds": {
+    "max": 30.90791199999876,
+    "mean": 1.1001571025249988,
+    "median": 0.7935943500015128,
+    "p95": 2.3918250649983737
+  },
+  "local_model_digests": {},
+  "manifest_issues": [],
+  "missing_cells": 0,
+  "model_key": "fireworks_deepseek_v41_flash",
+  "observed_records": 12000,
+  "parse_status": {
+    "ok": 12000
+  },
+  "prompt_repetition_coverage": {
+    "p0_capbench_canonical": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p1_lexical_paraphrase": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p2_label_order_permutation": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p3_structural_format": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    }
+  },
+  "provider": "fireworks",
+  "raw_file_count": 9,
+  "raw_inference_records_sha256": "f1ce7c73b340377a94179ab6c97aa5d0f661cb6364a64b3a8d50e34983adabd6",
+  "recorded_cost_total_usd": 0.8073996840000001,
+  "records_with_retries": 1,
+  "requested_model_id": "accounts/fireworks/models/deepseek-v4p1-flash",
+  "returned_model_ids": {
+    "accounts/fireworks/models/deepseek-v4p1-flash": 12000
+  },
+  "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+  "schedule_sha256": "584d874cf4e6be49b95e534315f4ee9a8d5849bdb158328ab5be14095ec4e738",
+  "schema_version": 1,
+  "structural_failures": {
+    "duplicate_cells": 0,
+    "manifest_issues": 0,
+    "model_key_mismatches": 0,
+    "prompt_hash_mismatches": 0,
+    "provider_mismatches": 0,
+    "requested_model_mismatches": 0,
+    "unexpected_cells": 0
+  },
+  "structural_qa_pass": true,
+  "system_fingerprints": {},
+  "total_adapter_retries": 1,
+  "total_tokens": {
+    "max": 3160,
+    "mean": 616.1451666666667,
+    "median": 479.0
+  },
+  "unexpected_cells": 0,
+  "unique_decision_cells": 12000
+}

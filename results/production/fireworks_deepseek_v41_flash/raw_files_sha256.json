@@ -1,0 +1,15 @@
+{
+  "files": {
+    "experiment_manifest.json": "84cc43506d207997d07d07a00a202986c7835fdedac7133dee8cc896694eb735",
+    "inference_records.jsonl": "f1ce7c73b340377a94179ab6c97aa5d0f661cb6364a64b3a8d50e34983adabd6",
+    "progress.json": "33398b61c9133fc67146b7ba5f43dc3e3a5a5cc091e81c35150bc9e1d1dbfbcf",
+    "sessions/fireworks_deepseek_v41_flash_20260923T161555Z/session_manifest.json": "1ca7bffa915dfd01af3be71f51443549bd5384ad77c3885296467a913c49ddc9",
+    "sessions/fireworks_deepseek_v41_flash_20260923T161911Z/session_manifest.json": "e808d5e0d4993d6e0549790178e535b773c23df14f8e930675adca7899afe36d",
+    "sessions/fireworks_deepseek_v41_flash_20260923T162930Z/session_manifest.json": "d9ec03c564b1f25f86432899e0e659aecf3560bb350215bd008caf1f10d44d45",
+    "sessions/fireworks_deepseek_v41_flash_20260923T184930Z/session_manifest.json": "e272e4ac8bcc4fcf6cd8d24a3039fc7eebed373f970d0a60ff300c88f7ae1fa7",
+    "sessions/fireworks_deepseek_v41_flash_20260923T201440Z/session_manifest.json": "a0ab08fca4b7e10139526afaca7b76e6fec9d4a5ae2f83965ff8579a26984265",
+    "sessions/fireworks_deepseek_v41_flash_20260923T212139Z/session_manifest.json": "bdc84870989f3aaca1f1dffcd447b84c706d398ee22560cba97f7ceac9f9e000"
+  },
+  "model_key": "fireworks_deepseek_v41_flash",
+  "schema_version": 1
+}

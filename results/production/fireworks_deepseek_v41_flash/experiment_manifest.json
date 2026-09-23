@@ -1,0 +1,44 @@
+{
+  "created_at_utc": "2026-09-23T16:15:55.182564+00:00",
+  "frozen_spec": {
+    "carbon_tracking_required": false,
+    "country_iso_code": null,
+    "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+    "expected_local_digest": null,
+    "input_mode": "text_en",
+    "max_output_tokens": 40,
+    "max_retries": 3,
+    "measure_power_secs": null,
+    "model_key": "fireworks_deepseek_v41_flash",
+    "n_cases": 1000,
+    "n_decisions": 12000,
+    "prompt_ids": [
+      "p0_capbench_canonical",
+      "p1_lexical_paraphrase",
+      "p2_label_order_permutation",
+      "p3_structural_format"
+    ],
+    "prompt_spec_sha256": {
+      "p0_capbench_canonical": "5c59306d3703606a6cb9ce30bc34c57b143397c5ad2ae57ca734aded1991c84b",
+      "p1_lexical_paraphrase": "257ac536d4ce1e2bb799a8b5bb28ed546f30ae1c9ccb0e121dce2c920cf833af",
+      "p2_label_order_permutation": "0072cb3795ba6c6344d1e18bf0199c750cd28d745967947812177a093e1634e9",
+      "p3_structural_format": "0b995231fa77e8f7e085b38184abb91d253bb1e47bc6306d92d2fe8fd0125bb0"
+    },
+    "provider": "fireworks",
+    "purpose": "prompt_and_inference_stability_production",
+    "reasoning_setting": "none",
+    "repetitions": 3,
+    "requested_model_id": "accounts/fireworks/models/deepseek-v4p1-flash",
+    "runtime_context_length": null,
+    "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+    "schedule_algorithm": "randomized_cells_pcg64_v1",
+    "schedule_seed": 20260923,
+    "schedule_sha256": "584d874cf4e6be49b95e534315f4ee9a8d5849bdb158328ab5be14095ec4e738",
+    "schema_version": 1,
+    "snapshot_pinned": false,
+    "stage": "core",
+    "structured_output_mode": "json_schema",
+    "temperature": 0.0,
+    "timeout_seconds": 120.0
+  }
+}
