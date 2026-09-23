@@ -32,3 +32,20 @@ def test_resolve_local_model_uses_exact_tag(monkeypatch):
 
     result = classifier.resolve_local_model("qwen3.6:35b")
     assert result["digest"] == "abc"
+
+
+def test_resolve_running_model(monkeypatch):
+    classifier = OllamaClassifier()
+    models = [
+        {
+            "name": "qwen3.6:35b",
+            "model": "qwen3.6:35b",
+            "size": 20_000,
+            "size_vram": 10_000,
+        }
+    ]
+    monkeypatch.setattr(classifier, "running_models", lambda: models)
+
+    result = classifier.resolve_running_model("qwen3.6:35b")
+    assert result is not None
+    assert result["size_vram"] == 10_000
