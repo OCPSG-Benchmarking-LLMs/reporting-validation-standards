@@ -117,6 +117,7 @@ def main() -> None:
         )
 
     records = []
+    runtime_residency_metadata = None
     run_started = time.perf_counter()
 
     if carbon_tracker is not None:
@@ -127,9 +128,9 @@ def main() -> None:
             text = select_input_text(row, input_mode=args.input_mode)
             rendered = render_prompt(prompt_id=args.prompt_id, text=text)
 
-            # Keep the model resident between cases but unload it after the last
-            # observation so sequential model runs do not compete for VRAM.
-            keep_alive = "0" if position == len(smoke_cases) else "5m"
+            # Keep the model resident throughout the run. We explicitly unload
+            # it in the finally block after capturing /api/ps residency metadata.
+            keep_alive = "5m"
 
             record = classifier.classify(
                 run_id=run_id,
@@ -149,6 +150,29 @@ def main() -> None:
                 keep_alive=keep_alive,
             )
             records.append(record.to_dict())
+
+            if position == 1 and record.parse_status == "ok":
+                running = classifier.resolve_running_model(model["model_id"])
+                if running is not None:
+                    size_bytes = running.get("size")
+                    size_vram_bytes = running.get("size_vram")
+                    vram_fraction = None
+                    if (
+                        isinstance(size_bytes, (int, float))
+                        and isinstance(size_vram_bytes, (int, float))
+                        and size_bytes > 0
+                    ):
+                        vram_fraction = float(size_vram_bytes) / float(size_bytes)
+                    runtime_residency_metadata = {
+                        "name": running.get("name"),
+                        "model": running.get("model"),
+                        "size_bytes": size_bytes,
+                        "size_vram_bytes": size_vram_bytes,
+                        "vram_fraction": vram_fraction,
+                        "context_length": running.get("context_length"),
+                        "expires_at": running.get("expires_at"),
+                        "details": running.get("details"),
+                    }
 
             status = "OK" if record.parse_status == "ok" else "ERROR"
             meta = record.provider_metadata or {}
@@ -174,8 +198,11 @@ def main() -> None:
                 f"{speed_text}"
             )
     finally:
-        if carbon_tracker is not None:
-            carbon_summary = carbon_tracker.stop()
+        try:
+            classifier.unload_model(model["model_id"])
+        finally:
+            if carbon_tracker is not None:
+                carbon_summary = carbon_tracker.stop()
 
     run_elapsed = time.perf_counter() - run_started
 
@@ -201,7 +228,8 @@ def main() -> None:
     timing_summary = {
         "cold_start_definition": (
             "First observation in a run includes model loading; subsequent observations "
-            "reuse the resident model until the final keep_alive=0 request."
+            "reuse the resident model. The model is explicitly unloaded after the run. "
+            "This is a first-request load measure, not a controlled storage-level cold start."
         ),
         "load_duration_seconds_total": _sum_numeric("load_duration_seconds"),
         "prompt_eval_duration_seconds_total": _sum_numeric("prompt_eval_duration_seconds"),
@@ -232,7 +260,8 @@ def main() -> None:
         "temperature": 0.0,
         "thinking_policy": "send think=false",
         "max_output_tokens": 40,
-        "keep_alive_policy": "5m between cases; 0 on final case to unload model",
+        "keep_alive_policy": "5m for every case; explicit unload after run",
+        "runtime_residency_metadata": runtime_residency_metadata,
         "n_records": len(records),
         "n_errors": sum(record["parse_status"] != "ok" for record in records),
         "elapsed_seconds": run_elapsed,
