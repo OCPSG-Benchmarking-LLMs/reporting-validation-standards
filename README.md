@@ -34,7 +34,7 @@ OCPSG Silver Standard (Hugging Face)
 
 The first implemented component is the frozen UK sampling pipeline. It downloads the canonical `GB/test.parquet` split directly from the Hugging Face dataset repository, resolves the current dataset revision to an immutable commit SHA, draws a reproducible label-stratified probability sample, and stores the information needed for design-based estimation.
 
-The default design uses:
+The default design currently uses:
 
 - target sample size: 1,000;
 - strata: silver-standard policy label;
@@ -42,9 +42,24 @@ The default design uses:
 - remainder: allocated approximately proportional to population stratum size;
 - random seed: 20260923.
 
-These defaults are explicit parameters rather than hard-coded methodological commitments and can be revised before the sample is frozen.
+These defaults are explicit parameters rather than final methodological commitments. The allocation rule should be reviewed against the actual GB test-set label distribution before the sample is formally frozen.
 
-## Setup
+## Setup with Pipenv
+
+The project uses a `src/` package layout. Therefore the local project itself must be installed in the environment; installing only its third-party dependencies is not enough.
+
+From the repository root:
+
+```bash
+pipenv install --dev
+pipenv run hf auth login
+```
+
+The included `Pipfile` installs this repository as an editable local package, so imports such as `reporting_validation_standards.sampling` resolve correctly.
+
+If you already created a local Pipfile before pulling the repository version, remove or reconcile that local file first.
+
+### Alternative setup with venv/pip
 
 ```bash
 python -m venv .venv
@@ -53,12 +68,18 @@ pip install -e ".[dev]"
 hf auth login
 ```
 
-If the OCPSG dataset is gated, make sure access has been accepted on Hugging Face before running the sampling script.
+If the OCPSG dataset is gated, make sure access has been accepted on Hugging Face before running the sampling code.
 
 ## Freeze the UK sample
 
 ```bash
-python scripts/01_freeze_uk_sample.py
+pipenv run python code/01_freeze_uk_sample.py
+```
+
+or, in an activated venv:
+
+```bash
+python code/01_freeze_uk_sample.py
 ```
 
 The script writes:
@@ -68,10 +89,21 @@ The script writes:
 - `data/manifests/uk_test_1000_metadata.json` — dataset revision, seed, design, and sample hash;
 - `data/generated/uk_test_1000.parquet` — full sampled observations for local analysis (gitignored).
 
-Do not redraw the sample after it is frozen. Changes to the design should create a new explicitly versioned sample rather than silently overwrite the registered one.
+Do not redraw the sample after it is formally frozen. Changes to the design should create a new explicitly versioned sample rather than silently overwrite the registered one.
+
+## Repository structure
+
+```text
+code/       executable research scripts
+src/        reusable Python package
+tests/      automated tests
+data/       manifests and locally generated data
+outputs/    generated analytical outputs
+```
+
+Using `code/` rather than `scripts/` is intentional: this repository is primarily a research-companion repository, and `code/` makes the role of the numbered analysis programs explicit.
 
 ## Related repositories
 
 - OCPSG `capbench`: benchmarking infrastructure and provider templates.
 - OCPSG Silver Standard: source benchmark and benchmark-construction workflow.
-
