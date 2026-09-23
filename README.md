@@ -193,6 +193,68 @@ pipenv run python code/04_smoke_test_fireworks.py
 
 The Fireworks adapter records returned model identity, response ID, token usage, cached tokens when exposed, finish reason, system fingerprint when exposed, retries, end-to-end latency, successful-attempt latency, timestamps, raw structured output, and calculated cost.
 
+## Ollama smoke test
+
+The local-inference adapter uses Ollama's native `/api/chat` endpoint so the experiment can capture local-specific telemetry that is not exposed through the OpenAI-compatible surface. The adapter sends the frozen system/user prompt, a JSON schema through `format`, `temperature=0`, and `think=false`. It records the Ollama model tag and local digest, token counts, cache reads, model-load time, prompt-evaluation time, generation time, tokens per second, end-to-end latency, retries, and raw structured output.
+
+Before running the local smoke tests, install the CodeCarbon dependency and make sure Ollama is running:
+
+```bash
+pipenv install --dev
+pipenv run pytest
+ollama list
+```
+
+The two frozen local model tags are:
+
+```text
+qwen3.6:35b
+gemma4:31b
+```
+
+If either is not installed locally:
+
+```bash
+ollama pull qwen3.6:35b
+ollama pull gemma4:31b
+```
+
+Begin with one Qwen case:
+
+```bash
+pipenv run python code/05_smoke_test_ollama.py --n-cases 1 --model-key ollama_qwen36_35b
+```
+
+Then test Gemma:
+
+```bash
+pipenv run python code/05_smoke_test_ollama.py --n-cases 1 --model-key ollama_gemma4_31b
+```
+
+If both succeed, run the same five frozen cases for each model:
+
+```bash
+pipenv run python code/05_smoke_test_ollama.py --model-key ollama_qwen36_35b
+pipenv run python code/05_smoke_test_ollama.py --model-key ollama_gemma4_31b
+```
+
+The script keeps a model resident between cases and sends `keep_alive=0` on the final case so sequential model runs do not remain loaded in VRAM.
+
+### Local energy and carbon measurement
+
+CodeCarbon is optional during smoke testing and is applied at the **run level**, not once per speech. Because Ollama executes inference in a separate server process, CodeCarbon uses `tracking_mode="machine"` so GPU/CPU energy associated with the server is not excluded by process-level tracking.
+
+Use an explicit three-letter country code for the machine's physical location. For example, when the machine is physically in the Netherlands:
+
+```bash
+pipenv run python code/05_smoke_test_ollama.py \
+  --model-key ollama_qwen36_35b \
+  --track-carbon \
+  --country-iso-code NLD
+```
+
+The run directory then contains `codecarbon_emissions.csv` and a compact `carbon_summary.json` alongside the inference records and run manifest. The manifest also records platform metadata and, when available, NVIDIA GPU model, UUID, driver, VRAM, and power limit.
+
 ## Repository structure
 
 ```text
