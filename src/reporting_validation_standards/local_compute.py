@@ -4,6 +4,7 @@ import csv
 import json
 import platform
 import shutil
+from importlib.metadata import version
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
@@ -25,6 +26,7 @@ class CarbonSummary:
     tracking_mode: str
     measure_power_secs: int
     codecarbon_output_file: str
+    codecarbon_version: str
 
 
 def collect_platform_metadata() -> dict[str, Any]:
@@ -150,6 +152,7 @@ class CodeCarbonRunTracker:
             tracking_mode="machine",
             measure_power_secs=self.measure_power_secs,
             codecarbon_output_file=self.output_file,
+            codecarbon_version=version("codecarbon"),
         )
 
         (self.run_dir / "carbon_summary.json").write_text(
