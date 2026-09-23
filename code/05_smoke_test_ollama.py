@@ -153,6 +153,16 @@ def main() -> None:
             status = "OK" if record.parse_status == "ok" else "ERROR"
             meta = record.provider_metadata or {}
             speed = meta.get("eval_tokens_per_second")
+            load_s = meta.get("load_duration_seconds")
+            prompt_s = meta.get("prompt_eval_duration_seconds")
+            generation_s = meta.get("eval_duration_seconds")
+            timing_text = ""
+            if all(isinstance(value, (float, int)) for value in (load_s, prompt_s, generation_s)):
+                timing_text = (
+                    f"  load={load_s:.3f}s"
+                    f"  prompt={prompt_s:.3f}s"
+                    f"  gen={generation_s:.3f}s"
+                )
             speed_text = f"  tok_s={speed:.2f}" if isinstance(speed, (float, int)) else ""
             print(
                 f"{status:5}  {args.model_key:24}  "
@@ -160,6 +170,7 @@ def main() -> None:
                 f"label={record.predicted_label}  "
                 f"tokens={record.total_tokens}  "
                 f"latency={record.latency_seconds:.3f}s"
+                f"{timing_text}"
                 f"{speed_text}"
             )
     finally:
@@ -172,6 +183,30 @@ def main() -> None:
     with jsonl_path.open("w", encoding="utf-8") as handle:
         for record in records:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+    timing_rows = [
+        record.get("provider_metadata") or {}
+        for record in records
+        if record.get("parse_status") == "ok"
+    ]
+
+    def _sum_numeric(field: str) -> float | None:
+        values = [
+            row.get(field)
+            for row in timing_rows
+            if isinstance(row.get(field), (float, int))
+        ]
+        return float(sum(values)) if values else None
+
+    timing_summary = {
+        "cold_start_definition": (
+            "First observation in a run includes model loading; subsequent observations "
+            "reuse the resident model until the final keep_alive=0 request."
+        ),
+        "load_duration_seconds_total": _sum_numeric("load_duration_seconds"),
+        "prompt_eval_duration_seconds_total": _sum_numeric("prompt_eval_duration_seconds"),
+        "generation_duration_seconds_total": _sum_numeric("eval_duration_seconds"),
+    }
 
     manifest = {
         "run_id": run_id,
@@ -201,6 +236,7 @@ def main() -> None:
         "n_records": len(records),
         "n_errors": sum(record["parse_status"] != "ok" for record in records),
         "elapsed_seconds": run_elapsed,
+        "timing_summary": timing_summary,
         "platform_metadata": platform_metadata,
         "nvidia_metadata": nvidia_metadata,
         "carbon_tracking_enabled": bool(args.track_carbon),
