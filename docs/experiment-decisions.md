@@ -73,3 +73,22 @@ The initial Ollama smoke tests used the runtime default of 4,096 tokens. A full-
 Because the estimate is a diagnostic proxy rather than an exact tokenizer count, and because the context must also leave room for the 40-token structured output budget and implementation overhead, 4,096 provides insufficient safety margin. The production local-model configuration therefore explicitly freezes `num_ctx=8192` for both Qwen3.6-35B-A3B and Gemma 4 31B.
 
 This is a pre-analysis infrastructure decision based on the frozen sample's length distribution, not on classification outcomes. The chosen context remains far below the models' advertised maximum context length while providing substantial headroom for the longest sampled parliamentary speech. A targeted longest-case smoke test is used to confirm the setting before production inference.
+
+
+## 2026-09-23 — Longest-case validation of the 8,192-token context
+
+The longest frozen GB speech, `ParlaMint-GB_2016-06-08-lords.u126` (2,422 whitespace-delimited words), was classified successfully by both local models after explicitly setting `num_ctx=8192`.
+
+Qwen3.6-35B-A3B returned `Transportation` with 3,037 total provider-reported tokens; Gemma 4 31B also returned `Transportation` with 3,008 total tokens. Ollama `/api/ps` confirmed a runtime context of 8,192 for both models.
+
+Increasing the runtime context from 4,096 to 8,192 had negligible observed effect on model residency. Qwen's VRAM-resident size increased from 9,329,285,528 to 9,337,674,136 bytes (8 MiB), while Gemma's recorded VRAM-resident size remained 9,063,251,311 bytes. The production context is therefore frozen at 8,192.
+
+## 2026-09-23 — Production decision ordering and resumability
+
+The production prompt-stability experiment uses the same deterministic randomized decision schedule for every model. The base design contains 1,000 frozen observations × four frozen prompts × three repetitions = 12,000 cells per model. Cells are permuted with NumPy PCG64 using seed 20260923 under schedule algorithm `randomized_cells_pcg64_v1`.
+
+Randomizing cells rather than running complete prompt or repetition blocks reduces the alignment between prompt condition and elapsed run time, and separates repeated classifications of the same observation. The schedule seed, algorithm, and SHA-256 are recorded in every model's production manifest.
+
+Production output is append-only and resumable. A completed decision cell is never silently rerun after interruption, regardless of whether its parse status is successful or an observed failure; provider-level retries remain governed by the frozen adapter retry policy. This preserves failures as measurement outcomes rather than replacing them through undocumented recovery attempts.
+
+For local production runs, CodeCarbon tracking is mandatory for every session. If a local run is interrupted and resumed, energy is measured in separate session-level segments and can later be aggregated without inventing request-level carbon estimates.
