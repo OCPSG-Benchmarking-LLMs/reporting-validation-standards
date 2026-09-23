@@ -73,3 +73,14 @@ def test_fireworks_reasoning_is_explicitly_disabled():
     )
 
     assert model["reasoning_setting"] == "none"
+
+
+def test_local_models_freeze_runtime_context():
+    config = load_model_config(MODELS)
+    local_models = [
+        model for model in config["models"]
+        if model["provider"] == "ollama"
+    ]
+
+    assert local_models
+    assert all(model["runtime_context_length"] == 8192 for model in local_models)
