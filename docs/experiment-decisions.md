@@ -92,3 +92,12 @@ Randomizing cells rather than running complete prompt or repetition blocks reduc
 Production output is append-only and resumable. A completed decision cell is never silently rerun after interruption, regardless of whether its parse status is successful or an observed failure; provider-level retries remain governed by the frozen adapter retry policy. This preserves failures as measurement outcomes rather than replacing them through undocumented recovery attempts.
 
 For local production runs, CodeCarbon tracking is mandatory for every session. If a local run is interrupted and resumed, energy is measured in separate session-level segments and can later be aggregated without inventing request-level carbon estimates.
+
+
+## 2026-09-23 — Production data archival policy
+
+Raw production inference records and local CodeCarbon artefacts remain under the gitignored `runs/` tree rather than being committed to ordinary Git history. Completed model runs are checked and finalized with a single script, `code/08_check_and_finalize_production.py`.
+
+The script operates in check-only mode by default so it can be used safely on partial runs. Explicit `--finalize` is allowed only when both structural QA and completion QA pass. Finalization records SHA-256 hashes for every raw run file and copies only lightweight provenance into `results/production/<model_key>/`: the frozen experiment manifest, a machine-readable QA summary, a raw-file hash inventory, and session manifests.
+
+Finalized provenance is immutable: a repeated finalization with identical source data is a no-op, while changed source data or changed archival content causes the script to refuse a silent overwrite. The eventual full raw inference corpus can therefore be deposited as a separate versioned research-data release while remaining cryptographically linked to the Git repository.
