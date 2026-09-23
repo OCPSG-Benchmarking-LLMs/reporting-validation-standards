@@ -43,3 +43,24 @@ For local Ollama models, a single wall-clock latency statistic is insufficient. 
 The first request in a run is treated as a model-load/first-request observation, while subsequent requests measure resident-model behavior. A first-request load time should not be interpreted as a fully controlled storage-level cold start because operating-system and filesystem caches may persist across nearby runs.
 
 Run-level CodeCarbon measurement includes the complete run, including model loading, because loading is part of the computational cost of deploying the measurement instrument. Steady-state timing metrics are reported separately.
+
+
+## 2026-09-23 — Runtime CPU/GPU residency
+
+Ollama `/api/ps` was queried while each local model was resident. The runtime context was 4,096 tokens in the smoke tests.
+
+Qwen3.6-35B-A3B:
+- total resident model size: 22,483,965,047 bytes
+- VRAM-resident size: 9,329,285,528 bytes
+- VRAM fraction: 0.41493 (41.5%)
+- implied non-VRAM resident portion: approximately 13.15 GB
+
+Gemma 4 31B:
+- total resident model size: 21,471,166,461 bytes
+- VRAM-resident size: 9,063,251,311 bytes
+- VRAM fraction: 0.42211 (42.2%)
+- implied non-VRAM resident portion: approximately 12.41 GB
+
+These measurements confirm substantial partial CPU/GPU residency on the 12 GB RTX 4070 SUPER and help explain why CPU energy exceeds GPU energy in the short CodeCarbon smoke runs. The residency split is recorded from Ollama at runtime rather than inferred from nominal parameter count.
+
+The 4,096-token runtime context should be checked against the full frozen 1,000-case sample before production inference. A preflight script was added for this purpose; production context settings should be frozen only after that check.
