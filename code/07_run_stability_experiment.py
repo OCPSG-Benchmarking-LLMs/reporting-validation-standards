@@ -198,6 +198,11 @@ def main() -> None:
         raise ValueError("--track-carbon is only valid for local Ollama runs.")
     if args.track_carbon and not args.country_iso_code:
         raise ValueError("--country-iso-code is required with --track-carbon.")
+    if model["provider"] == "ollama" and not args.plan_only and not args.track_carbon:
+        raise ValueError(
+            "Production Ollama runs require --track-carbon so every local "
+            "production session contributes to run-level energy accounting."
+        )
 
     policy = model_config["experiment_policy"]
     repetitions = int(policy["repetitions"])
@@ -258,6 +263,17 @@ def main() -> None:
         "structured_output_mode": model["structured_output_mode"],
         "runtime_context_length": model.get("runtime_context_length"),
         "expected_local_digest": model.get("expected_local_digest"),
+        "timeout_seconds": _effective_timeout(model, args.timeout_seconds),
+        "max_retries": _effective_retry_count(model, args.max_retries),
+        "carbon_tracking_required": model["provider"] == "ollama",
+        "country_iso_code": (
+            args.country_iso_code.upper()
+            if model["provider"] == "ollama" and args.country_iso_code
+            else None
+        ),
+        "measure_power_secs": (
+            args.measure_power_secs if model["provider"] == "ollama" else None
+        ),
     }
 
     existing_records = _read_jsonl(records_path)
