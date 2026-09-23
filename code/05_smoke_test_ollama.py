@@ -31,6 +31,11 @@ def parse_args() -> argparse.Namespace:
         description="Smoke-test one local Ollama model on frozen UK cases using P0."
     )
     parser.add_argument("--n-cases", type=int, default=5)
+    parser.add_argument(
+        "--observation-id",
+        default=None,
+        help="Run exactly one frozen observation by ID instead of taking the first --n-cases rows.",
+    )
     parser.add_argument("--model-key", default=DEFAULT_MODEL_KEY)
     parser.add_argument("--prompt-id", default="p0_capbench_canonical")
     parser.add_argument("--input-mode", choices=["text_en", "text"], default="text_en")
@@ -95,7 +100,17 @@ def main() -> None:
 
     token = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_HUB_TOKEN")
     sample, sample_metadata = load_frozen_sample(token=token)
-    smoke_cases = sample.iloc[: args.n_cases].copy()
+    if args.observation_id:
+        id_column = sample_metadata["id_column"]
+        matches = sample.loc[sample[id_column].astype(str) == str(args.observation_id)].copy()
+        if len(matches) != 1:
+            raise ValueError(
+                f"Expected exactly one frozen row for observation ID {args.observation_id!r}; "
+                f"found {len(matches)}."
+            )
+        smoke_cases = matches
+    else:
+        smoke_cases = sample.iloc[: args.n_cases].copy()
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_id = f"ollama_smoke_{args.model_key}_{timestamp}"
@@ -145,6 +160,7 @@ def main() -> None:
                 reasoning_setting=model["reasoning_setting"],
                 temperature=0.0,
                 max_output_tokens=40,
+                runtime_context_length=int(model["runtime_context_length"]),
                 structured_output_mode=model["structured_output_mode"],
                 send_think_false=send_think_false,
                 keep_alive=keep_alive,
@@ -241,7 +257,8 @@ def main() -> None:
         "purpose": "ollama_smoke_test",
         "sample_id_sha256": sample_metadata["sample_id_sha256"],
         "dataset_revision": sample_metadata["dataset_revision"],
-        "n_cases": args.n_cases,
+        "n_cases": len(smoke_cases),
+        "requested_observation_id": args.observation_id,
         "input_mode": args.input_mode,
         "prompt_id": args.prompt_id,
         "model_key": args.model_key,
@@ -260,6 +277,7 @@ def main() -> None:
         "temperature": 0.0,
         "thinking_policy": "send think=false",
         "max_output_tokens": 40,
+        "requested_runtime_context_length": int(model["runtime_context_length"]),
         "keep_alive_policy": "5m for every case; explicit unload after run",
         "runtime_residency_metadata": runtime_residency_metadata,
         "n_records": len(records),
