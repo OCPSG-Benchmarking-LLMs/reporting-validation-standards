@@ -11,6 +11,17 @@ import pandas as pd
 from huggingface_hub import HfApi, hf_hub_download
 
 
+ALLOCATION_RULE_VERSION = "label_stratified_minimum_plus_proportional_v1"
+ALLOCATION_RULE = (
+    "Stratify on the silver-standard reference label. Give each stratum "
+    "min(minimum_per_label, N_h) observations; allocate all remaining sample slots "
+    "approximately in proportion to N_h among strata with remaining capacity using "
+    "iterative floor allocation followed by a largest-remainder step with a stable "
+    "lexical tie-break; then draw n_h observations without replacement within each "
+    "stratum using NumPy PCG64 with the recorded random seed."
+)
+
+
 @dataclass(frozen=True)
 class SampleMetadata:
     dataset_repo: str
@@ -19,9 +30,14 @@ class SampleMetadata:
     split: str
     label_column: str
     id_column: str
+    population_n: int
+    population_labels_n: int
     target_n: int
     realised_n: int
     minimum_per_label: int
+    allocation_rule: str
+    allocation_rule_version: str
+    random_generator: str
     seed: int
     n_strata: int
     sample_id_sha256: str
@@ -189,7 +205,7 @@ def draw_stratified_sample(
         minimum_per_stratum=minimum_per_label,
     )
 
-    rng = np.random.default_rng(seed)
+    rng = np.random.Generator(np.random.PCG64(seed))
     sampled_frames: list[pd.DataFrame] = []
 
     for label in counts.index:
