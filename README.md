@@ -255,6 +255,18 @@ pipenv run python code/05_smoke_test_ollama.py \
 
 The run directory then contains `codecarbon_emissions.csv` and a compact `carbon_summary.json` alongside the inference records and run manifest. The manifest also records platform metadata and, when available, NVIDIA GPU model, UUID, driver, VRAM, and power limit.
 
+## Production stability preflight
+
+Before launching the full 1,000-case × four-prompt × three-repetition stability experiment, run a length/context preflight:
+
+```bash
+pipenv run python code/06_preflight_stability_experiment.py
+```
+
+The script verifies the frozen sample, reports text and rendered-prompt length distributions, lists the longest sampled speeches, confirms the planned 12,000 decisions per model / 72,000 decisions overall, and uses successful Ollama smoke records to construct an empirical prompt-token proxy. When recent Ollama residency manifests are available, it compares those estimates with the runtime context length.
+
+The token proxy is diagnostic rather than tokenizer-exact. Its purpose is to determine whether the 4,096-token smoke-test context is plausibly sufficient before the local production configuration is frozen. The generated preflight JSON is written below `outputs/` and is therefore not committed.
+
 ## Repository structure
 
 ```text
