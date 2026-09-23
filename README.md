@@ -165,6 +165,34 @@ pipenv run python code/03_smoke_test_openai.py --n-cases 1
 
 Do not commit API keys or the raw `runs/` directory.
 
+## Fireworks smoke test
+
+The Fireworks adapter uses the same frozen prompt text and the same provider-neutral inference contract as the OpenAI adapter. It calls DeepSeek V4.1 Flash through Fireworks' OpenAI-compatible Chat Completions endpoint.
+
+For comparability with the OpenAI runs, it uses JSON-schema structured output rather than the older CapBench function-call wrapper. Fireworks documents that JSON-schema `response_format` constrains the generated JSON and disables reasoning output, which matches the classifier-style design of this experiment.
+
+The dated Fireworks pricing configuration is stored in:
+
+```text
+config/pricing/fireworks_2026-09-23.yaml
+```
+
+The current serverless rates recorded for `accounts/fireworks/models/deepseek-v4p1-flash` are separate ordinary-input, cached-input, and output prices. Cost is calculated from provider-returned usage and the dated configuration rather than hard-coded into the adapter.
+
+After setting `FIREWORKS_API_KEY`, begin with one frozen case:
+
+```bash
+pipenv run python code/04_smoke_test_fireworks.py --n-cases 1
+```
+
+Then run the same five-case smoke panel used for OpenAI:
+
+```bash
+pipenv run python code/04_smoke_test_fireworks.py
+```
+
+The Fireworks adapter records returned model identity, response ID, token usage, cached tokens when exposed, finish reason, system fingerprint when exposed, retries, end-to-end latency, successful-attempt latency, timestamps, raw structured output, and calculated cost.
+
 ## Repository structure
 
 ```text
