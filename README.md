@@ -169,7 +169,7 @@ Do not commit API keys or the raw `runs/` directory.
 
 The Fireworks adapter uses the same frozen prompt text and the same provider-neutral inference contract as the OpenAI adapter. It calls DeepSeek V4.1 Flash through Fireworks' OpenAI-compatible Chat Completions endpoint.
 
-For comparability with the OpenAI runs, it uses JSON-schema structured output rather than the older CapBench function-call wrapper. Fireworks documents that JSON-schema `response_format` constrains the generated JSON and disables reasoning output, which matches the classifier-style design of this experiment.
+For comparability with the OpenAI runs, it uses JSON-schema structured output rather than the older CapBench function-call wrapper. Structured output constrains the final answer format but does not by itself disable model reasoning. DeepSeek V4.1 defaults to reasoning when the control is omitted, so the adapter explicitly sends `reasoning_effort="none"` for this classifier-style experiment.
 
 The dated Fireworks pricing configuration is stored in:
 
