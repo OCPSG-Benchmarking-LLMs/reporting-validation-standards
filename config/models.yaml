@@ -54,6 +54,7 @@ models:
     snapshot_pinned: false
     structured_output_mode: json_schema
     reasoning_setting: thinking_false
+    runtime_context_length: 8192
     local_identity_policy: record_ollama_digest_at_run_time
 
   - model_key: ollama_gemma4_31b
