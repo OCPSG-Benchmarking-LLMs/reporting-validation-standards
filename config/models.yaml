@@ -70,7 +70,8 @@ models:
     structured_output_mode: json_schema
     reasoning_setting: thinking_false
     runtime_context_length: 8192
-    local_identity_policy: record_ollama_digest_at_run_time
+    expected_local_digest: 6316f0629137b426c9d9b853ffc4c8209589f30ee39aebede6285096c0ff47e7
+    local_identity_policy: require_expected_digest_and_record_at_run_time
 
   - model_key: openai_gpt6_luna
     provider: openai
