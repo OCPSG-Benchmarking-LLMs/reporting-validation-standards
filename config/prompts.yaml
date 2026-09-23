@@ -1,0 +1,171 @@
+schema_version: 1
+
+official_labels:
+  - Macroeconomics
+  - Civil_Rights
+  - Health
+  - Agriculture
+  - Labor
+  - Education
+  - Environment
+  - Energy
+  - Immigration
+  - Transportation
+  - Law_and_Crime
+  - Social_Welfare
+  - Housing
+  - Domestic_Commerce
+  - Defense
+  - Technology
+  - Foreign_Trade
+  - International_Affairs
+  - Government_Operations
+  - Public_Lands
+  - Culture
+  - Other
+  - No_Policy_Content
+
+prompts:
+  - prompt_id: p0_capbench_canonical
+    frozen: true
+    perturbation: none
+    description: >
+      Canonical zero-shot prompt used as the reference measurement specification.
+      The wording is copied from capbench/templates/openai_zero_shot.py.
+    provenance:
+      repository: OCPSG-Benchmarking-LLMs/capbench
+      path: templates/openai_zero_shot.py
+      source_blob_sha: fcd3727c9231fccf23facadf499e03d7c7dc799d
+      source_function_system: build_system_prompt
+      source_function_user: build_user_prompt
+    label_order: canonical
+    system_template: |
+      You are classifying parliamentary speeches into one major policy agenda label.
+
+      Return exactly one official benchmark label in JSON.
+
+      Official labels:
+      {labels_block}
+
+      Instructions:
+      - Choose the single best label for the speech.
+      - The JSON must contain exactly one key: "predicted_label".
+      - The value of "predicted_label" must be one official label.
+      - Do not think aloud.
+      - Do not reason step by step.
+      - Do not explain your answer.
+      - Do not return markdown.
+      - Do not return more than one label.
+    user_template: |
+      Classify the following parliamentary speech into exactly one official benchmark label.
+
+      Speech:
+      {text}
+
+  - prompt_id: p1_lexical_paraphrase
+    frozen: true
+    perturbation: lexical_paraphrase
+    description: >
+      Semantically equivalent wording perturbation. Label inventory, canonical
+      label order, system/user role allocation, and output contract are unchanged.
+    label_order: canonical
+    system_template: |
+      You are assigning parliamentary speeches to one major policy agenda category.
+
+      Return exactly one official benchmark label in JSON.
+
+      Official labels:
+      {labels_block}
+
+      Instructions:
+      - Select the one label that best matches the speech.
+      - Return a JSON object containing only the key "predicted_label".
+      - The value assigned to "predicted_label" must be one of the official labels.
+      - Do not reveal your reasoning.
+      - Do not provide a step-by-step explanation.
+      - Do not justify the classification.
+      - Do not use markdown.
+      - Return only one label.
+    user_template: |
+      Assign the parliamentary speech below to exactly one official benchmark label.
+
+      Speech:
+      {text}
+
+  - prompt_id: p2_label_order_permutation
+    frozen: true
+    perturbation: label_order
+    description: >
+      Canonical wording with a fixed preregistered permutation of the 23 official
+      labels. The permutation was generated with NumPy PCG64 using seed 20260923
+      and is stored explicitly below.
+    label_order_seed: 20260923
+    label_order:
+      - Education
+      - Agriculture
+      - Law_and_Crime
+      - Foreign_Trade
+      - Health
+      - Civil_Rights
+      - Technology
+      - Macroeconomics
+      - Social_Welfare
+      - Housing
+      - Defense
+      - Domestic_Commerce
+      - Other
+      - Labor
+      - Environment
+      - Government_Operations
+      - International_Affairs
+      - Public_Lands
+      - Transportation
+      - Immigration
+      - Energy
+      - No_Policy_Content
+      - Culture
+    system_template: |
+      You are classifying parliamentary speeches into one major policy agenda label.
+
+      Return exactly one official benchmark label in JSON.
+
+      Official labels:
+      {labels_block}
+
+      Instructions:
+      - Choose the single best label for the speech.
+      - The JSON must contain exactly one key: "predicted_label".
+      - The value of "predicted_label" must be one official label.
+      - Do not think aloud.
+      - Do not reason step by step.
+      - Do not explain your answer.
+      - Do not return markdown.
+      - Do not return more than one label.
+    user_template: |
+      Classify the following parliamentary speech into exactly one official benchmark label.
+
+      Speech:
+      {text}
+
+  - prompt_id: p3_structural_format
+    frozen: true
+    perturbation: structural_format
+    description: >
+      Canonical substantive instructions and canonical label order, but the
+      instruction block is moved before the label inventory and rendered as prose
+      rather than bullets.
+    label_order: canonical
+    system_template: |
+      You are classifying parliamentary speeches into one major policy agenda label.
+
+      Return exactly one official benchmark label in JSON.
+
+      Instructions: Choose the single best label for the speech. The JSON must contain exactly one key: "predicted_label". The value of "predicted_label" must be one official label. Do not think aloud. Do not reason step by step. Do not explain your answer. Do not return markdown. Do not return more than one label.
+
+      Official labels:
+      {labels_block}
+    user_template: |
+      Classify the following parliamentary speech into exactly one official benchmark label.
+
+      Speech:
+      {text}
