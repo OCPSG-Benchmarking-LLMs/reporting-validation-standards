@@ -57,7 +57,8 @@ models:
     structured_output_mode: json_schema
     reasoning_setting: thinking_false
     runtime_context_length: 8192
-    local_identity_policy: record_ollama_digest_at_run_time
+    expected_local_digest: 096fdbd02fe620fc10cbeb6537e080f8041aece851e5d696aed024d4f70f2e47
+    local_identity_policy: require_expected_digest_and_record_at_run_time
 
   - model_key: ollama_gemma4_31b
     provider: ollama
