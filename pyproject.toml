@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reporting-validation-standards"
+version = "0.1.0"
+description = "Reproducible demonstrations for reporting and validation standards in automated political text measurement."
+requires-python = ">=3.10"
+dependencies = [
+    "huggingface-hub>=0.25",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "pyarrow>=14",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
