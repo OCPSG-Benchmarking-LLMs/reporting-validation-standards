@@ -1,0 +1,11 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+reporting-validation-standards = {path = ".", editable = true}
+
+[dev-packages]
+pytest = ">=8"
+ruff = ">=0.6"
