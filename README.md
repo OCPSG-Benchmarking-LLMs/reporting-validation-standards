@@ -281,7 +281,9 @@ code/       executable research scripts
 src/        reusable Python package
 tests/      automated tests
 data/       manifests and locally generated data
-outputs/    generated analytical outputs
+outputs/    generated analytical outputs (gitignored)
+runs/       raw smoke/production run artefacts (gitignored)
+results/    compact finalized production provenance (version controlled)
 ```
 
 Using `code/` rather than `scripts/` is intentional: this repository is primarily a research-companion repository, and `code/` makes the role of the numbered analysis programs explicit.
