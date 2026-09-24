@@ -1,0 +1,73 @@
+{
+  "completion_qa_pass": true,
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "duplicate_cells": 0,
+  "expected_decisions": 12000,
+  "latency_seconds": {
+    "max": 60.81469309999375,
+    "mean": 0.9667362508082912,
+    "median": 0.8563867999982904,
+    "p95": 1.5452730700017125
+  },
+  "local_model_digests": {},
+  "manifest_issues": [],
+  "missing_cells": 0,
+  "model_key": "openai_gpt54_mini",
+  "observed_records": 12000,
+  "parse_status": {
+    "ok": 12000
+  },
+  "prompt_repetition_coverage": {
+    "p0_capbench_canonical": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p1_lexical_paraphrase": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p2_label_order_permutation": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p3_structural_format": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    }
+  },
+  "provider": "openai",
+  "raw_file_count": 10,
+  "raw_inference_records_sha256": "3e7311f61a405dd1a68fdce030eca793dea2a6c9e797ca34798f384977f333a8",
+  "recorded_cost_total_usd": 5.9715657,
+  "records_with_retries": 1,
+  "requested_model_id": "gpt-5.4-mini-2026-03-17",
+  "returned_model_ids": {
+    "gpt-5.4-mini-2026-03-17": 12000
+  },
+  "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+  "schedule_sha256": "584d874cf4e6be49b95e534315f4ee9a8d5849bdb158328ab5be14095ec4e738",
+  "schema_version": 1,
+  "structural_failures": {
+    "duplicate_cells": 0,
+    "manifest_issues": 0,
+    "model_key_mismatches": 0,
+    "prompt_hash_mismatches": 0,
+    "provider_mismatches": 0,
+    "requested_model_mismatches": 0,
+    "unexpected_cells": 0
+  },
+  "structural_qa_pass": true,
+  "system_fingerprints": {},
+  "total_adapter_retries": 1,
+  "total_tokens": {
+    "max": 3116,
+    "mean": 579.7735833333334,
+    "median": 443.0
+  },
+  "unexpected_cells": 0,
+  "unique_decision_cells": 12000
+}

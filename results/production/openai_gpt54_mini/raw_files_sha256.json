@@ -1,0 +1,16 @@
+{
+  "files": {
+    "experiment_manifest.json": "0debb5042581972f8d286be3bf8e632601e2a55380b7cd9ac2e426e9c2bb56ca",
+    "inference_records.jsonl": "3e7311f61a405dd1a68fdce030eca793dea2a6c9e797ca34798f384977f333a8",
+    "progress.json": "21ce615a5018416bf615cc24db0db5f660da88bea498db6fec2f479b62774a1b",
+    "sessions/openai_gpt54_mini_20260923T161136Z/session_manifest.json": "bfb1acfb04187411b40e32bdf36eab98d919bf57183155884035ad103e2be356",
+    "sessions/openai_gpt54_mini_20260923T225050Z/session_manifest.json": "42617bc47be73697627864e0dd70d91eb69a9046ebd5068f4d3dff8bb86bfda8",
+    "sessions/openai_gpt54_mini_20260923T235541Z/session_manifest.json": "896a705ab4d929524a5fbebadf382ba1d83d96607144534069de7921bd410054",
+    "sessions/openai_gpt54_mini_20260924T000500Z/session_manifest.json": "b05d527b28d39cac5f891e5cf8545dbcad0fde53d4ba84e19ab149d919742497",
+    "sessions/openai_gpt54_mini_20260924T003841Z/session_manifest.json": "2484502d400102189ae9055d256e2e825dcf2364b516fc3bac463eb081d94846",
+    "sessions/openai_gpt54_mini_20260924T074600Z/session_manifest.json": "2a7f289e9ea850e154a8013eb3c35c99368613f0c6f972e9e8fa58c761a45f51",
+    "sessions/openai_gpt54_mini_20260924T105925Z/session_manifest.json": "4e3a5dfae550344881478630ce3099bd8b6ff1ce166662dbe6bdcb8612db57c4"
+  },
+  "model_key": "openai_gpt54_mini",
+  "schema_version": 1
+}
