@@ -1,0 +1,38 @@
+{
+  "carbon_summary": null,
+  "carbon_tracking_enabled": false,
+  "elapsed_seconds": 16.453356500000154,
+  "ended_at_utc": "2026-09-23T16:18:41.433487+00:00",
+  "fatal_error": null,
+  "git": {
+    "commit": "9f4c0d6ce3d093945fe4ca7f1e2248981e3a048c",
+    "working_tree_dirty": true
+  },
+  "local_model_digest": null,
+  "local_model_registry_metadata": null,
+  "max_decisions_requested": 5,
+  "max_retries": 3,
+  "model_key": "openai_gpt6_luna",
+  "n_completed_after_session": 5,
+  "n_completed_before_session": 0,
+  "n_errors": 0,
+  "n_processed": 5,
+  "n_total_decisions": 12000,
+  "nvidia_metadata": null,
+  "ollama_version": null,
+  "platform_metadata": {
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python_version": "3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]",
+    "release": "11",
+    "system": "Windows"
+  },
+  "provider": "openai",
+  "requested_model_id": "gpt-6-luna",
+  "runtime_residency_metadata": null,
+  "session_id": "openai_gpt6_luna_20260923T161824Z",
+  "started_at_utc": "2026-09-23T16:18:24.979552+00:00",
+  "status": "complete_or_staged",
+  "timeout_seconds": 120.0
+}

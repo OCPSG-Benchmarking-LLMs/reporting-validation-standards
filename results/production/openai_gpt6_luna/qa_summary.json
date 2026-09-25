@@ -1,0 +1,73 @@
+{
+  "completion_qa_pass": true,
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "duplicate_cells": 0,
+  "expected_decisions": 12000,
+  "latency_seconds": {
+    "max": 42.268394500002614,
+    "mean": 1.4427040059250764,
+    "median": 1.3117156000007526,
+    "p95": 2.2503350150072947
+  },
+  "local_model_digests": {},
+  "manifest_issues": [],
+  "missing_cells": 0,
+  "model_key": "openai_gpt6_luna",
+  "observed_records": 12000,
+  "parse_status": {
+    "ok": 12000
+  },
+  "prompt_repetition_coverage": {
+    "p0_capbench_canonical": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p1_lexical_paraphrase": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p2_label_order_permutation": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p3_structural_format": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    }
+  },
+  "provider": "openai",
+  "raw_file_count": 6,
+  "raw_inference_records_sha256": "52bc4566cba7458e2a428e7a81b1fdded8db563ae21570cce985f186af52b87b",
+  "recorded_cost_total_usd": 0.789057255,
+  "records_with_retries": 1,
+  "requested_model_id": "gpt-6-luna",
+  "returned_model_ids": {
+    "gpt-6-luna": 12000
+  },
+  "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+  "schedule_sha256": "584d874cf4e6be49b95e534315f4ee9a8d5849bdb158328ab5be14095ec4e738",
+  "schema_version": 1,
+  "structural_failures": {
+    "duplicate_cells": 0,
+    "manifest_issues": 0,
+    "model_key_mismatches": 0,
+    "prompt_hash_mismatches": 0,
+    "provider_mismatches": 0,
+    "requested_model_mismatches": 0,
+    "unexpected_cells": 0
+  },
+  "structural_qa_pass": true,
+  "system_fingerprints": {},
+  "total_adapter_retries": 1,
+  "total_tokens": {
+    "max": 3116,
+    "mean": 579.74925,
+    "median": 443.0
+  },
+  "unexpected_cells": 0,
+  "unique_decision_cells": 12000
+}
