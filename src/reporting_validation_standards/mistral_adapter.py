@@ -92,7 +92,7 @@ class MistralClassifier:
         prompt: RenderedPrompt,
         official_labels: list[str],
         repetition: int = 1,
-        reasoning_setting: str = "none",
+        reasoning_setting: str = "not_exposed_for_model",
         temperature: float | None = 0.0,
         max_output_tokens: int = 40,
         structured_output_mode: str = "json_schema",
@@ -120,14 +120,18 @@ class MistralClassifier:
                 },
             },
             "max_tokens": max_output_tokens,
-            # Mistral exposes both controls on its Chat Completions endpoint.
-            # Pass them through extra_body so provider-specific enum values are
-            # not constrained by the OpenAI SDK's own type surface.
+            # Pass the provider-specific service-tier enum through extra_body so
+            # it is not constrained by the OpenAI SDK's own type surface.
             "extra_body": {
-                "reasoning_effort": reasoning_setting,
                 "service_tier": MISTRAL_SERVICE_TIER,
             },
         }
+        # Mistral Large 3 does not document adjustable reasoning support.
+        # Only send reasoning_effort for models whose frozen specification
+        # explicitly exposes a supported value.
+        if reasoning_setting not in {"not_exposed_for_model", "not_exposed"}:
+            request["extra_body"]["reasoning_effort"] = reasoning_setting
+
         if temperature is not None:
             request["temperature"] = temperature
 
