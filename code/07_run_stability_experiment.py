@@ -17,6 +17,7 @@ from reporting_validation_standards.experiment_specs import (
     render_prompt,
 )
 from reporting_validation_standards.fireworks_adapter import FireworksClassifier
+from reporting_validation_standards.mistral_adapter import MistralClassifier
 from reporting_validation_standards.local_compute import (
     CodeCarbonRunTracker,
     collect_nvidia_metadata,
@@ -155,6 +156,11 @@ def _build_classifier(
         )
     if provider == "fireworks":
         return FireworksClassifier(
+            timeout_seconds=timeout_seconds or 120.0,
+            max_retries=3 if max_retries is None else max_retries,
+        )
+    if provider == "mistral":
+        return MistralClassifier(
             timeout_seconds=timeout_seconds or 120.0,
             max_retries=3 if max_retries is None else max_retries,
         )
@@ -404,7 +410,7 @@ def main() -> None:
                         max_output_tokens=MAX_OUTPUT_TOKENS,
                         structured_output_mode=model["structured_output_mode"],
                     )
-                elif model["provider"] == "fireworks":
+                elif model["provider"] in {"fireworks", "mistral"}:
                     record = classifier.classify(
                         run_id=session_id,
                         observation_id=cell.observation_id,
