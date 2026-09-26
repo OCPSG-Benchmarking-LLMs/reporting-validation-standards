@@ -73,7 +73,7 @@ def test_fireworks_reasoning_is_explicitly_disabled():
         if model["model_key"] == "fireworks_deepseek_v41_flash"
     )
 
-    assert model["reasoning_setting"] == "not_exposed_for_model"
+    assert model["reasoning_setting"] == "none"
 
 
 def test_local_models_freeze_runtime_context():
@@ -112,5 +112,5 @@ def test_mistral_extension_is_snapshot_pinned():
     assert model["model_id"] == "mistral-large-2512"
     assert model["stage"] == "supplementary"
     assert model["snapshot_pinned"] is True
-    assert model["reasoning_setting"] == "none"
+    assert model["reasoning_setting"] == "not_exposed_for_model"
     assert model["extension_status"] == "post_production_robustness"
