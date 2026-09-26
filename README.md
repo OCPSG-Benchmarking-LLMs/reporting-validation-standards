@@ -433,7 +433,7 @@ The resulting confusion-matrix totals are Horvitz-Thompson-style population esti
 
 Operational and conditional performance are reported separately. Operational metrics retain API/parse failures as measurement failures; they therefore reduce recall and F1 for the affected reference classes. Conditional metrics describe performance among valid model outputs only. This distinction matters for the supplementary Mistral run, while it is algebraically irrelevant for models with 100% valid output.
 
-Sampling uncertainty is estimated using 2,000 paired Rao-Wu rescaled bootstrap replicates by default. Resampling occurs at the sampled-speech level within the 17 original sampling strata, preserving all repeated inferences for a resampled observation. The rescaling incorporates the stratum sampling fraction, so census strata contribute no sampling variance. The same bootstrap replicate design is reused across models. Percentile 95% intervals therefore quantify uncertainty induced by the frozen probability sample, not every possible source of model or benchmark uncertainty.
+Sampling uncertainty is estimated using 2,000 paired Rao-Wu rescaled bootstrap replicates by default. Resampling occurs at the sampled-speech level within the 17 original sampling strata, preserving all repeated inferences for a resampled observation. The rescaling incorporates the stratum sampling fraction, so census strata contribute no sampling variance. The same bootstrap replicate design is reused across models. Percentile 95% intervals therefore quantify uncertainty induced by the frozen probability sample, not every possible source of model or benchmark uncertainty. Because the same bootstrap replicate weights are used for every model, model differences are evaluated from paired replicate differences rather than by comparing overlap of separate marginal confidence intervals.
 
 Outputs are written under `outputs/validation/`:
 
@@ -441,7 +441,8 @@ Outputs are written under `outputs/validation/`:
 - `condition_performance.csv` — performance for every prompt × repetition condition plus repetition-averaged prompt estimates;
 - `per_class_performance.csv` — weighted class-specific precision, recall, F1, support, and F1 intervals;
 - `confusion_matrix_population.csv` — weighted confusion-matrix cells interpreted as estimated GB test-population counts;
-- `bootstrap_metrics.csv` — replicate-level primary metrics for reproducibility; and
+- `bootstrap_metrics.csv` — replicate-level primary metrics for reproducibility;
+- `paired_model_differences.csv` — paired-bootstrap differences in accuracy and macro-F1 across model pairs; and
 - `analysis_manifest.json` — frozen estimands, source hashes, bootstrap specification, and uncertainty scope.
 
 These are **silver-reference performance estimates**, not human-gold validation. The distinction should be retained in the manuscript and all tables.
