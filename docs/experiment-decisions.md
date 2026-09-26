@@ -172,3 +172,18 @@ The primary correction therefore estimates the 17-dimensional reference prevalen
 The point misclassification matrix averages the three P0 validation repetitions within each sampled observation through one-third decision weights, preserving one inverse-inclusion population weight per speech. Sampling uncertainty is propagated with the same 2,000-replicate Rao-Wu rescaled bootstrap design used for Section 4.3: each bootstrap replicate produces a new misclassification matrix, the constrained prevalence problem is solved again, and percentile intervals are computed from the resulting prevalence distribution.
 
 The correction does use one piece of information from the frozen benchmark sampling frame: the target population is known to have positive silver-reference support on 17 of the 23 official labels. The estimator is therefore support-conditioned and constrains the six unsupported labels to zero true prevalence. This is not equivalent to using the full target prevalence vector, but it means that zero corrected mass on those six labels is imposed by design and must not be presented as empirical evidence of successful correction. The numerical prevalence values of the 17 supported labels are not supplied to the correction algorithm; they are used only ex post to compare naive and corrected prevalence. In an application where true class support is unknown, additional validation information for the unsupported classes would be necessary before applying the same correction.
+
+
+## 2026-09-27 — Computational and environmental reporting scope
+
+Section 4.5 separates request-level computational accounting from infrastructure-level environmental measurement.
+
+Across all seven production models, request-level records support reporting of end-to-end latency, provider/runtime token accounting, explicit adapter retries, structured-output failures, and monetary cost where a dated price table and provider token usage were available. These quantities can be summarized directly from the finalized inference records.
+
+Environmental claims depend on infrastructure observability. Hosted API providers do not expose the server hardware, utilization, power draw, PUE, regional execution location, or contemporaneous electricity mix required for a defensible run-level energy/carbon estimate. Consequently, the analysis records hosted-provider energy and carbon as unobserved and does not infer them from latency, tokens, model size, or monetary price.
+
+The two local Ollama models were measured with CodeCarbon in tracking mode `machine` for every production session. Section 4.5 therefore reports session/run-level CPU, GPU, RAM, total energy, and estimated emissions for those models, alongside the recorded country assumption, CodeCarbon version, hardware, driver, Ollama version, exact model digest, quantisation, runtime context length, and observed CPU/GPU residency. Session summaries are summed because the 12,000-decision production run for each model was completed across multiple resumable sessions. The initial staged five-decision session is included because those five records are part of the finalized production schedule.
+
+Energy or emissions per 1,000 decisions are permitted only as transparent normalizations of the complete measured session totals. They are not described as directly measured per-request carbon footprints. Likewise, the first request after a production session starts is reported as a session-start model-load observation rather than a strict cold start, because lower-level caches may survive between sessions.
+
+The analysis is implemented in `code/12_analyze_compute_environment.py`. Its governing principle is that environmental precision should not exceed infrastructure knowledge.
