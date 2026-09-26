@@ -7,5 +7,5 @@ deployment:
   input_mode: text_en
   repetitions: 1
   schedule_seed: 20260926
-  schedule_algorithm: randomized_population_ids_pcg64_v1
+  schedule_algorithm: randomized_cells_pcg64_v1
   failure_policy: retain_after_adapter_retries
