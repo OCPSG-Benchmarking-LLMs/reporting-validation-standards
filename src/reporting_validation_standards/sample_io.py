@@ -94,3 +94,59 @@ def select_input_text(row: pd.Series, input_mode: str = "text_en") -> str:
     if not text:
         raise ValueError("Selected input text is empty.")
     return text
+
+
+
+def load_frozen_population(
+    *,
+    stem: str = "uk_test_1000",
+    manifest_dir: str | Path = "data/manifests",
+    token: str | None = None,
+    cache_dir: str | None = None,
+) -> tuple[pd.DataFrame, dict]:
+    """Load the full population underlying the frozen sample at its immutable revision."""
+    manifest_dir = Path(manifest_dir)
+    metadata_path = manifest_dir / f"{stem}_metadata.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+
+    parquet_path = download_country_split(
+        repo_id=metadata["dataset_repo"],
+        country_code=metadata["country_code"],
+        split=metadata["split"],
+        revision=metadata["dataset_revision"],
+        token=token,
+        cache_dir=cache_dir,
+    )
+    population = pd.read_parquet(parquet_path).copy()
+
+    id_column = metadata["id_column"]
+    label_column = metadata["label_column"]
+    if id_column not in population.columns:
+        raise RuntimeError(f"Population is missing ID column {id_column!r}.")
+    if label_column not in population.columns:
+        raise RuntimeError(f"Population is missing label column {label_column!r}.")
+    if population[id_column].isna().any():
+        raise RuntimeError("Population ID column contains missing values.")
+    if population[id_column].duplicated().any():
+        raise RuntimeError("Population ID column is not unique.")
+    if population[label_column].isna().any():
+        raise RuntimeError("Population reference-label column contains missing values.")
+
+    if len(population) != int(metadata["population_n"]):
+        raise RuntimeError(
+            "Population-size mismatch at frozen dataset revision: "
+            f"expected {metadata['population_n']}, observed {len(population)}."
+        )
+    observed_labels = int(population[label_column].astype(str).nunique())
+    if observed_labels != int(metadata["population_labels_n"]):
+        raise RuntimeError(
+            "Population label-count mismatch at frozen dataset revision: "
+            f"expected {metadata['population_labels_n']}, observed {observed_labels}."
+        )
+
+    population[id_column] = population[id_column].astype(str)
+    enriched_metadata = dict(metadata)
+    enriched_metadata["population_id_sha256"] = hash_sample_ids(
+        population[id_column].tolist()
+    )
+    return population.reset_index(drop=True), enriched_metadata
