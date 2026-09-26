@@ -1,0 +1,31 @@
+{
+  "created_at_utc": "2026-09-26T14:12:58.854493+00:00",
+  "frozen_spec": {
+    "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+    "deployment_id": "gb_test_p0_gpt54_mini_v1",
+    "failure_policy": "retain_after_adapter_retries",
+    "input_mode": "text_en",
+    "max_output_tokens": 40,
+    "max_retries": 3,
+    "model_key": "openai_gpt54_mini",
+    "n_decisions": 28978,
+    "population_id_sha256": "835a2dc883ed50a939248fa446f0de34f067653973910d09332ed4ffb65c3295",
+    "population_labels_n": 17,
+    "population_n": 28978,
+    "prompt_id": "p0_capbench_canonical",
+    "prompt_spec_sha256": "5c59306d3703606a6cb9ce30bc34c57b143397c5ad2ae57ca734aded1991c84b",
+    "provider": "openai",
+    "purpose": "full_population_prevalence_deployment",
+    "reasoning_setting": "none",
+    "repetitions": 1,
+    "requested_model_id": "gpt-5.4-mini-2026-03-17",
+    "schedule_algorithm": "randomized_cells_pcg64_v1",
+    "schedule_seed": 20260926,
+    "schedule_sha256": "b3545c4236069adfaa60e6c19b4f4e4b0a24364b161e4f385f8323f1eb41f35c",
+    "schema_version": 1,
+    "snapshot_pinned": true,
+    "structured_output_mode": "json_schema",
+    "temperature": 0.0,
+    "timeout_seconds": 120.0
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "deployment_id": "gb_test_p0_gpt54_mini_v1",
+  "files": {
+    "experiment_manifest.json": "f8e7387ae75f76cf7cd703cc5f351ceaf740e24849d56e9c23313b0224df3dbb",
+    "inference_records.jsonl": "7e1ed3bb8c1cbdfb858c5c70709e454abec250434d736e49acbe4a909e5ad8c9",
+    "progress.json": "a058c0555a7239b53737bbcd836fae4ec2142580e9fc2bbbba3ee81c5e833b91",
+    "sessions/gb_test_p0_gpt54_mini_v1_20260926T141258Z/session_manifest.json": "5ba19f1cf82827358ad05785d8bffe3a2929fc1297b9ffd2e118dccb864a1b5b",
+    "sessions/gb_test_p0_gpt54_mini_v1_20260926T141338Z/session_manifest.json": "c93bd0cfe158e6dc949eb7c5664383582c615ed959baa35ae7eb5eb3b1fec829",
+    "sessions/gb_test_p0_gpt54_mini_v1_20260926T141914Z/session_manifest.json": "527c558bce6a70a0f25b0d3e3f6124311c24d5997cbd5744f3d821d130f4b3bb",
+    "sessions/gb_test_p0_gpt54_mini_v1_20260926T160054Z/session_manifest.json": "c39ff03cdbab7a362bf8bbc9be212f1e55aa0ecf152620b3e88168b58ec526f1",
+    "sessions/gb_test_p0_gpt54_mini_v1_20260926T173956Z/session_manifest.json": "fbfe8134ececa6e2a5630fdd6643dae36563533f9725681c16a398213f822205"
+  },
+  "schema_version": 1
+}

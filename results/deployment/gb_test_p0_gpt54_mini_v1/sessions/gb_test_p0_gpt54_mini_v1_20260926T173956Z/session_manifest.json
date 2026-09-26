@@ -1,0 +1,33 @@
+{
+  "deployment_id": "gb_test_p0_gpt54_mini_v1",
+  "elapsed_seconds": 14924.346585599997,
+  "ended_at_utc": "2026-09-26T21:48:40.665094+00:00",
+  "fatal_error": null,
+  "git": {
+    "commit": "feb4b91ea98c9de5e72be1fcf717ae0778c43f1e",
+    "working_tree_dirty": false
+  },
+  "max_decisions_requested": null,
+  "max_retries": 3,
+  "model_key": "openai_gpt54_mini",
+  "n_completed_after_session": 28978,
+  "n_completed_before_session": 11310,
+  "n_errors": 0,
+  "n_processed": 17668,
+  "n_total_decisions": 28978,
+  "platform_metadata": {
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python_version": "3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]",
+    "release": "11",
+    "system": "Windows"
+  },
+  "provider": "openai",
+  "recorded_cost_usd": 8.974079249999983,
+  "requested_model_id": "gpt-5.4-mini-2026-03-17",
+  "session_id": "gb_test_p0_gpt54_mini_v1_20260926T173956Z",
+  "started_at_utc": "2026-09-26T17:39:56.086979+00:00",
+  "status": "complete_or_staged",
+  "timeout_seconds": 120.0
+}

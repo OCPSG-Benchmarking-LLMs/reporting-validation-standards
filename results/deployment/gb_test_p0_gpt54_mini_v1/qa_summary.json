@@ -1,0 +1,48 @@
+{
+  "completion_qa_pass": true,
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "deployment_id": "gb_test_p0_gpt54_mini_v1",
+  "duplicate_cells": 0,
+  "expected_decisions": 28978,
+  "latency_seconds": {
+    "max": 21.016661100031342,
+    "mean": 0.8564514597244988,
+    "median": 0.7828803999873344,
+    "p95": 1.1272103549796155
+  },
+  "manifest_issues": [],
+  "missing_cells": 0,
+  "model_key": "openai_gpt54_mini",
+  "observed_records": 28978,
+  "parse_status": {
+    "ok": 28978
+  },
+  "population_id_sha256": "835a2dc883ed50a939248fa446f0de34f067653973910d09332ed4ffb65c3295",
+  "population_n": 28978,
+  "prompt_id": "p0_capbench_canonical",
+  "provider": "openai",
+  "raw_file_count": 8,
+  "raw_inference_records_sha256": "7e1ed3bb8c1cbdfb858c5c70709e454abec250434d736e49acbe4a909e5ad8c9",
+  "recorded_cost_total_usd": 14.63501325,
+  "records_with_retries": 1,
+  "requested_model_id": "gpt-5.4-mini-2026-03-17",
+  "returned_model_ids": {
+    "gpt-5.4-mini-2026-03-17": 28978
+  },
+  "schedule_sha256": "b3545c4236069adfaa60e6c19b4f4e4b0a24364b161e4f385f8323f1eb41f35c",
+  "schema_version": 1,
+  "structural_failures": {
+    "duplicate_cells": 0,
+    "manifest_issues": 0,
+    "model_key_mismatches": 0,
+    "prompt_mismatches": 0,
+    "provider_mismatches": 0,
+    "repetition_mismatches": 0,
+    "requested_model_mismatches": 0,
+    "unexpected_cells": 0
+  },
+  "structural_qa_pass": true,
+  "total_adapter_retries": 1,
+  "unexpected_cells": 0,
+  "unique_decision_cells": 28978
+}
