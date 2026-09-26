@@ -21,6 +21,12 @@ def numeric_summary(values: list[Any]) -> dict[str, float | None]:
 def summarize_records(records: pd.DataFrame) -> dict[str, Any]:
     valid = records["is_valid"].astype(bool)
     latency = numeric_summary(records["latency_seconds"].tolist())
+    valid_latency = numeric_summary(
+        records.loc[valid, "latency_seconds"].tolist()
+    )
+    invalid_latency = numeric_summary(
+        records.loc[~valid, "latency_seconds"].tolist()
+    )
     retries = pd.to_numeric(records["retry_count"], errors="coerce").fillna(0)
 
     def total(column: str) -> int | None:
@@ -49,6 +55,12 @@ def summarize_records(records: pd.DataFrame) -> dict[str, Any]:
         "latency_median_seconds": latency["median"],
         "latency_p95_seconds": latency["p95"],
         "latency_max_seconds": latency["max"],
+        "valid_latency_mean_seconds": valid_latency["mean"],
+        "valid_latency_median_seconds": valid_latency["median"],
+        "valid_latency_p95_seconds": valid_latency["p95"],
+        "invalid_latency_mean_seconds": invalid_latency["mean"],
+        "invalid_latency_median_seconds": invalid_latency["median"],
+        "invalid_latency_p95_seconds": invalid_latency["p95"],
         "records_with_retries": int((retries > 0).sum()),
         "total_adapter_retries": int(retries.sum()),
         "input_tokens_total": total("input_tokens"),
