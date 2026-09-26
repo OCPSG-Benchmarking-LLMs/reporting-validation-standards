@@ -1,0 +1,8 @@
+model_key,provider,request_latency_reportable,token_usage_reportable,retry_diagnostics_reportable,monetary_cost_reportable,machine_energy_reportable,machine_carbon_estimate_reportable,provider_side_energy_reportable,provider_side_carbon_reportable,environmental_claim_scope
+openai_gpt54,openai,True,True,True,True,False,False,False,False,"No provider-side infrastructure or energy telemetry available; do not infer carbon from latency, tokens, or price."
+openai_gpt54_mini,openai,True,True,True,True,False,False,False,False,"No provider-side infrastructure or energy telemetry available; do not infer carbon from latency, tokens, or price."
+fireworks_deepseek_v41_flash,fireworks,True,True,True,True,False,False,False,False,"No provider-side infrastructure or energy telemetry available; do not infer carbon from latency, tokens, or price."
+ollama_qwen36_35b,ollama,True,True,True,False,True,True,False,False,Dedicated local machine sessions measured with CodeCarbon; report run/session totals and normalized run-average intensity.
+ollama_gemma4_31b,ollama,True,True,True,False,True,True,False,False,Dedicated local machine sessions measured with CodeCarbon; report run/session totals and normalized run-average intensity.
+openai_gpt6_luna,openai,True,True,True,True,False,False,False,False,"No provider-side infrastructure or energy telemetry available; do not infer carbon from latency, tokens, or price."
+mistral_large3_2512,mistral,True,True,True,True,False,False,False,False,"No provider-side infrastructure or energy telemetry available; do not infer carbon from latency, tokens, or price."

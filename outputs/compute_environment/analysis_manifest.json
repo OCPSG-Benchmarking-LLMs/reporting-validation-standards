@@ -1,0 +1,50 @@
+{
+  "analysis": "computational_performance_and_environmental_transparency",
+  "deployment_id": "gb_test_p0_gpt54_mini_v1",
+  "deployment_raw_inference_sha256": "7e1ed3bb8c1cbdfb858c5c70709e454abec250434d736e49acbe4a909e5ad8c9",
+  "hosted_environmental_measurement": {
+    "rule": "No server-side energy or carbon estimate is produced for hosted providers because infrastructure, utilization, power, and electricity mix are not exposed by the recorded API telemetry.",
+    "scope": "not observed"
+  },
+  "interpretive_principle": "Environmental precision should not exceed infrastructure knowledge.",
+  "local_environmental_measurement": {
+    "aggregation": "Session-level CPU, GPU, RAM, total energy, and emissions estimates are summed across all production sessions contributing to the 12,000 finalized decisions for each local model.",
+    "load_timing": "First valid request per session is reported as session-start load. It is not labelled a perfect cold start because OS/filesystem/driver caches may persist between sessions.",
+    "normalized_metrics": "Per-1,000-decision energy/emissions values are run-average normalizations of measured session totals, not direct per-request carbon measurements.",
+    "scope": "dedicated local production sessions",
+    "tool": "CodeCarbon"
+  },
+  "outputs": [
+    "production_compute_summary.csv",
+    "deployment_compute_summary.csv",
+    "local_inference_timing.csv",
+    "local_environment_summary.csv",
+    "local_session_environment.csv",
+    "environmental_reporting_scope.csv"
+  ],
+  "production_model_keys": [
+    "openai_gpt54",
+    "openai_gpt54_mini",
+    "fireworks_deepseek_v41_flash",
+    "ollama_qwen36_35b",
+    "ollama_gemma4_31b",
+    "openai_gpt6_luna",
+    "mistral_large3_2512"
+  ],
+  "production_raw_inference_sha256": {
+    "fireworks_deepseek_v41_flash": "f1ce7c73b340377a94179ab6c97aa5d0f661cb6364a64b3a8d50e34983adabd6",
+    "mistral_large3_2512": "93415e80291d8ed0386adc0e0fa37fd2dad21d2a296e8b5940f52ae9ee2695d9",
+    "ollama_gemma4_31b": "15145bcc2beb2eb397de6588fb549c49a6afc264ad38a55cccfc83db4176bdcf",
+    "ollama_qwen36_35b": "071a620b2d0f8c8cb1f605a41719d9d524361c1d5612f1d2eba23a5a8047914e",
+    "openai_gpt54": "f075335aa0174e00bc34e40a8a6c1dae64c4847e09c34c117b0a20bd98883fdf",
+    "openai_gpt54_mini": "3e7311f61a405dd1a68fdce030eca793dea2a6c9e797ca34798f384977f333a8",
+    "openai_gpt6_luna": "52bc4566cba7458e2a428e7a81b1fdded8db563ae21570cce985f186af52b87b"
+  },
+  "request_level_metrics": {
+    "latency": "End-to-end including retries and backoff. Summaries are retained for all scheduled decisions and separately for valid and invalid outputs so operational failures do not masquerade as ordinary successful-request latency.",
+    "monetary_cost": "recorded only when dated provider pricing and usage accounting were available",
+    "retries": "explicit adapter retries; SDK retries disabled where applicable",
+    "tokens": "provider/runtime reported token accounting"
+  },
+  "schema_version": 1
+}
