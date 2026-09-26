@@ -73,7 +73,7 @@ def test_fireworks_reasoning_is_explicitly_disabled():
         if model["model_key"] == "fireworks_deepseek_v41_flash"
     )
 
-    assert model["reasoning_setting"] == "none"
+    assert model["reasoning_setting"] == "not_exposed_for_model"
 
 
 def test_local_models_freeze_runtime_context():
