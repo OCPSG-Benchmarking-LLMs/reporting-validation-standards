@@ -15,10 +15,11 @@ def test_model_panel_is_unique_and_has_expected_size():
     config = load_model_config(MODELS)
     models = config["models"]
 
-    assert len(models) == 6
-    assert len({model["model_key"] for model in models}) == 6
+    assert len(models) == 7
+    assert len({model["model_key"] for model in models}) == 7
     assert sum(model["stage"] == "core" for model in models) == 5
     assert sum(model["stage"] == "secondary" for model in models) == 1
+    assert sum(model["stage"] == "supplementary" for model in models) == 1
 
 
 def test_all_prompt_variants_use_same_label_inventory():
@@ -98,3 +99,18 @@ def test_local_models_freeze_exact_digests():
         lookup["ollama_gemma4_31b"]["expected_local_digest"]
         == "6316f0629137b426c9d9b853ffc4c8209589f30ee39aebede6285096c0ff47e7"
     )
+
+
+def test_mistral_extension_is_snapshot_pinned():
+    config = load_model_config(MODELS)
+    model = next(
+        model for model in config["models"]
+        if model["model_key"] == "mistral_large3_2512"
+    )
+
+    assert model["provider"] == "mistral"
+    assert model["model_id"] == "mistral-large-2512"
+    assert model["stage"] == "supplementary"
+    assert model["snapshot_pinned"] is True
+    assert model["reasoning_setting"] == "none"
+    assert model["extension_status"] == "post_production_robustness"
