@@ -446,3 +446,44 @@ Outputs are written under `outputs/validation/`:
 - `analysis_manifest.json` — frozen estimands, source hashes, bootstrap specification, and uncertainty scope.
 
 These are **silver-reference performance estimates**, not human-gold validation. The distinction should be retained in the manuscript and all tables.
+
+
+## Full-population deployment for prevalence propagation
+
+After the stability and design-based validation analyses, the prevalence-propagation demonstration uses one frozen deployment over the complete GB silver-reference test population. The deployment specification is stored in `config/deployment.yaml`.
+
+The deployment uses the pinned GPT-5.4 Mini snapshot (`gpt-5.4-mini-2026-03-17`), the canonical P0 prompt, the same `text_en` fallback rule, and one classification per speech. This is a deliberately separate deployment stage rather than an additional stability-model run. The model was selected for the downstream demonstration after the seven-model validation stage because it offers substantially lower API cost than GPT-5.4 while the paired bootstrap comparison of their silver-reference macro-F1 difference included zero. This selection is not an equivalence claim and does not redefine the original model panel.
+
+Inspect the frozen deployment plan without sending requests:
+
+```bash
+pipenv run python code/09_run_population_deployment.py --plan-only
+```
+
+Then begin with five legitimate population decisions:
+
+```bash
+pipenv run python code/09_run_population_deployment.py --max-decisions 5
+```
+
+Check the staged deployment with:
+
+```bash
+pipenv run python code/10_check_and_finalize_deployment.py
+```
+
+If structural QA passes, resume the remaining population:
+
+```bash
+pipenv run python code/09_run_population_deployment.py
+```
+
+The runner is append-only and resumable. The population is loaded from the exact immutable Hugging Face revision used to freeze the 1,000-case validation sample. It records a population-ID SHA-256 and uses a deterministic randomized PCG64 schedule so elapsed API time is not mechanically aligned with the source-data order. Persistent inference failures are retained after the frozen adapter retry policy rather than silently replaced.
+
+After all 28,978 population decisions are present, finalize with:
+
+```bash
+pipenv run python code/10_check_and_finalize_deployment.py --finalize
+```
+
+Raw deployment records remain under the gitignored `runs/deployment/` tree. Compact immutable provenance is written under `results/deployment/gb_test_p0_gpt54_mini_v1/` and should be committed before running the subsequent error-propagation analysis.
