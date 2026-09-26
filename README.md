@@ -417,3 +417,31 @@ Generated files are written to `outputs/stability/`:
 - `analysis_manifest.json` — source hashes, panel definitions, and analysis rules.
 
 The original six-model panel remains distinct from the supplementary Mistral extension in all metadata and panel-level summaries.
+
+
+## Design-based validation analysis
+
+The next stage estimates classifier performance relative to the frozen OCPSG silver reference using the probability-sample design:
+
+```bash
+pipenv run python code/08_analyze_validation.py
+```
+
+The primary validation condition is the canonical P0 prompt. For each sampled speech, its three repeated P0 decisions are averaged so that the observation contributes its inverse-inclusion sampling weight exactly once in the primary confusion matrix. This avoids treating repeated calls on the same speech as independent test-set observations.
+
+The resulting confusion-matrix totals are Horvitz-Thompson-style population estimates under the frozen label-stratified sampling design. Macro-averaged metrics are calculated across the 17 silver-reference labels that occur in the GB target population. The full 23-label benchmark inventory remains available to the classifiers: predictions into benchmark labels absent from the GB silver-reference population still count as errors for the true reference class.
+
+Operational and conditional performance are reported separately. Operational metrics retain API/parse failures as measurement failures; they therefore reduce recall and F1 for the affected reference classes. Conditional metrics describe performance among valid model outputs only. This distinction matters for the supplementary Mistral run, while it is algebraically irrelevant for models with 100% valid output.
+
+Sampling uncertainty is estimated using 2,000 paired Rao-Wu rescaled bootstrap replicates by default. Resampling occurs at the sampled-speech level within the 17 original sampling strata, preserving all repeated inferences for a resampled observation. The rescaling incorporates the stratum sampling fraction, so census strata contribute no sampling variance. The same bootstrap replicate design is reused across models. Percentile 95% intervals therefore quantify uncertainty induced by the frozen probability sample, not every possible source of model or benchmark uncertainty.
+
+Outputs are written under `outputs/validation/`:
+
+- `primary_model_performance.csv` — weighted P0 performance, unweighted diagnostics, and 95% bootstrap intervals;
+- `condition_performance.csv` — performance for every prompt × repetition condition plus repetition-averaged prompt estimates;
+- `per_class_performance.csv` — weighted class-specific precision, recall, F1, support, and F1 intervals;
+- `confusion_matrix_population.csv` — weighted confusion-matrix cells interpreted as estimated GB test-population counts;
+- `bootstrap_metrics.csv` — replicate-level primary metrics for reproducibility; and
+- `analysis_manifest.json` — frozen estimands, source hashes, bootstrap specification, and uncertainty scope.
+
+These are **silver-reference performance estimates**, not human-gold validation. The distinction should be retained in the manuscript and all tables.
