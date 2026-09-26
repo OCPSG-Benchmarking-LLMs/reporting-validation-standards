@@ -150,3 +150,14 @@ Sampling uncertainty is estimated with a Rao-Wu rescaled bootstrap appropriate t
 The bootstrap intervals quantify uncertainty from the probability-sample design conditional on the observed silver benchmark and classifier runs. They should not be interpreted as integrating benchmark-construction uncertainty, provider/infrastructure drift, or the full stochastic distribution of the model beyond the three observed repeated inferences.
 
 Paired model comparisons use the same bootstrap replicate weights for every model. Differences in accuracy and macro-F1 are therefore calculated within replicate before constructing percentile intervals. This is preferable to inferring model differences from overlap or non-overlap of separate marginal confidence intervals.
+
+
+## 2026-09-26 — Full-population deployment model for prevalence propagation
+
+The downstream prevalence-error demonstration is separated from the seven-model stability/validation panel. It uses one frozen deployment over all 28,978 speeches in the GB silver-reference test population, with one P0 classification per speech.
+
+The selected deployment instrument is the pinned GPT-5.4 Mini snapshot, `gpt-5.4-mini-2026-03-17`. This choice was made after completion of the comparative validation analysis for a practical downstream demonstration: GPT-5.4 Mini has substantially lower observed API cost than GPT-5.4, while their paired design-based P0 macro-F1 difference was -0.11 percentage points with a 95% paired bootstrap interval of approximately [-1.68, +1.67] percentage points. The interval including zero is treated only as absence of evidence of a difference at this precision, not as a formal equivalence result or a claim that Mini is superior.
+
+The population deployment is frozen in `config/deployment.yaml`: canonical P0 prompt, `text_en` input mode, one decision per observation, temperature 0, 40-token output cap, the model's no-reasoning configuration, deterministic randomized PCG64 ordering, and the existing explicit adapter retry policy. The source population is loaded from the same immutable Hugging Face dataset revision used to draw the validation sample. A SHA-256 of the complete population ID set and the exact randomized schedule hash are stored in the deployment manifest.
+
+The full-population run is append-only and resumable. Persistent provider/API failures are retained as deployment outcomes rather than silently rerun. The completed deployment is checked and finalized separately under `results/deployment/` before any prevalence correction is estimated.
