@@ -64,6 +64,48 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
+def _failure_diagnostics(records: pd.DataFrame) -> pd.DataFrame:
+    failures = records.loc[~records["is_valid"]].copy()
+    if failures.empty:
+        return pd.DataFrame(
+            columns=[
+                "model_key",
+                "error_type",
+                "last_status_code",
+                "count",
+            ]
+        )
+
+    def last_status_code(metadata: Any) -> int | None:
+        if not isinstance(metadata, dict):
+            return None
+        events = metadata.get("retry_events") or []
+        if not events:
+            return None
+        status = events[-1].get("status_code")
+        return int(status) if status is not None else None
+
+    failures["error_type"] = failures.get(
+        "error_type",
+        pd.Series(index=failures.index, dtype="object"),
+    ).fillna("UnknownError")
+    failures["last_status_code"] = failures.get(
+        "provider_metadata",
+        pd.Series(index=failures.index, dtype="object"),
+    ).map(last_status_code)
+
+    return (
+        failures.groupby(
+            ["model_key", "error_type", "last_status_code"],
+            dropna=False,
+        )
+        .size()
+        .reset_index(name="count")
+        .sort_values(["model_key", "count"], ascending=[True, False])
+        .reset_index(drop=True)
+    )
+
+
 def _read_and_verify_model(
     *,
     model_key: str,
@@ -238,6 +280,7 @@ def main() -> None:
         records=records,
         observation_summary=observation_summary,
     )
+    failure_diagnostics = _failure_diagnostics(records)
 
     observation_output = observation_summary.copy()
     observation_output["instability_rank"] = (
@@ -259,6 +302,7 @@ def main() -> None:
         "model_pair_agreement.csv": model_pair_agreement,
         "panel_agreement.csv": panel_agreement,
         "stability_by_reference_label.csv": by_reference_label,
+        "failure_diagnostics.csv": failure_diagnostics,
         "observation_instability.csv": observation_output,
     }
     for filename, frame in outputs.items():
@@ -330,6 +374,10 @@ def main() -> None:
             lambda value: "NA" if pd.isna(value) else f"{100 * value:.2f}%"
         )
     print(display.to_string(index=False))
+
+    if not failure_diagnostics.empty:
+        print("\nObserved production failures")
+        print(failure_diagnostics.to_string(index=False))
 
     print("\nPanel-level agreement")
     panel_display = panel_agreement.copy()
