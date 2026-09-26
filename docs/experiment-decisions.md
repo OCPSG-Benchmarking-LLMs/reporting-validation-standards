@@ -101,3 +101,18 @@ Raw production inference records and local CodeCarbon artefacts remain under the
 The script operates in check-only mode by default so it can be used safely on partial runs. Explicit `--finalize` is allowed only when both structural QA and completion QA pass. Finalization records SHA-256 hashes for every raw run file and copies only lightweight provenance into `results/production/<model_key>/`: the frozen experiment manifest, a machine-readable QA summary, a raw-file hash inventory, and session manifests.
 
 Finalized provenance is immutable: a repeated finalization with identical source data is a no-op, while changed source data or changed archival content causes the script to refuse a silent overwrite. The eventual full raw inference corpus can therefore be deposited as a separate versioned research-data release while remaining cryptographically linked to the Git repository.
+
+
+## 2026-09-26 — Mistral Large 3 post-production robustness extension
+
+After the original six-model stability panel had been fully run and finalized, one additional model was selected for a supplementary robustness extension: Mistral Large 3, using the exact API snapshot `mistral-large-2512`.
+
+This addition does not redefine the original panel. It is labelled `stage: supplementary` and `extension_status: post_production_robustness` in the model configuration. The selection rationale was to broaden provider and model-family coverage while using available API access at feasible cost. The choice was made before inspecting any Mistral classification outcomes and therefore is not based on comparative performance against the completed six models.
+
+Mistral documents Large 3 v25.12 as an open-weight, general-purpose Mixture-of-Experts model with 41B active parameters, 675B total parameters, and a 256k context window. The exact versioned model identifier `mistral-large-2512` is used instead of the moving `mistral-large-latest` alias.
+
+For API inference, the project uses Mistral's documented OpenAI-compatible base URL (`https://api.mistral.ai/v1`) through the already-frozen OpenAI Python SDK dependency. This avoids changing the Python environment solely to add the Mistral SDK. The adapter preserves the common experiment contract: frozen system/user prompts, `temperature=0`, 40-token output cap, `reasoning_effort=none`, JSON-schema structured output, explicit retries, returned model identity, token accounting, latency, and dated cost accounting.
+
+The dated standard-tier pricing configuration is `config/pricing/mistral_2026-09-26.yaml`, recording $0.50 per million ordinary input tokens, $0.05 per million cached input tokens, and $1.50 per million output tokens. As with other hosted providers, no provider-side energy or carbon estimate is inferred from API latency or token usage.
+
+The extension reuses the identical frozen 1,000-observation × four-prompt × three-repetition randomized schedule. The original six-model experiment therefore remains 72,000 decisions; Mistral contributes a separate additional 12,000 decisions.
