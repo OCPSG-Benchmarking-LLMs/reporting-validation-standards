@@ -109,6 +109,9 @@ def main() -> None:
         if record.returned_model_id:
             base += f"  returned={record.returned_model_id}"
         print(base)
+        if record.parse_status != "ok":
+            print(f"       error_type={record.error_type}")
+            print(f"       error_message={record.error_message}")
 
     jsonl_path = run_dir / "inference_records.jsonl"
     with jsonl_path.open("w", encoding="utf-8") as handle:
