@@ -155,6 +155,68 @@ def _metric_row(
     return output
 
 
+def _paired_model_differences(
+    *,
+    primary_performance: pd.DataFrame,
+    bootstrap_metrics: pd.DataFrame,
+    model_keys: list[str],
+) -> pd.DataFrame:
+    metrics = [
+        "operational_accuracy",
+        "operational_macro_f1",
+        "conditional_macro_f1",
+    ]
+    point_lookup = primary_performance.set_index("model_key")
+    rows: list[dict[str, Any]] = []
+
+    for left_index, left in enumerate(model_keys):
+        for right in model_keys[left_index + 1 :]:
+            left_boot = (
+                bootstrap_metrics.loc[
+                    bootstrap_metrics["model_key"].eq(left),
+                    ["bootstrap_rep", *metrics],
+                ]
+                .set_index("bootstrap_rep")
+                .sort_index()
+            )
+            right_boot = (
+                bootstrap_metrics.loc[
+                    bootstrap_metrics["model_key"].eq(right),
+                    ["bootstrap_rep", *metrics],
+                ]
+                .set_index("bootstrap_rep")
+                .sort_index()
+            )
+            if not left_boot.index.equals(right_boot.index):
+                raise RuntimeError(
+                    f"Paired bootstrap replicate indices differ for {left} and {right}."
+                )
+
+            for metric in metrics:
+                differences = (
+                    left_boot[metric].to_numpy(dtype=float)
+                    - right_boot[metric].to_numpy(dtype=float)
+                )
+                lower, upper = np.quantile(differences, [0.025, 0.975])
+                point_difference = float(
+                    point_lookup.loc[left, f"weighted_{metric}"]
+                    - point_lookup.loc[right, f"weighted_{metric}"]
+                )
+                rows.append(
+                    {
+                        "model_key_left": left,
+                        "model_key_right": right,
+                        "metric": metric,
+                        "difference_left_minus_right": point_difference,
+                        "ci_low": float(lower),
+                        "ci_high": float(upper),
+                        "ci_excludes_zero": bool(lower > 0 or upper < 0),
+                    }
+                )
+
+    return pd.DataFrame(rows)
+
+
 def _condition_performance(
     records: pd.DataFrame,
     *,
@@ -440,6 +502,12 @@ def main() -> None:
     confusion_long = pd.DataFrame(confusion_rows)
     bootstrap_metrics = pd.concat(bootstrap_frames, ignore_index=True)
 
+    paired_model_differences = _paired_model_differences(
+        primary_performance=primary_performance,
+        bootstrap_metrics=bootstrap_metrics,
+        model_keys=model_keys,
+    )
+
     condition_performance = _condition_performance(
         records,
         model_keys=model_keys,
@@ -467,6 +535,10 @@ def main() -> None:
     )
     bootstrap_metrics.to_csv(
         args.output_dir / "bootstrap_metrics.csv",
+        index=False,
+    )
+    paired_model_differences.to_csv(
+        args.output_dir / "paired_model_differences.csv",
         index=False,
     )
 
@@ -537,6 +609,7 @@ def main() -> None:
             "per_class_performance.csv",
             "confusion_matrix_population.csv",
             "bootstrap_metrics.csv",
+            "paired_model_differences.csv",
         ],
     }
     _write_json(args.output_dir / "analysis_manifest.json", manifest)
@@ -550,6 +623,8 @@ def main() -> None:
             "weighted_operational_macro_f1",
             "weighted_operational_macro_f1_ci_low",
             "weighted_operational_macro_f1_ci_high",
+            "unweighted_operational_macro_f1",
+            "weighted_minus_unweighted_operational_macro_f1",
             "weighted_conditional_macro_f1",
         ]
     ].copy()
@@ -558,6 +633,24 @@ def main() -> None:
             lambda value: f"{100 * value:.2f}%"
         )
     print(display.to_string(index=False))
+
+    print("\nPaired model differences in weighted operational macro-F1")
+    pair_display = paired_model_differences.loc[
+        paired_model_differences["metric"].eq("operational_macro_f1"),
+        [
+            "model_key_left",
+            "model_key_right",
+            "difference_left_minus_right",
+            "ci_low",
+            "ci_high",
+            "ci_excludes_zero",
+        ],
+    ].copy()
+    for column in ["difference_left_minus_right", "ci_low", "ci_high"]:
+        pair_display[column] = pair_display[column].map(
+            lambda value: f"{100 * value:+.2f} pp"
+        )
+    print(pair_display.to_string(index=False))
 
     print(f"\nAnalysis outputs: {args.output_dir}")
     print(
