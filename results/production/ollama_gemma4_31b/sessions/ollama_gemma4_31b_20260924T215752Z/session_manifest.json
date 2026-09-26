@@ -1,0 +1,104 @@
+{
+  "carbon_summary": {
+    "codecarbon_output_file": "codecarbon_emissions.csv",
+    "codecarbon_version": "3.3.1",
+    "country_iso_code": "NLD",
+    "cpu_energy_kwh": 0.8588396077824972,
+    "duration_seconds": 34847.7180081,
+    "emissions_kg_co2e": 0.4042031783119113,
+    "energy_consumed_kwh": 1.5103510859044178,
+    "gpu_energy_kwh": 0.45850205985690995,
+    "measure_power_secs": 1,
+    "ram_energy_kwh": 0.1930094182650116,
+    "tracking_mode": "machine"
+  },
+  "carbon_tracking_enabled": true,
+  "elapsed_seconds": 34850.520886700004,
+  "ended_at_utc": "2026-09-25T07:38:44.132749+00:00",
+  "fatal_error": null,
+  "git": {
+    "commit": "ce498bb23e0ce3029c8329eb4b8fb698c8d010db",
+    "working_tree_dirty": true
+  },
+  "local_model_digest": "6316f0629137b426c9d9b853ffc4c8209589f30ee39aebede6285096c0ff47e7",
+  "local_model_registry_metadata": {
+    "capabilities": [
+      "completion",
+      "vision",
+      "tools",
+      "thinking"
+    ],
+    "details": {
+      "context_length": 262144,
+      "embedding_length": 5376,
+      "families": [
+        "gemma4"
+      ],
+      "family": "gemma4",
+      "format": "gguf",
+      "parameter_size": "31.3B",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "digest": "6316f0629137b426c9d9b853ffc4c8209589f30ee39aebede6285096c0ff47e7",
+    "model": "gemma4:31b",
+    "modified_at": "2026-09-23T15:49:10.1292259+02:00",
+    "name": "gemma4:31b",
+    "size": 19868981791
+  },
+  "max_decisions_requested": null,
+  "max_retries": 1,
+  "model_key": "ollama_gemma4_31b",
+  "n_completed_after_session": 7166,
+  "n_completed_before_session": 1554,
+  "n_errors": 0,
+  "n_processed": 5612,
+  "n_total_decisions": 12000,
+  "nvidia_metadata": {
+    "available": true,
+    "gpus": [
+      {
+        "driver_version": "617.14",
+        "index": "0",
+        "memory_total_mb": "12282",
+        "name": "NVIDIA GeForce RTX 4070 SUPER",
+        "power_limit_w": "220.00",
+        "uuid": "GPU-f276a4f9-966c-b340-f4ac-bc3b23d81b5b"
+      }
+    ]
+  },
+  "ollama_version": "0.34.3",
+  "platform_metadata": {
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python_version": "3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]",
+    "release": "11",
+    "system": "Windows"
+  },
+  "provider": "ollama",
+  "requested_model_id": "gemma4:31b",
+  "runtime_residency_metadata": {
+    "context_length": 8192,
+    "details": {
+      "families": [
+        "gemma4"
+      ],
+      "family": "gemma4",
+      "format": "gguf",
+      "parameter_size": "31.3B",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "expires_at": "2026-09-25T00:03:13.8998932+02:00",
+    "model": "gemma4:31b",
+    "name": "gemma4:31b",
+    "size_bytes": 21475360765,
+    "size_vram_bytes": 9063251311,
+    "vram_fraction": 0.4220302238540764
+  },
+  "session_id": "ollama_gemma4_31b_20260924T215752Z",
+  "started_at_utc": "2026-09-24T21:57:53.028383+00:00",
+  "status": "interrupted",
+  "timeout_seconds": 600.0
+}

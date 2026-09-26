@@ -1,0 +1,24 @@
+{
+  "files": {
+    "experiment_manifest.json": "62fc87937495503d77aa7312535a1fb5fbb731ab5856daab2689ff6eafa21421",
+    "inference_records.jsonl": "15145bcc2beb2eb397de6588fb549c49a6afc264ad38a55cccfc83db4176bdcf",
+    "progress.json": "8871c1e7585d356d1e11a9d347f0e7794fb275f6e0dee87d46ef1edf98559a0d",
+    "sessions/ollama_gemma4_31b_20260923T161631Z/carbon_summary.json": "ee9cc91c533cda61da9ee566461d8c13719e4a9cb18d905a5ddb7cafef4315be",
+    "sessions/ollama_gemma4_31b_20260923T161631Z/codecarbon_emissions.csv": "b26a2a18b51e458e7d309b6f22a949e757d3858948f92fc292d5d78eab137cb6",
+    "sessions/ollama_gemma4_31b_20260923T161631Z/session_manifest.json": "8c8003da35974fc49531b0af1f09a2940ac8ab8e145c8ff818d6af7149e2f57e",
+    "sessions/ollama_gemma4_31b_20260924T170215Z/carbon_summary.json": "a7a51bc9924cc110b8efc2eefdabe5e3e4f73a936de5b4b4a4735e0b07c4c313",
+    "sessions/ollama_gemma4_31b_20260924T170215Z/codecarbon_emissions.csv": "6d11313d18b0ceb0fd8e502eb1c2d356e782bb908505b21d4dce1034a1021e0c",
+    "sessions/ollama_gemma4_31b_20260924T170215Z/session_manifest.json": "a2107138a2dbdcab094c480a32d5dd50cf87a758b9ea4e0958b65999c8667b8d",
+    "sessions/ollama_gemma4_31b_20260924T205930Z/carbon_summary.json": "2c5000475bd00cb3e7de00fdb5212d2cfc0d412ed75371c68f9cdbdaae070665",
+    "sessions/ollama_gemma4_31b_20260924T205930Z/codecarbon_emissions.csv": "c705222fe660d982e637d201d552e8041b3f16cd44d75cd1d24bd166d8796215",
+    "sessions/ollama_gemma4_31b_20260924T205930Z/session_manifest.json": "35728fcc8abc8696c48caa262dac55d3495955b502ff08fe6862194201f131d8",
+    "sessions/ollama_gemma4_31b_20260924T215752Z/carbon_summary.json": "f997cca130419a2e810e22f2a9b159fdf10701c34ac22fe86d5e4031bcde1d29",
+    "sessions/ollama_gemma4_31b_20260924T215752Z/codecarbon_emissions.csv": "40c394b3576a695a1b7865dd7be1477f3c95cc81b5f5aeb0f87cd9c8ebbc9584",
+    "sessions/ollama_gemma4_31b_20260924T215752Z/session_manifest.json": "ed03317718cd565f9fdeb6d030bfb7406989ae8715d8e6b82386efad89340654",
+    "sessions/ollama_gemma4_31b_20260925T221424Z/carbon_summary.json": "0e095c363d7f15c734d755d56c77e2bea4dd0ef0434fcb4a3fee2ab71b434fe0",
+    "sessions/ollama_gemma4_31b_20260925T221424Z/codecarbon_emissions.csv": "337b6c8bdab61398acb9d92133987aa6c8ebbfc2b96c856e9cc6d91381eacb46",
+    "sessions/ollama_gemma4_31b_20260925T221424Z/session_manifest.json": "dd5a485bcaf8183e18284776cfa842585a9605d31d2a05f6fc96b2a335b1a70b"
+  },
+  "model_key": "ollama_gemma4_31b",
+  "schema_version": 1
+}
