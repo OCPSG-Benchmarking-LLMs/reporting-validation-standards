@@ -117,7 +117,7 @@ The four frozen prompt conditions are:
 3. `p2_label_order_permutation` — fixed permutation of the official label order;
 4. `p3_structural_format` — layout/format perturbation with unchanged substantive instructions.
 
-The model panel contains the two pinned GPT-5.4 snapshots, Fireworks DeepSeek V4.1 Flash, local Qwen3.6 35B and Gemma 4 31B, plus `gpt-6-luna` as a secondary moving-alias run after the OpenAI smoke tests succeed.
+The original six-model panel contains the two pinned GPT-5.4 snapshots, Fireworks DeepSeek V4.1 Flash, local Qwen3.6 35B and Gemma 4 31B, plus `gpt-6-luna` as a secondary moving-alias run. After completion of that panel, Mistral Large 3 (`mistral-large-2512`) was added explicitly as a supplementary post-production robustness extension to broaden provider/model-family coverage.
 
 Validate the frozen specifications locally with:
 
@@ -355,3 +355,36 @@ results/
 ```
 
 The finalized artefacts are immutable by default. Re-running `--finalize` against unchanged raw data is a no-op; if an already-finalized artefact would change, the script refuses to overwrite it. This keeps source-code provenance in Git while allowing the larger raw production outputs to be released separately as a research-data archive.
+
+
+## Mistral Large 3 supplementary extension
+
+Mistral Large 3 is included as a post-production robustness extension rather than being retroactively treated as part of the original frozen six-model panel. The exact API snapshot is `mistral-large-2512`. The selection was made after the original panel had been completed, on the basis of additional provider/model-family coverage and feasible API access, not after observing Mistral classification outcomes.
+
+The adapter uses Mistral's documented OpenAI-compatible Chat Completions endpoint at `https://api.mistral.ai/v1`, allowing the existing pinned OpenAI SDK dependency to be reused without changing the Python environment. It requests the same frozen prompts, `temperature=0`, a 40-token output cap, `reasoning_effort=none`, JSON-schema structured output, and the standard service tier. Pricing is recorded separately in `config/pricing/mistral_2026-09-26.yaml`.
+
+Set `MISTRAL_API_KEY`, then validate the provider-specific configuration before touching the production schedule:
+
+```bash
+pipenv run python code/04b_smoke_test_mistral.py --n-cases 1
+pipenv run python code/04b_smoke_test_mistral.py
+```
+
+If the five-case smoke test succeeds and the returned model identity is exactly `mistral-large-2512`, stage the first five legitimate production cells with:
+
+```bash
+pipenv run python code/07_run_stability_experiment.py \
+  --model-key mistral_large3_2512 \
+  --max-decisions 5
+```
+
+Check the partial run with:
+
+```bash
+pipenv run python code/08_check_and_finalize_production.py \
+  --model-key mistral_large3_2512
+```
+
+If structural QA passes, resume all remaining cells by rerunning `07_run_stability_experiment.py` without `--max-decisions`. Finalize the completed 12,000-cell extension using the same `08_check_and_finalize_production.py --finalize` workflow used for the original panel.
+
+The original six-model design contributes 72,000 decisions. The supplementary Mistral run adds 12,000 more without changing the original panel definition, for 84,000 decisions across all completed and supplementary runs.
