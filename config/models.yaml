@@ -95,7 +95,7 @@ models:
     adapter: openai_compatible
     snapshot_pinned: true
     structured_output_mode: json_schema
-    reasoning_setting: none
+    reasoning_setting: not_exposed_for_model
     extension_status: post_production_robustness
     selection_rationale: >-
       Added after completion of the original six-model panel to broaden
