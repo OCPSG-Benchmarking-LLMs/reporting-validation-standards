@@ -1,0 +1,11 @@
+schema_version: 1
+
+deployment:
+  deployment_id: gb_test_p0_gpt54_mini_v1
+  model_key: openai_gpt54_mini
+  prompt_id: p0_capbench_canonical
+  input_mode: text_en
+  repetitions: 1
+  schedule_seed: 20260926
+  schedule_algorithm: randomized_population_ids_pcg64_v1
+  failure_policy: retain_after_adapter_retries
