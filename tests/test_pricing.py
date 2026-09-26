@@ -58,3 +58,18 @@ def test_fireworks_deepseek_cost_with_cached_tokens():
 
     expected = (1000 * 0.22 + 1000 * 0.007 + 100 * 0.66) / 1_000_000
     assert round(estimate.cost_usd, 12) == round(expected, 12)
+
+
+def test_mistral_large3_cost_with_cached_tokens():
+    from reporting_validation_standards.pricing import estimate_mistral_cost
+
+    estimate = estimate_mistral_cost(
+        model_id="mistral-large-2512",
+        input_tokens=2000,
+        cached_input_tokens=1000,
+        cache_write_tokens=0,
+        output_tokens=100,
+    )
+
+    expected = (1000 * 0.50 + 1000 * 0.05 + 100 * 1.50) / 1_000_000
+    assert round(estimate.cost_usd, 12) == round(expected, 12)
