@@ -20,7 +20,7 @@
     "schema_version": {"const": "1.0"},
     "run_id": {"type": "string", "minLength": 1},
     "observation_id": {"type": "string", "minLength": 1},
-    "provider": {"type": "string", "enum": ["openai", "fireworks", "ollama"]},
+    "provider": {"type": "string", "enum": ["openai", "fireworks", "mistral", "ollama"]},
     "model_key": {"type": "string", "minLength": 1},
     "requested_model_id": {"type": "string", "minLength": 1},
     "returned_model_id": {"type": ["string", "null"]},
