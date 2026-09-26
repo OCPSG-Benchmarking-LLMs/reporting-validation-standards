@@ -96,7 +96,7 @@ For local production runs, CodeCarbon tracking is mandatory for every session. I
 
 ## 2026-09-23 — Production data archival policy
 
-Raw production inference records and local CodeCarbon artefacts remain under the gitignored `runs/` tree rather than being committed to ordinary Git history. Completed model runs are checked and finalized with a single script, `code/08_check_and_finalize_production.py`.
+Raw production inference records and local CodeCarbon artefacts remain under the gitignored `runs/` tree rather than being committed to ordinary Git history. Completed model runs are checked and finalized with a single script, `code/06_check_and_finalize_production.py`.
 
 The script operates in check-only mode by default so it can be used safely on partial runs. Explicit `--finalize` is allowed only when both structural QA and completion QA pass. Finalization records SHA-256 hashes for every raw run file and copies only lightweight provenance into `results/production/<model_key>/`: the frozen experiment manifest, a machine-readable QA summary, a raw-file hash inventory, and session manifests.
 
@@ -121,3 +121,14 @@ The extension reuses the identical frozen 1,000-observation × four-prompt × th
 ### Initial Mistral smoke-test correction
 
 The first one-case connectivity test failed before returning token usage or a model response. Before any Mistral production cell was run, the provider-specific specification was rechecked against current Mistral documentation. The initial adapter had sent `reasoning_effort="none"` by analogy with other models, but adjustable reasoning is not documented for Mistral Large 3. The parameter was therefore removed and the configuration changed to `reasoning_setting: not_exposed_for_model`. This is an adapter/configuration correction made during smoke testing, before production inference; it does not alter any completed experimental observations.
+
+
+## 2026-09-26 — Stability analysis estimands and failure handling
+
+The first post-production analysis is implemented in `code/07_analyze_stability.py`. It verifies every local raw inference file against the SHA-256 stored in finalized provenance before reading classifications.
+
+The analysis separates operational reliability from classification stability. API or parse failures remain observed outcomes and are not converted into substantive policy labels. Stability statistics are therefore reported in two forms where relevant: an unconditional quantity in which a missing/invalid classification prevents the cell from being counted as stable, and a conditional quantity restricted to cells for which all classifications required by that comparison are valid. This distinction is particularly important for Mistral Large 3, which completed the scheduled design but retained observed failed classifications under the frozen no-silent-rerun policy.
+
+Repeated-inference stability is measured within model × prompt × observation triads across the three repetitions. Prompt stability compares P0 with each perturbation at matched observation × repetition cells and also examines unanimity across all four prompt conditions. Observation-level stability summarizes all 12 model-specific decisions (four prompts × three repetitions) using complete-case unanimity, the number of distinct valid labels, modal share, and Shannon entropy in bits. Model-family dependence is summarized through pairwise exact agreement for matched decisions, with P0 reported separately from all-prompt agreement. Panel-level unanimity is reported both for the original six-model panel and for all seven models including the post-production Mistral extension.
+
+Because the frozen sample deliberately oversamples rare reference labels, primary aggregate stability quantities use inverse-inclusion sampling weights. Unweighted counterparts are retained as descriptive sample diagnostics. Confidence intervals are not mixed into this diagnostic stage; uncertainty estimation is reserved for the subsequent design-based validation analysis.
