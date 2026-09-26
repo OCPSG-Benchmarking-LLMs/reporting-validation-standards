@@ -85,3 +85,19 @@ models:
     run_condition: >
       Run after the two pinned GPT-5.4 OpenAI smoke tests succeed. Record the
       returned model identifier and run date because this is a moving alias.
+
+
+  - model_key: mistral_large3_2512
+    provider: mistral
+    model_id: mistral-large-2512
+    stage: supplementary
+    access: api
+    adapter: openai_compatible
+    snapshot_pinned: true
+    structured_output_mode: json_schema
+    reasoning_setting: none
+    extension_status: post_production_robustness
+    selection_rationale: >-
+      Added after completion of the original six-model panel to broaden
+      provider and model-family coverage. Selection was based on design
+      coverage and feasible API access, not on observed Mistral outcomes.
