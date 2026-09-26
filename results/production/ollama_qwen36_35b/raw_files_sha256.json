@@ -1,0 +1,21 @@
+{
+  "files": {
+    "experiment_manifest.json": "a846c172235b6f63b553a21f5414cfcefcec36cd9450f76547fab8288fb053fc",
+    "inference_records.jsonl": "071a620b2d0f8c8cb1f605a41719d9d524361c1d5612f1d2eba23a5a8047914e",
+    "progress.json": "74ee51ab54b4375eda981592dfbe8918823b264ff4771cf04eb1498f9ce4c143",
+    "sessions/ollama_qwen36_35b_20260923T161249Z/carbon_summary.json": "e76d37c82560d5b611735132cbdbde8fdf7d0753e7a8974ea659e41291a8b883",
+    "sessions/ollama_qwen36_35b_20260923T161249Z/codecarbon_emissions.csv": "b1047fe21eadcc751553967394c4bc481ee67ee3a89d918764dc7a414920b069",
+    "sessions/ollama_qwen36_35b_20260923T161249Z/session_manifest.json": "e273bb033a399438ec74127d97175b7e378ccbdbe9651902441bed6827ccdc23",
+    "sessions/ollama_qwen36_35b_20260925T091237Z/carbon_summary.json": "e460360d8acec3d712841f373c29f7a4102e3199ce9c75d7449f42a25d5cf7b2",
+    "sessions/ollama_qwen36_35b_20260925T091237Z/codecarbon_emissions.csv": "d706f395a2bb923adc575e4966ebdebddf8547735d4ff2157a8537a7c2b2409a",
+    "sessions/ollama_qwen36_35b_20260925T091237Z/session_manifest.json": "8677e0a83265a2b7f256ad454f2adda3eda1b29f90c490a76175557e344edcad",
+    "sessions/ollama_qwen36_35b_20260925T145040Z/carbon_summary.json": "f7f6d443127dd072f34667f65dc1ab5a89354f3bad441a9c912d2ce87ecd589f",
+    "sessions/ollama_qwen36_35b_20260925T145040Z/codecarbon_emissions.csv": "96f495a9cf37a77835ea677acf963a6264db8a582faff0f12fcfcf05eafdf595",
+    "sessions/ollama_qwen36_35b_20260925T145040Z/session_manifest.json": "1daa4286c21a1b54969a11666f559cb0289d70df73cfc66c41fc3c6b43d15ccc",
+    "sessions/ollama_qwen36_35b_20260926T080034Z/carbon_summary.json": "d31a220bc217ac3e50b9a7409e5adb05e3aafbbab9386b30d8622e5a1bc6d211",
+    "sessions/ollama_qwen36_35b_20260926T080034Z/codecarbon_emissions.csv": "f6b7b6c083f8d43836b1fc090407c841ca04b77cc5fdd623857d34b63f5bd1d5",
+    "sessions/ollama_qwen36_35b_20260926T080034Z/session_manifest.json": "c66685f715a935336a54908fc5cc762c1428bbbc55ab20524a5191135b69294e"
+  },
+  "model_key": "ollama_qwen36_35b",
+  "schema_version": 1
+}
