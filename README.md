@@ -487,3 +487,42 @@ pipenv run python code/10_check_and_finalize_deployment.py --finalize
 ```
 
 Raw deployment records remain under the gitignored `runs/deployment/` tree. Compact immutable provenance is written under `results/deployment/gb_test_p0_gpt54_mini_v1/` and should be committed before running the subsequent error-propagation analysis.
+
+
+## Prevalence error propagation
+
+After the finalized full-population deployment is committed, estimate and propagate measurement error with:
+
+```bash
+pipenv run python code/11_analyze_error_propagation.py
+```
+
+The analysis combines two frozen inputs: the one-pass GPT-5.4 Mini P0 deployment over all 28,978 GB test speeches and the design-based 1,000-speech validation sample with three repeated P0 classifications. Both raw JSONL inputs are checked against the SHA-256 hashes in their committed finalized provenance before analysis begins.
+
+Let `pi` denote the unknown 17-label prevalence vector over the GB silver-reference support, `M` the estimated 17 × 23 misclassification matrix with entries `P(predicted=j | reference=i)`, and `q` the observed 23-label prevalence vector from the full deployment. The measurement model is
+
+```text
+q ≈ M^T pi
+```
+
+and the corrected prevalence estimator solves
+
+```text
+min ||M^T pi - q||²
+subject to pi >= 0 and sum(pi) = 1.
+```
+
+The implementation uses a dependency-free projected FISTA solver with exact Euclidean projection onto the probability simplex. Direct matrix inversion is not applicable because the forward operator is 23 × 17 rather than square. An unconstrained least-squares solution is retained only as a diagnostic for negative mass, unit-sum violations, and residual fit.
+
+The point misclassification matrix uses inverse-inclusion validation weights and averages the three repeated P0 classifications so each sampled speech contributes its population weight once. Uncertainty is propagated by rebuilding the misclassification matrix in each of 2,000 Rao-Wu rescaled stratified bootstrap replicates and resolving the constrained prevalence problem. The full-population deployment distribution is treated as the observed census output of one frozen model realization; these intervals therefore quantify validation-sample uncertainty in the estimated error mechanism, not provider drift, benchmark-construction uncertainty, or the full stochastic distribution of the model.
+
+The known full-population silver prevalence is not used to fit the corrected estimator. It is brought in only afterward to demonstrate whether correction moves the measured policy-agenda distribution toward the known benchmark distribution.
+
+Generated version-controlled outputs are written to `outputs/propagation/`:
+
+- `prevalence_comparison.csv` — silver truth, naive deployment prevalence, corrected prevalence, and 95% propagated intervals for all 23 benchmark labels;
+- `propagation_summary.csv` — naive versus corrected total-variation distance, MAE, RMSE, and improvement;
+- `misclassification_matrix.csv` — the estimated 17 × 23 P0 error mechanism;
+- `bootstrap_propagation.csv` — replicate-level corrected prevalence and error diagnostics;
+- `solver_diagnostics.json` — conditioning, convergence, and unconstrained-solution diagnostics; and
+- `analysis_manifest.json` — source hashes, estimand, estimator, and uncertainty scope.
