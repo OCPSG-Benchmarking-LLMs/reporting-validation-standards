@@ -1,0 +1,74 @@
+{
+  "completion_qa_pass": true,
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "duplicate_cells": 0,
+  "expected_decisions": 12000,
+  "latency_seconds": {
+    "max": 121.67810119999922,
+    "mean": 0.7891879144167154,
+    "median": 0.5546103500091704,
+    "p95": 1.1635917550025623
+  },
+  "local_model_digests": {},
+  "manifest_issues": [],
+  "missing_cells": 0,
+  "model_key": "mistral_large3_2512",
+  "observed_records": 12000,
+  "parse_status": {
+    "error": 193,
+    "ok": 11807
+  },
+  "prompt_repetition_coverage": {
+    "p0_capbench_canonical": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p1_lexical_paraphrase": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p2_label_order_permutation": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    },
+    "p3_structural_format": {
+      "1": 1000,
+      "2": 1000,
+      "3": 1000
+    }
+  },
+  "provider": "mistral",
+  "raw_file_count": 8,
+  "raw_inference_records_sha256": "93415e80291d8ed0386adc0e0fa37fd2dad21d2a296e8b5940f52ae9ee2695d9",
+  "recorded_cost_total_usd": 2.41238,
+  "records_with_retries": 343,
+  "requested_model_id": "mistral-large-2512",
+  "returned_model_ids": {
+    "mistral-large-2512": 11807
+  },
+  "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+  "schedule_sha256": "584d874cf4e6be49b95e534315f4ee9a8d5849bdb158328ab5be14095ec4e738",
+  "schema_version": 1,
+  "structural_failures": {
+    "duplicate_cells": 0,
+    "manifest_issues": 0,
+    "model_key_mismatches": 0,
+    "prompt_hash_mismatches": 0,
+    "provider_mismatches": 0,
+    "requested_model_mismatches": 0,
+    "unexpected_cells": 0
+  },
+  "structural_qa_pass": true,
+  "system_fingerprints": {},
+  "total_adapter_retries": 937,
+  "total_tokens": {
+    "max": 3028,
+    "mean": 472.2062335902431,
+    "median": 331
+  },
+  "unexpected_cells": 0,
+  "unique_decision_cells": 12000
+}

@@ -1,0 +1,14 @@
+{
+  "files": {
+    "experiment_manifest.json": "70385f165c9b80d77c5539c6093121e409d7f103574c84be829122a10565f607",
+    "inference_records.jsonl": "93415e80291d8ed0386adc0e0fa37fd2dad21d2a296e8b5940f52ae9ee2695d9",
+    "progress.json": "6d23ae5bfaa9b5587df4e3474fcc98944f0f014b353678b17596382197126b1f",
+    "sessions/mistral_large3_2512_20260926T101111Z/session_manifest.json": "bfcc04422c6997f37b2ea0407c7e938944fb94463418770f5770c6ceba4e808d",
+    "sessions/mistral_large3_2512_20260926T101228Z/session_manifest.json": "31180c54926e303753417e1f43aad1e2b170e714170deb86919590ebc7161244",
+    "sessions/mistral_large3_2512_20260926T101745Z/session_manifest.json": "d4085618b2e2dbafb4fa674e0e2e7f4fc02be29ecd76d95b83c7b322de7927a9",
+    "sessions/mistral_large3_2512_20260926T105628Z/session_manifest.json": "50865108ab732c60f27a64943917443ee037da862d1d18c611e4351908118de8",
+    "sessions/mistral_large3_2512_20260926T122516Z/session_manifest.json": "13febf820c06c867e832e15c26eeef4c280ec95659d6e0f1f7a977d1ff6eb2c2"
+  },
+  "model_key": "mistral_large3_2512",
+  "schema_version": 1
+}
