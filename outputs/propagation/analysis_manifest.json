@@ -1,0 +1,99 @@
+{
+  "absent_reference_labels": [
+    "Technology",
+    "Foreign_Trade",
+    "Public_Lands",
+    "Culture",
+    "Other",
+    "No_Policy_Content"
+  ],
+  "analysis": "prevalence_error_propagation",
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "deployment_id": "gb_test_p0_gpt54_mini_v1",
+  "deployment_model_key": "openai_gpt54_mini",
+  "deployment_raw_inference_sha256": "7e1ed3bb8c1cbdfb858c5c70709e454abec250434d736e49acbe4a909e5ad8c9",
+  "estimator": {
+    "constraints": [
+      "pi_j >= 0",
+      "sum(pi)=1"
+    ],
+    "equation": "q approximately equals M^T pi",
+    "reason_for_constraint": "The 23-by-17 forward operator is rectangular; constrained least squares respects prevalence geometry and avoids negative or non-unit-mass corrected prevalences.",
+    "type": "simplex_constrained_least_squares"
+  },
+  "known_silver_truth_usage": {
+    "generalisability_caveat": "In an application where the true class support is unknown, this support-conditioned correction cannot be applied without additional validation information for the unsupported classes.",
+    "prevalence_values": "The numerical full-population silver prevalence values are not used to fit the constrained solution. They are introduced only after correction to evaluate whether adjustment moves the estimated distribution toward the known benchmark distribution.",
+    "support_conditioning": "The correction is explicitly conditional on the 17-label support known from the frozen silver benchmark sampling frame. The six official labels with zero silver-reference support are constrained to zero true prevalence."
+  },
+  "official_prediction_labels": [
+    "Macroeconomics",
+    "Civil_Rights",
+    "Health",
+    "Agriculture",
+    "Labor",
+    "Education",
+    "Environment",
+    "Energy",
+    "Immigration",
+    "Transportation",
+    "Law_and_Crime",
+    "Social_Welfare",
+    "Housing",
+    "Domestic_Commerce",
+    "Defense",
+    "Technology",
+    "Foreign_Trade",
+    "International_Affairs",
+    "Government_Operations",
+    "Public_Lands",
+    "Culture",
+    "Other",
+    "No_Policy_Content"
+  ],
+  "outputs": [
+    "prevalence_comparison.csv",
+    "propagation_summary.csv",
+    "misclassification_matrix.csv",
+    "bootstrap_propagation.csv",
+    "solver_diagnostics.json"
+  ],
+  "population_id_sha256": "835a2dc883ed50a939248fa446f0de34f067653973910d09332ed4ffb65c3295",
+  "population_n": 28978,
+  "prompt_id": "p0_capbench_canonical",
+  "reference_labels": [
+    "Macroeconomics",
+    "Civil_Rights",
+    "Health",
+    "Agriculture",
+    "Labor",
+    "Education",
+    "Environment",
+    "Energy",
+    "Immigration",
+    "Transportation",
+    "Law_and_Crime",
+    "Social_Welfare",
+    "Housing",
+    "Domestic_Commerce",
+    "Defense",
+    "International_Affairs",
+    "Government_Operations"
+  ],
+  "requested_model_id": "gpt-5.4-mini-2026-03-17",
+  "schema_version": 1,
+  "uncertainty": {
+    "bootstrap_reps": 2000,
+    "confidence_level": 0.95,
+    "interval": "percentile",
+    "method": "Rao-Wu rescaled bootstrap within the 17 sampling strata",
+    "rng": "NumPy PCG64",
+    "scope": "The full deployment is treated as a census of one frozen model realization. Intervals propagate validation-sample uncertainty in the misclassification mechanism, not model stochasticity, benchmark-construction uncertainty, or provider drift.",
+    "seed": 20260926,
+    "source": "validation probability-sample uncertainty"
+  },
+  "validation_model_key": "openai_gpt54_mini",
+  "validation_raw_inference_sha256": "3e7311f61a405dd1a68fdce030eca793dea2a6c9e797ca34798f384977f333a8",
+  "validation_repetition_treatment": "Each sampled observation's three P0 classifications are averaged so its inverse-inclusion weight contributes once to the estimated misclassification mechanism.",
+  "validation_repetitions": 3
+}

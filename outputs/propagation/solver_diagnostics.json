@@ -1,0 +1,97 @@
+{
+  "bootstrap": {
+    "all_converged": true,
+    "improvement_mae_target_labels_ci": [
+      0.0003080251236794551,
+      0.0031370365109433243
+    ],
+    "improvement_total_variation_distance_ci": [
+      0.009571764520976526,
+      0.03361836131271942
+    ],
+    "reps": 2000,
+    "seed": 20260926
+  },
+  "corrected_absent_reference_label_mass": 0.0,
+  "estimator": "simplex-constrained least squares: min ||M^T pi - q||_2^2 subject to pi >= 0 and sum(pi)=1",
+  "forward_operator": {
+    "condition_number": 1.9281010760514445,
+    "rank": 17,
+    "shape": [
+      23,
+      17
+    ],
+    "singular_values": [
+      1.0327622493625368,
+      1.0076523529897996,
+      1.0003448701282494,
+      1.0002172188797562,
+      1.0,
+      0.9983326520341388,
+      0.9937010960859215,
+      0.9846040860085253,
+      0.9824244690646765,
+      0.9609989099551266,
+      0.9419127119223987,
+      0.932764659463302,
+      0.9261555944875064,
+      0.8737479310810935,
+      0.7410755067400476,
+      0.6107602507369388,
+      0.5356369861467684
+    ]
+  },
+  "naive_absent_reference_label_mass": 0.013907101939402306,
+  "point_solution": {
+    "converged": true,
+    "iterations": 68,
+    "objective": 2.4272228723222715e-05,
+    "projected_gradient_norm": 4.695690542023258e-12,
+    "solution_by_reference_label": {
+      "Agriculture": 0.02604817003785614,
+      "Civil_Rights": 0.00145567116524363,
+      "Defense": 0.07362120170424286,
+      "Domestic_Commerce": 0.0,
+      "Education": 0.0906138399518135,
+      "Energy": 0.026159294081657916,
+      "Environment": 0.0037744540459334094,
+      "Government_Operations": 0.09071813469760702,
+      "Health": 0.1740288881532624,
+      "Housing": 0.05337653315450173,
+      "Immigration": 0.0070891739162868145,
+      "International_Affairs": 0.1746707336832502,
+      "Labor": 0.012687066101686763,
+      "Law_and_Crime": 0.10672048678475544,
+      "Macroeconomics": 0.04489839900168091,
+      "Social_Welfare": 0.041404623646949065,
+      "Transportation": 0.07273332987327222
+    }
+  },
+  "unconstrained_least_squares": {
+    "maximum": 0.1745593948332137,
+    "minimum": -0.001053059421042224,
+    "negative_components": 1,
+    "negative_mass": 0.001053059421042224,
+    "residual_sum_squares": 4.698828464967733e-05,
+    "solution_by_reference_label": {
+      "Agriculture": 0.02578955234597216,
+      "Civil_Rights": 0.000944369705516257,
+      "Defense": 0.0733386929112702,
+      "Domestic_Commerce": -0.001053059421042224,
+      "Education": 0.09036974555924887,
+      "Energy": 0.02590660813085677,
+      "Environment": 0.003519911657119165,
+      "Government_Operations": 0.0907550280388478,
+      "Health": 0.17378161043378182,
+      "Housing": 0.053097247384662094,
+      "Immigration": 0.006835444219834333,
+      "International_Affairs": 0.1745593948332137,
+      "Labor": 0.012423537346574354,
+      "Law_and_Crime": 0.10648379252723361,
+      "Macroeconomics": 0.04474358397538384,
+      "Social_Welfare": 0.04113729657327669,
+      "Transportation": 0.07247765479414411
+    },
+    "sum": 0.9951104110158935
+  }
+}
