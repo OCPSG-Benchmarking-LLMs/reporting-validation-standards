@@ -1,0 +1,17 @@
+{
+  "files": {
+    "experiment_manifest.json": "b6cffcbe6940039e176900c7f02679163c55065271f029f9a22028db664a4a27",
+    "inference_records.jsonl": "f075335aa0174e00bc34e40a8a6c1dae64c4847e09c34c117b0a20bd98883fdf",
+    "progress.json": "82ba9516b0b72464680a2daf23a95a69610cf17b9f94563e2652131452186756",
+    "sessions/openai_gpt54_20260923T161534Z/session_manifest.json": "4d61e6ba09263cbdd39ca712cac165334b9fb4eac277c436a2d3a74ae0d702f3",
+    "sessions/openai_gpt54_20260923T201603Z/session_manifest.json": "1495c1b5a348edd48118bf43d94a496738d9424be95d11979ca55e4a6363116c",
+    "sessions/openai_gpt54_20260923T212915Z/session_manifest.json": "f80ad3f37ab910401312a0a8d2a0638a991e823d0f4f7357ba5539fccebf6763",
+    "sessions/openai_gpt54_20260923T214805Z/session_manifest.json": "c38cba0b103e6142c85a2ee68aee294f8a576fa75fa33b32387faf2584193edc",
+    "sessions/openai_gpt54_20260923T221150Z/session_manifest.json": "bbc04c6fa248e8ec25c789c03f60daa032f8407b25c4089f3ab91e937cf9bf3c",
+    "sessions/openai_gpt54_20260923T224255Z/session_manifest.json": "909567c658b30c8163c361518902f75d9518668bceba3aa4eee93d9cea5bfb63",
+    "sessions/openai_gpt54_20260924T095941Z/session_manifest.json": "826fc2cb50072a3abb19eeddfee8497749aadc6b5071192a1cd175a27ee2eede",
+    "sessions/openai_gpt54_20260925T074110Z/session_manifest.json": "5e5897a6bc6fd82c806c538f4294b384f07ec90ff900407127125264e32a7eec"
+  },
+  "model_key": "openai_gpt54",
+  "schema_version": 1
+}
