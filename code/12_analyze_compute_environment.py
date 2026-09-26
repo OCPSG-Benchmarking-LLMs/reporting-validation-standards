@@ -300,7 +300,12 @@ def main() -> None:
             deployment_qa["raw_inference_records_sha256"]
         ),
         "request_level_metrics": {
-            "latency": "end_to_end_including_retries_and_backoff",
+            "latency": (
+                "End-to-end including retries and backoff. Summaries are retained "
+                "for all scheduled decisions and separately for valid and invalid "
+                "outputs so operational failures do not masquerade as ordinary "
+                "successful-request latency."
+            ),
             "tokens": "provider/runtime reported token accounting",
             "retries": "explicit adapter retries; SDK retries disabled where applicable",
             "monetary_cost": (
@@ -356,6 +361,10 @@ def main() -> None:
             "valid_rate",
             "latency_median_seconds",
             "latency_p95_seconds",
+            "valid_latency_median_seconds",
+            "valid_latency_p95_seconds",
+            "invalid_latency_median_seconds",
+            "invalid_latency_p95_seconds",
             "total_tokens_mean_valid",
             "records_with_retries",
             "recorded_cost_total_usd",
