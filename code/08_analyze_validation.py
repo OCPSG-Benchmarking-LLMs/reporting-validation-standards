@@ -628,10 +628,18 @@ def main() -> None:
             "weighted_conditional_macro_f1",
         ]
     ].copy()
-    for column in display.columns[1:]:
+    percentage_columns = [
+        column
+        for column in display.columns[1:]
+        if column != "weighted_minus_unweighted_operational_macro_f1"
+    ]
+    for column in percentage_columns:
         display[column] = display[column].map(
             lambda value: f"{100 * value:.2f}%"
         )
+    display["weighted_minus_unweighted_operational_macro_f1"] = display[
+        "weighted_minus_unweighted_operational_macro_f1"
+    ].map(lambda value: f"{100 * value:+.2f} pp")
     print(display.to_string(index=False))
 
     print("\nPaired model differences in weighted operational macro-F1")
