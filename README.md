@@ -154,13 +154,13 @@ pipenv run pytest
 Set `OPENAI_API_KEY` in the environment and then run:
 
 ```bash
-pipenv run python code/03_smoke_test_openai.py
+pipenv run python code/03a_smoke_test_openai.py
 ```
 
 For an even smaller connectivity check:
 
 ```bash
-pipenv run python code/03_smoke_test_openai.py --n-cases 1
+pipenv run python code/03a_smoke_test_openai.py --n-cases 1
 ```
 
 Do not commit API keys or the raw `runs/` directory.
@@ -182,13 +182,13 @@ The current serverless rates recorded for `accounts/fireworks/models/deepseek-v4
 After setting `FIREWORKS_API_KEY`, begin with one frozen case:
 
 ```bash
-pipenv run python code/04_smoke_test_fireworks.py --n-cases 1
+pipenv run python code/03b_smoke_test_fireworks.py --n-cases 1
 ```
 
 Then run the same five-case smoke panel used for OpenAI:
 
 ```bash
-pipenv run python code/04_smoke_test_fireworks.py
+pipenv run python code/03b_smoke_test_fireworks.py
 ```
 
 The Fireworks adapter records returned model identity, response ID, token usage, cached tokens when exposed, finish reason, system fingerprint when exposed, retries, end-to-end latency, successful-attempt latency, timestamps, raw structured output, and calculated cost.
@@ -222,20 +222,20 @@ ollama pull gemma4:31b
 Begin with one Qwen case:
 
 ```bash
-pipenv run python code/05_smoke_test_ollama.py --n-cases 1 --model-key ollama_qwen36_35b
+pipenv run python code/03c_smoke_test_ollama.py --n-cases 1 --model-key ollama_qwen36_35b
 ```
 
 Then test Gemma:
 
 ```bash
-pipenv run python code/05_smoke_test_ollama.py --n-cases 1 --model-key ollama_gemma4_31b
+pipenv run python code/03c_smoke_test_ollama.py --n-cases 1 --model-key ollama_gemma4_31b
 ```
 
 If both succeed, run the same five frozen cases for each model:
 
 ```bash
-pipenv run python code/05_smoke_test_ollama.py --model-key ollama_qwen36_35b
-pipenv run python code/05_smoke_test_ollama.py --model-key ollama_gemma4_31b
+pipenv run python code/03c_smoke_test_ollama.py --model-key ollama_qwen36_35b
+pipenv run python code/03c_smoke_test_ollama.py --model-key ollama_gemma4_31b
 ```
 
 The script keeps a model resident throughout the run, queries Ollama's running-model state after the first successful request to record total resident size and VRAM-resident size, and then explicitly unloads the model after the run. This allows the manifest to document CPU/GPU residency rather than inferring it from nominal model size or GPU capacity.
@@ -247,7 +247,7 @@ CodeCarbon is optional during smoke testing and is applied at the **run level**,
 Use an explicit three-letter country code for the machine's physical location. For example, when the machine is physically in the Netherlands:
 
 ```bash
-pipenv run python code/05_smoke_test_ollama.py \
+pipenv run python code/03c_smoke_test_ollama.py \
   --model-key ollama_qwen36_35b \
   --track-carbon \
   --country-iso-code NLD
@@ -260,7 +260,7 @@ The run directory then contains `codecarbon_emissions.csv` and a compact `carbon
 Before launching the full 1,000-case × four-prompt × three-repetition stability experiment, run a length/context preflight:
 
 ```bash
-pipenv run python code/06_preflight_stability_experiment.py
+pipenv run python code/04_preflight_stability_experiment.py
 ```
 
 The script verifies the frozen sample, reports text and rendered-prompt length distributions, lists the longest sampled speeches, confirms the planned 12,000 decisions per model / 72,000 decisions overall, and uses successful Ollama smoke records to construct an empirical prompt-token proxy. When recent Ollama residency manifests are available, it compares those estimates with the runtime context length.
@@ -270,8 +270,8 @@ The token proxy is diagnostic rather than tokenizer-exact. The completed preflig
 The longest frozen speech can be used for a targeted context test before production:
 
 ```bash
-pipenv run python code/05_smoke_test_ollama.py --observation-id ParlaMint-GB_2016-06-08-lords.u126 --model-key ollama_qwen36_35b
-pipenv run python code/05_smoke_test_ollama.py --observation-id ParlaMint-GB_2016-06-08-lords.u126 --model-key ollama_gemma4_31b
+pipenv run python code/03c_smoke_test_ollama.py --observation-id ParlaMint-GB_2016-06-08-lords.u126 --model-key ollama_qwen36_35b
+pipenv run python code/03c_smoke_test_ollama.py --observation-id ParlaMint-GB_2016-06-08-lords.u126 --model-key ollama_gemma4_31b
 ```
 
 ## Repository structure
@@ -299,7 +299,7 @@ Using `code/` rather than `scripts/` is intentional: this repository is primaril
 After smoke testing and the full-sample context preflight, run the frozen stability experiment one model at a time with:
 
 ```bash
-pipenv run python code/07_run_stability_experiment.py --model-key <MODEL_KEY>
+pipenv run python code/05_run_stability_experiment.py --model-key <MODEL_KEY>
 ```
 
 The runner uses the same deterministic randomized 12,000-cell schedule for every model (1,000 observations × four prompts × three repetitions), appends each completed inference record immediately, validates the frozen experiment manifest on resume, and skips every decision cell already present. Use `--plan-only` to inspect a model run without sending requests. Use `--max-decisions N` for a staged launch; rerunning the same command later resumes the identical schedule.
@@ -307,12 +307,12 @@ The runner uses the same deterministic randomized 12,000-cell schedule for every
 For local Ollama production runs, energy tracking is required:
 
 ```bash
-pipenv run python code/07_run_stability_experiment.py \
+pipenv run python code/05_run_stability_experiment.py \
   --model-key ollama_qwen36_35b \
   --track-carbon \
   --country-iso-code NLD
 
-pipenv run python code/07_run_stability_experiment.py \
+pipenv run python code/05_run_stability_experiment.py \
   --model-key ollama_gemma4_31b \
   --track-carbon \
   --country-iso-code NLD
@@ -326,7 +326,7 @@ Each invocation creates a session manifest. This permits interrupted local runs 
 Production runs remain under the gitignored `runs/` directory. Use the combined QA/finalization script to inspect a partial or completed model run:
 
 ```bash
-pipenv run python code/08_check_and_finalize_production.py \
+pipenv run python code/06_check_and_finalize_production.py \
   --model-key <MODEL_KEY>
 ```
 
@@ -335,7 +335,7 @@ Check-only mode has no archival side effects and can be used during staged or in
 After all 12,000 scheduled cells for a model are complete, finalize the run explicitly:
 
 ```bash
-pipenv run python code/08_check_and_finalize_production.py \
+pipenv run python code/06_check_and_finalize_production.py \
   --model-key <MODEL_KEY> \
   --finalize
 ```
@@ -366,14 +366,14 @@ The adapter uses Mistral's documented OpenAI-compatible Chat Completions endpoin
 Set `MISTRAL_API_KEY`, then validate the provider-specific configuration before touching the production schedule:
 
 ```bash
-pipenv run python code/04b_smoke_test_mistral.py --n-cases 1
-pipenv run python code/04b_smoke_test_mistral.py
+pipenv run python code/03d_smoke_test_mistral.py --n-cases 1
+pipenv run python code/03d_smoke_test_mistral.py
 ```
 
 If the five-case smoke test succeeds and the returned model identity is exactly `mistral-large-2512`, stage the first five legitimate production cells with:
 
 ```bash
-pipenv run python code/07_run_stability_experiment.py \
+pipenv run python code/05_run_stability_experiment.py \
   --model-key mistral_large3_2512 \
   --max-decisions 5
 ```
@@ -381,10 +381,38 @@ pipenv run python code/07_run_stability_experiment.py \
 Check the partial run with:
 
 ```bash
-pipenv run python code/08_check_and_finalize_production.py \
+pipenv run python code/06_check_and_finalize_production.py \
   --model-key mistral_large3_2512
 ```
 
-If structural QA passes, resume all remaining cells by rerunning `07_run_stability_experiment.py` without `--max-decisions`. Finalize the completed 12,000-cell extension using the same `08_check_and_finalize_production.py --finalize` workflow used for the original panel.
+If structural QA passes, resume all remaining cells by rerunning `05_run_stability_experiment.py` without `--max-decisions`. Finalize the completed 12,000-cell extension using the same `06_check_and_finalize_production.py --finalize` workflow used for the original panel.
 
 The original six-model design contributes 72,000 decisions. The supplementary Mistral run adds 12,000 more without changing the original panel definition, for 84,000 decisions across all completed and supplementary runs.
+
+
+## Stability analysis
+
+After all model runs are finalized, analyse repeated-inference, prompt, and model-family stability with:
+
+```bash
+pipenv run python code/07_analyze_stability.py
+```
+
+Before calculating any statistic, the script verifies that every local raw `inference_records.jsonl` file has the SHA-256 recorded in the corresponding committed `results/production/<MODEL_KEY>/qa_summary.json`. Analysis therefore fails closed if the local raw data no longer match the finalized provenance.
+
+The stability analysis keeps two concepts separate. **Operational reliability** concerns whether a scheduled decision produced a valid structured classification. **Classification stability** concerns whether valid classifications remain the same under repetition, prompt perturbation, or model-family changes. This matters for the supplementary Mistral run because observed API/parse failures are preserved rather than silently rerun.
+
+Primary aggregate quantities use the inverse-inclusion weights from the frozen label-stratified probability sample so they describe the GB test population represented by the sampling design. Parallel unweighted quantities are retained as sample diagnostics. The script does not attach uncertainty intervals to these diagnostics; design-based uncertainty is handled in the subsequent validation analysis.
+
+Generated files are written to `outputs/stability/`:
+
+- `model_summary.csv` — model-level operational reliability and stability;
+- `repetition_by_prompt.csv` — repeated-inference consistency within each prompt;
+- `prompt_comparisons.csv` — canonical P0 versus each prompt perturbation;
+- `model_pair_agreement.csv` — pairwise model agreement under P0 and across all prompts;
+- `panel_agreement.csv` — unanimity for the original six-model panel and all seven models;
+- `stability_by_reference_label.csv` — diagnostics by silver-standard reference label;
+- `observation_instability.csv` — observation-level instability for case inspection; and
+- `analysis_manifest.json` — source hashes, panel definitions, and analysis rules.
+
+The original six-model panel remains distinct from the supplementary Mistral extension in all metadata and panel-level summaries.
