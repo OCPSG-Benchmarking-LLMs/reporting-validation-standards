@@ -651,12 +651,25 @@ def main() -> None:
                 "benchmark-construction uncertainty, or provider drift."
             ),
         },
-        "known_silver_truth_usage": (
-            "Silver prevalence is used only after correction to demonstrate "
-            "whether the adjustment moves estimates toward the known benchmark "
-            "population distribution; it is not used to fit the constrained "
-            "prevalence solution."
-        ),
+        "known_silver_truth_usage": {
+            "support_conditioning": (
+                "The correction is explicitly conditional on the 17-label support "
+                "known from the frozen silver benchmark sampling frame. The six "
+                "official labels with zero silver-reference support are constrained "
+                "to zero true prevalence."
+            ),
+            "prevalence_values": (
+                "The numerical full-population silver prevalence values are not used "
+                "to fit the constrained solution. They are introduced only after "
+                "correction to evaluate whether adjustment moves the estimated "
+                "distribution toward the known benchmark distribution."
+            ),
+            "generalisability_caveat": (
+                "In an application where the true class support is unknown, this "
+                "support-conditioned correction cannot be applied without additional "
+                "validation information for the unsupported classes."
+            ),
+        },
         "outputs": [
             "prevalence_comparison.csv",
             "propagation_summary.csv",
@@ -692,7 +705,7 @@ def main() -> None:
         f"{100 * naive_absent_mass:.2f}%"
     )
     print(
-        f"  constrained correction mass on absent labels: "
+        f"  corrected mass on six support-excluded labels (constrained by design): "
         f"{100 * corrected_absent_mass:.2f}%"
     )
     print(
