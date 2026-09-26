@@ -1,0 +1,2 @@
+model_key,error_type,last_status_code,count
+mistral_large3_2512,RateLimitError,429,193

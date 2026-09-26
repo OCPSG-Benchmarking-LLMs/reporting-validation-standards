@@ -1,0 +1,273 @@
+{
+  "experiment_scale": {
+    "decisions_per_model": 12000,
+    "decisions_total": 72000,
+    "n_models_planned": 6,
+    "n_prompts": 4,
+    "repetitions": 3
+  },
+  "ollama_smoke_calibration": {
+    "ollama_gemma4_31b": {
+      "max_input_tokens_per_whitespace_word": 1.5735294117647058,
+      "median_input_tokens_per_whitespace_word": 1.486842105263158,
+      "n_smoke_records": 12,
+      "note": "Token estimates are diagnostics calibrated from smoke-test prompt/token ratios; they are not tokenizer-exact counts and should not be treated as an upper bound.",
+      "prompt_estimates": {
+        "p0_capbench_canonical": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4030.0,
+            "min": 237.0,
+            "p50": 359.0,
+            "p90": 1116.6000000000001,
+            "p95": 1637.1499999999999,
+            "p99": 2597.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 2,
+          "n_estimated_ge_runtime_context": 0
+        },
+        "p1_lexical_paraphrase": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4035.0,
+            "min": 241.0,
+            "p50": 364.0,
+            "p90": 1121.6000000000001,
+            "p95": 1642.1499999999999,
+            "p99": 2602.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 2,
+          "n_estimated_ge_runtime_context": 0
+        },
+        "p2_label_order_permutation": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4030.0,
+            "min": 237.0,
+            "p50": 359.0,
+            "p90": 1116.6000000000001,
+            "p95": 1637.1499999999999,
+            "p99": 2597.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 2,
+          "n_estimated_ge_runtime_context": 0
+        },
+        "p3_structural_format": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4018.0,
+            "min": 224.0,
+            "p50": 347.0,
+            "p90": 1104.6000000000001,
+            "p95": 1624.1999999999998,
+            "p99": 2584.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 1,
+          "n_estimated_ge_runtime_context": 0
+        }
+      },
+      "runtime_context_length_latest_smoke": 4096
+    },
+    "ollama_qwen36_35b": {
+      "max_input_tokens_per_whitespace_word": 1.5686274509803921,
+      "median_input_tokens_per_whitespace_word": 1.4736842105263157,
+      "n_smoke_records": 12,
+      "note": "Token estimates are diagnostics calibrated from smoke-test prompt/token ratios; they are not tokenizer-exact counts and should not be treated as an upper bound.",
+      "prompt_estimates": {
+        "p0_capbench_canonical": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4018.0,
+            "min": 236.0,
+            "p50": 358.0,
+            "p90": 1113.6000000000001,
+            "p95": 1632.1499999999999,
+            "p99": 2589.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 1,
+          "n_estimated_ge_runtime_context": 0
+        },
+        "p1_lexical_paraphrase": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4022.0,
+            "min": 240.0,
+            "p50": 363.0,
+            "p90": 1117.7000000000003,
+            "p95": 1637.1499999999999,
+            "p99": 2593.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 2,
+          "n_estimated_ge_runtime_context": 0
+        },
+        "p2_label_order_permutation": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4018.0,
+            "min": 236.0,
+            "p50": 358.0,
+            "p90": 1113.6000000000001,
+            "p95": 1632.1499999999999,
+            "p99": 2589.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 1,
+          "n_estimated_ge_runtime_context": 0
+        },
+        "p3_structural_format": {
+          "estimated_input_tokens_using_max_smoke_ratio": {
+            "max": 4005.0,
+            "min": 223.0,
+            "p50": 346.0,
+            "p90": 1100.6000000000001,
+            "p95": 1619.1499999999999,
+            "p99": 2576.33
+          },
+          "n_estimated_ge_90pct_runtime_context": 1,
+          "n_estimated_ge_runtime_context": 0
+        }
+      },
+      "runtime_context_length_latest_smoke": 4096
+    }
+  },
+  "prompts": {
+    "p0_capbench_canonical": {
+      "characters": {
+        "max": 15605.0,
+        "min": 967.0,
+        "p50": 1428.0,
+        "p90": 4185.0,
+        "p95": 6143.149999999999,
+        "p99": 9932.649999999998
+      },
+      "whitespace_words": {
+        "max": 2561.0,
+        "min": 150.0,
+        "p50": 228.0,
+        "p90": 709.4000000000001,
+        "p95": 1040.1,
+        "p99": 1650.2099999999998
+      }
+    },
+    "p1_lexical_paraphrase": {
+      "characters": {
+        "max": 15642.0,
+        "min": 1004.0,
+        "p50": 1465.0,
+        "p90": 4222.0,
+        "p95": 6180.149999999999,
+        "p99": 9969.649999999998
+      },
+      "whitespace_words": {
+        "max": 2564.0,
+        "min": 153.0,
+        "p50": 231.0,
+        "p90": 712.4000000000001,
+        "p95": 1043.1,
+        "p99": 1653.2099999999998
+      }
+    },
+    "p2_label_order_permutation": {
+      "characters": {
+        "max": 15605.0,
+        "min": 967.0,
+        "p50": 1428.0,
+        "p90": 4185.0,
+        "p95": 6143.149999999999,
+        "p99": 9932.649999999998
+      },
+      "whitespace_words": {
+        "max": 2561.0,
+        "min": 150.0,
+        "p50": 228.0,
+        "p90": 709.4000000000001,
+        "p95": 1040.1,
+        "p99": 1650.2099999999998
+      }
+    },
+    "p3_structural_format": {
+      "characters": {
+        "max": 15589.0,
+        "min": 951.0,
+        "p50": 1412.0,
+        "p90": 4169.0,
+        "p95": 6127.149999999999,
+        "p99": 9916.649999999998
+      },
+      "whitespace_words": {
+        "max": 2553.0,
+        "min": 142.0,
+        "p50": 220.0,
+        "p90": 701.4000000000001,
+        "p95": 1032.1,
+        "p99": 1642.2099999999998
+      }
+    }
+  },
+  "sample": {
+    "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+    "input_mode": "text_en",
+    "longest_cases": [
+      {
+        "observation_id": "ParlaMint-GB_2016-06-08-lords.u126",
+        "text_chars": 14696,
+        "text_words": 2422
+      },
+      {
+        "observation_id": "ParlaMint-GB_2018-04-17-lords.u157",
+        "text_chars": 12566,
+        "text_words": 2208
+      },
+      {
+        "observation_id": "ParlaMint-GB_2020-11-19-commons.u467",
+        "text_chars": 12119,
+        "text_words": 2058
+      },
+      {
+        "observation_id": "ParlaMint-GB_2019-05-15-commons.u342",
+        "text_chars": 11368,
+        "text_words": 1969
+      },
+      {
+        "observation_id": "ParlaMint-GB_2018-09-10-commons.u396",
+        "text_chars": 10061,
+        "text_words": 1734
+      },
+      {
+        "observation_id": "ParlaMint-GB_2018-07-19-commons.u421",
+        "text_chars": 9826,
+        "text_words": 1632
+      },
+      {
+        "observation_id": "ParlaMint-GB_2021-11-19-lords.u36",
+        "text_chars": 9553,
+        "text_words": 1495
+      },
+      {
+        "observation_id": "ParlaMint-GB_2017-12-11-commons.u615",
+        "text_chars": 9462,
+        "text_words": 1635
+      },
+      {
+        "observation_id": "ParlaMint-GB_2021-11-16-commons.u284",
+        "text_chars": 9306,
+        "text_words": 1574
+      },
+      {
+        "observation_id": "ParlaMint-GB_2019-05-07-lords.u96",
+        "text_chars": 9187,
+        "text_words": 1480
+      }
+    ],
+    "n_cases": 1000,
+    "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+    "text_characters": {
+      "max": 14696.0,
+      "min": 58.0,
+      "p50": 519.0,
+      "p90": 3276.0000000000005,
+      "p95": 5234.149999999999,
+      "p99": 9023.649999999998
+    },
+    "text_whitespace_words": {
+      "max": 2422.0,
+      "min": 11.0,
+      "p50": 89.0,
+      "p90": 570.4000000000001,
+      "p95": 901.0999999999999,
+      "p99": 1511.2099999999998
+    }
+  }
+}

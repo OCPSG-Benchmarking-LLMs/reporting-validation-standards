@@ -1,0 +1,113 @@
+{
+  "analysis": "design_based_silver_reference_validation",
+  "created_at_utc": "2026-09-26T14:03:02.843881+00:00",
+  "dataset_revision": "ed2b731715dbd308803db87186c4fa44890b9f76",
+  "model_keys": [
+    "openai_gpt54",
+    "openai_gpt54_mini",
+    "fireworks_deepseek_v41_flash",
+    "ollama_qwen36_35b",
+    "ollama_gemma4_31b",
+    "openai_gpt6_luna",
+    "mistral_large3_2512"
+  ],
+  "model_stages": {
+    "fireworks_deepseek_v41_flash": "core",
+    "mistral_large3_2512": "supplementary",
+    "ollama_gemma4_31b": "core",
+    "ollama_qwen36_35b": "core",
+    "openai_gpt54": "core",
+    "openai_gpt54_mini": "core",
+    "openai_gpt6_luna": "secondary"
+  },
+  "outputs": [
+    "primary_model_performance.csv",
+    "condition_performance.csv",
+    "per_class_performance.csv",
+    "confusion_matrix_population.csv",
+    "bootstrap_metrics.csv",
+    "paired_model_differences.csv"
+  ],
+  "primary_estimand": {
+    "failure_handling": "Operational metrics retain invalid API/parse outcomes as measurement failures that contribute false negatives for the true reference class. Conditional metrics separately describe performance among valid outputs.",
+    "macro_average_labels": [
+      "Macroeconomics",
+      "Civil_Rights",
+      "Health",
+      "Agriculture",
+      "Labor",
+      "Education",
+      "Environment",
+      "Energy",
+      "Immigration",
+      "Transportation",
+      "Law_and_Crime",
+      "Social_Welfare",
+      "Housing",
+      "Domestic_Commerce",
+      "Defense",
+      "International_Affairs",
+      "Government_Operations"
+    ],
+    "population_n": 28978,
+    "prediction_inventory": [
+      "Macroeconomics",
+      "Civil_Rights",
+      "Health",
+      "Agriculture",
+      "Labor",
+      "Education",
+      "Environment",
+      "Energy",
+      "Immigration",
+      "Transportation",
+      "Law_and_Crime",
+      "Social_Welfare",
+      "Housing",
+      "Domestic_Commerce",
+      "Defense",
+      "Technology",
+      "Foreign_Trade",
+      "International_Affairs",
+      "Government_Operations",
+      "Public_Lands",
+      "Culture",
+      "Other",
+      "No_Policy_Content"
+    ],
+    "prompt": "p0_capbench_canonical",
+    "repetition_treatment": "Average each observation's three repeated P0 decisions so each sampled observation contributes one population weight in total.",
+    "target_population": "GB frozen silver-standard test population"
+  },
+  "raw_inference_sha256": {
+    "fireworks_deepseek_v41_flash": "f1ce7c73b340377a94179ab6c97aa5d0f661cb6364a64b3a8d50e34983adabd6",
+    "mistral_large3_2512": "93415e80291d8ed0386adc0e0fa37fd2dad21d2a296e8b5940f52ae9ee2695d9",
+    "ollama_gemma4_31b": "15145bcc2beb2eb397de6588fb549c49a6afc264ad38a55cccfc83db4176bdcf",
+    "ollama_qwen36_35b": "071a620b2d0f8c8cb1f605a41719d9d524361c1d5612f1d2eba23a5a8047914e",
+    "openai_gpt54": "f075335aa0174e00bc34e40a8a6c1dae64c4847e09c34c117b0a20bd98883fdf",
+    "openai_gpt54_mini": "3e7311f61a405dd1a68fdce030eca793dea2a6c9e797ca34798f384977f333a8",
+    "openai_gpt6_luna": "52bc4566cba7458e2a428e7a81b1fdded8db563ae21570cce985f186af52b87b"
+  },
+  "reference_standard": "OCPSG automated silver-standard consensus labels; not human gold labels",
+  "sample_id_sha256": "b9b9b155075b8fcdd7813c7e9973ceb5ea6ff3aac5d7486cb343b00a68f7e987",
+  "sampling_design": {
+    "estimator": "Inverse-inclusion weighted confusion-matrix totals under the frozen label-stratified SRSWOR design.",
+    "positivity": true,
+    "strata_column": "predicted_label",
+    "weight_column": "sampling_weight"
+  },
+  "schedule_sha256": "584d874cf4e6be49b95e534315f4ee9a8d5849bdb158328ab5be14095ec4e738",
+  "schema_version": 1,
+  "uncertainty": {
+    "bootstrap_reps": 2000,
+    "cluster_unit": "sampled observation",
+    "confidence_level": 0.95,
+    "finite_population_note": "Rescaling uses each stratum sampling fraction; census strata contribute no sampling variance.",
+    "interval": "percentile",
+    "method": "Rao-Wu rescaled bootstrap within sampling strata",
+    "paired_across_models": true,
+    "rng": "NumPy PCG64",
+    "scope": "Intervals quantify uncertainty from the frozen probability sample. They do not claim to integrate all model-infrastructure or benchmark-construction uncertainty.",
+    "seed": 20260926
+  }
+}

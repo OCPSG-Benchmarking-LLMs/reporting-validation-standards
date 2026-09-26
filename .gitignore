@@ -9,7 +9,6 @@ __pycache__/
 
 # Generated observations and results
 data/generated/
-outputs/
 
 # API/local run artefacts may contain large or sensitive outputs
 runs/
