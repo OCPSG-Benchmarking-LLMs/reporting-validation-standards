@@ -412,6 +412,7 @@ Generated files are written to `outputs/stability/`:
 - `model_pair_agreement.csv` — pairwise model agreement under P0 and across all prompts;
 - `panel_agreement.csv` — unanimity for the original six-model panel and all seven models;
 - `stability_by_reference_label.csv` — diagnostics by silver-standard reference label;
+- `failure_diagnostics.csv` — observed production failures by model, error type, and final status code;
 - `observation_instability.csv` — observation-level instability for case inspection; and
 - `analysis_manifest.json` — source hashes, panel definitions, and analysis rules.
 
