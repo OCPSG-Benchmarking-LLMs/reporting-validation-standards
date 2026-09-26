@@ -35,8 +35,11 @@ def summarize_records(records: pd.DataFrame) -> dict[str, Any]:
         values = pd.to_numeric(records.loc[valid, column], errors="coerce")
         return float(values.mean()) if values.notna().any() else None
 
-    costs = pd.to_numeric(records.get("cost_usd"), errors="coerce")
-    cost_total = float(costs.fillna(0).sum()) if costs.notna().any() else None
+    if "cost_usd" in records.columns:
+        costs = pd.to_numeric(records["cost_usd"], errors="coerce")
+        cost_total = float(costs.fillna(0).sum()) if costs.notna().any() else None
+    else:
+        cost_total = None
 
     return {
         "scheduled_decisions": int(len(records)),
