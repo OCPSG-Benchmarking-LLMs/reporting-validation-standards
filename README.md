@@ -538,7 +538,7 @@ pipenv run python code/12_analyze_compute_environment.py
 
 The script verifies every production raw-inference file against the SHA-256 recorded in finalized provenance before summarizing computational performance. It also verifies the finalized full-population GPT-5.4 Mini deployment.
 
-For every model, the analysis reports request-level end-to-end latency, token accounting, valid-output rate, explicit adapter retries, and monetary cost where dated provider pricing and usage metadata were available. Hosted and local inference are then treated differently for environmental reporting.
+For every model, the analysis reports request-level end-to-end latency, token accounting, valid-output rate, explicit adapter retries, and monetary cost where dated provider pricing and usage metadata were available. Latency is summarized both across all scheduled decisions and separately for valid and invalid outputs, so operational failures are not conflated with ordinary successful-request latency. Hosted and local inference are then treated differently for environmental reporting.
 
 For hosted API models, server-side hardware, utilization, power draw, data-centre overhead, and electricity mix are not exposed in the recorded API telemetry. The analysis therefore **does not estimate provider-side energy use or carbon emissions from latency, token counts, or price**.
 
