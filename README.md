@@ -361,7 +361,7 @@ The finalized artefacts are immutable by default. Re-running `--finalize` agains
 
 Mistral Large 3 is included as a post-production robustness extension rather than being retroactively treated as part of the original frozen six-model panel. The exact API snapshot is `mistral-large-2512`. The selection was made after the original panel had been completed, on the basis of additional provider/model-family coverage and feasible API access, not after observing Mistral classification outcomes.
 
-The adapter uses Mistral's documented OpenAI-compatible Chat Completions endpoint at `https://api.mistral.ai/v1`, allowing the existing pinned OpenAI SDK dependency to be reused without changing the Python environment. It requests the same frozen prompts, `temperature=0`, a 40-token output cap, `reasoning_effort=none`, JSON-schema structured output, and the standard service tier. Pricing is recorded separately in `config/pricing/mistral_2026-09-26.yaml`.
+The adapter uses Mistral's documented OpenAI-compatible Chat Completions endpoint at `https://api.mistral.ai/v1`, allowing the existing pinned OpenAI SDK dependency to be reused without changing the Python environment. It requests the same frozen prompts, `temperature=0`, a 40-token output cap, JSON-schema structured output, and the standard service tier. Mistral Large 3 does not document adjustable reasoning support, so the adapter does not send `reasoning_effort`; the run manifest records this as `not_exposed_for_model`. Pricing is recorded separately in `config/pricing/mistral_2026-09-26.yaml`.
 
 Set `MISTRAL_API_KEY`, then validate the provider-specific configuration before touching the production schedule:
 
