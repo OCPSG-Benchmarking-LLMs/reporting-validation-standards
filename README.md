@@ -526,3 +526,34 @@ Generated version-controlled outputs are written to `outputs/propagation/`:
 - `bootstrap_propagation.csv` — replicate-level corrected prevalence and error diagnostics;
 - `solver_diagnostics.json` — conditioning, convergence, and unconstrained-solution diagnostics; and
 - `analysis_manifest.json` — source hashes, estimand, estimator, and uncertainty scope.
+
+
+## Computational performance and environmental transparency
+
+The final substantive demonstration for Section 4.5 is:
+
+```bash
+pipenv run python code/12_analyze_compute_environment.py
+```
+
+The script verifies every production raw-inference file against the SHA-256 recorded in finalized provenance before summarizing computational performance. It also verifies the finalized full-population GPT-5.4 Mini deployment.
+
+For every model, the analysis reports request-level end-to-end latency, token accounting, valid-output rate, explicit adapter retries, and monetary cost where dated provider pricing and usage metadata were available. Hosted and local inference are then treated differently for environmental reporting.
+
+For hosted API models, server-side hardware, utilization, power draw, data-centre overhead, and electricity mix are not exposed in the recorded API telemetry. The analysis therefore **does not estimate provider-side energy use or carbon emissions from latency, token counts, or price**.
+
+For the two local Ollama models, all production sessions were run with machine-level CodeCarbon tracking. The analysis aggregates the finalized session summaries across every session contributing to the 12,000 decisions and reports total tracked duration, total CPU/GPU/RAM energy, total machine energy, and estimated emissions. Energy and emissions per 1,000 decisions are included only as **run-average normalizations of session-level totals**; they are not presented as direct per-request carbon measurements.
+
+The local inference records also permit timing decomposition into session-start model loading, warm load overhead, prompt evaluation, generation time, and generation throughput. The first valid request in each production session is labelled a **session-start load**, not a perfect cold start, because operating-system, filesystem, driver, and other caches may persist across sessions.
+
+Outputs are written to `outputs/compute_environment/`:
+
+- `production_compute_summary.csv` — computational accounting for all seven production models;
+- `deployment_compute_summary.csv` — accounting for the 28,978-case GPT-5.4 Mini deployment;
+- `local_inference_timing.csv` — Ollama timing decomposition and generation throughput;
+- `local_environment_summary.csv` — aggregated local machine energy/emissions and runtime metadata;
+- `local_session_environment.csv` — session-level CodeCarbon summaries;
+- `environmental_reporting_scope.csv` — explicit statement of which environmental claims are and are not supported for each model; and
+- `analysis_manifest.json` — source hashes, measurement scope, aggregation rules, and interpretive limits.
+
+The governing reporting principle is: **environmental precision should not exceed infrastructure knowledge**.
