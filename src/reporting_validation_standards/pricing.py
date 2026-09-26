@@ -9,6 +9,7 @@ import yaml
 
 DEFAULT_OPENAI_PRICING_PATH = Path("config/pricing/openai_2026-09-23.yaml")
 DEFAULT_FIREWORKS_PRICING_PATH = Path("config/pricing/fireworks_2026-09-23.yaml")
+DEFAULT_MISTRAL_PRICING_PATH = Path("config/pricing/mistral_2026-09-26.yaml")
 
 
 @dataclass(frozen=True)
@@ -116,6 +117,25 @@ def estimate_fireworks_cost(
     cache_write_tokens: int = 0,
     output_tokens: int,
     path: str | Path = DEFAULT_FIREWORKS_PRICING_PATH,
+) -> CostEstimate:
+    return estimate_token_cost(
+        model_id=model_id,
+        input_tokens=input_tokens,
+        cached_input_tokens=cached_input_tokens,
+        cache_write_tokens=cache_write_tokens,
+        output_tokens=output_tokens,
+        path=path,
+    )
+
+
+def estimate_mistral_cost(
+    *,
+    model_id: str,
+    input_tokens: int,
+    cached_input_tokens: int = 0,
+    cache_write_tokens: int = 0,
+    output_tokens: int,
+    path: str | Path = DEFAULT_MISTRAL_PRICING_PATH,
 ) -> CostEstimate:
     return estimate_token_cost(
         model_id=model_id,
