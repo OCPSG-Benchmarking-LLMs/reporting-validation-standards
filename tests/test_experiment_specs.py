@@ -9,6 +9,7 @@ from reporting_validation_standards.experiment_specs import (
 
 PROMPTS = Path("config/prompts.yaml")
 MODELS = Path("config/models.yaml")
+DEPLOYMENT = Path("config/deployment.yaml")
 
 
 def test_model_panel_is_unique_and_has_expected_size():
@@ -114,3 +115,20 @@ def test_mistral_extension_is_snapshot_pinned():
     assert model["snapshot_pinned"] is True
     assert model["reasoning_setting"] == "not_exposed_for_model"
     assert model["extension_status"] == "post_production_robustness"
+
+
+
+def test_population_deployment_spec_is_frozen():
+    import yaml
+
+    payload = yaml.safe_load(DEPLOYMENT.read_text(encoding="utf-8"))
+    deployment = payload["deployment"]
+
+    assert deployment["deployment_id"] == "gb_test_p0_gpt54_mini_v1"
+    assert deployment["model_key"] == "openai_gpt54_mini"
+    assert deployment["prompt_id"] == "p0_capbench_canonical"
+    assert deployment["input_mode"] == "text_en"
+    assert deployment["repetitions"] == 1
+    assert deployment["schedule_seed"] == 20260926
+    assert deployment["schedule_algorithm"] == "randomized_cells_pcg64_v1"
+    assert deployment["failure_policy"] == "retain_after_adapter_retries"
