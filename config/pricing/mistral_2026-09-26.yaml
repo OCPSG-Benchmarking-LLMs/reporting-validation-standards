@@ -1,0 +1,15 @@
+pricing_config_id: mistral_standard_2026-09-26
+checked_date: 2026-09-26
+currency: USD
+unit: per_1m_tokens
+access_mode: standard
+
+sources:
+  mistral-large-3: https://docs.mistral.ai/inference/pricing/
+
+models:
+  mistral-large-2512:
+    input_per_million: 0.50
+    cached_input_per_million: 0.05
+    cache_write_per_million: null
+    output_per_million: 1.50
