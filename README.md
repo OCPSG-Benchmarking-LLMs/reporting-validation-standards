@@ -579,6 +579,6 @@ The script creates:
 - `outputs/figures/prevalence_propagation.pdf`
 - `outputs/figures/prevalence_propagation.txt`
 
-The 17 policy categories with positive silver-reference support are ordered by the absolute error of the naïve GPT-5.4 Mini prevalence estimate. Grey diamonds mark known silver-reference prevalence, terracotta circles mark naïve classifier prevalence, blue squares and horizontal intervals mark corrected prevalence and its propagated 95% uncertainty, and light arrows show the direction of the correction. The aggregate propagation metrics remain in `outputs/propagation/propagation_summary.csv` and should be reported separately in the manuscript table.
+The 17 policy categories with positive silver-reference support are ordered by silver-reference prevalence. Grey diamonds mark known silver-reference prevalence, terracotta circles mark naïve classifier prevalence, blue squares and horizontal intervals mark corrected prevalence and its propagated 95% uncertainty, and a light connector links the naïve and corrected estimates. The aggregate propagation metrics remain in `outputs/propagation/propagation_summary.csv` and should be reported separately in the manuscript table.
 
 The plotting script requires Matplotlib, which is declared in `pyproject.toml` and `Pipfile`.
