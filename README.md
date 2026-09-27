@@ -2,6 +2,8 @@
 
 Code and reproducible demonstrations for the working paper:
 
+
+> **Language convention.** Documentation uses British English. Existing source-code identifiers and machine-readable provenance retain their original American-English spellings for compatibility and reproducibility.
 **Report, Diagnose, Propagate: Reporting and Validation Standards for Machine-Learning and LLM Classifiers in Political Science**
 
 The repository is intentionally separate from `capbench`. It uses the OCPSG Silver Standard as a controlled demonstration environment for:
@@ -302,7 +304,7 @@ After smoke testing and the full-sample context preflight, run the frozen stabil
 pipenv run python code/05_run_stability_experiment.py --model-key <MODEL_KEY>
 ```
 
-The runner uses the same deterministic randomized 12,000-cell schedule for every model (1,000 observations × four prompts × three repetitions), appends each completed inference record immediately, validates the frozen experiment manifest on resume, and skips every decision cell already present. Use `--plan-only` to inspect a model run without sending requests. Use `--max-decisions N` for a staged launch; rerunning the same command later resumes the identical schedule.
+The runner uses the same deterministic randomised 12,000-cell schedule for every model (1,000 observations × four prompts × three repetitions), appends each completed inference record immediately, validates the frozen experiment manifest on resume, and skips every decision cell already present. Use `--plan-only` to inspect a model run without sending requests. Use `--max-decisions N` for a staged launch; rerunning the same command later resumes the identical schedule.
 
 For local Ollama production runs, energy tracking is required:
 
@@ -323,7 +325,7 @@ Each invocation creates a session manifest. This permits interrupted local runs 
 
 ## Check and finalize a production run
 
-Production runs remain under the gitignored `runs/` directory. Use the combined QA/finalization script to inspect a partial or completed model run:
+Production runs remain under the gitignored `runs/` directory. Use the combined QA/finalisation script to inspect a partial or completed model run:
 
 ```bash
 pipenv run python code/06_check_and_finalize_production.py \
@@ -340,7 +342,7 @@ pipenv run python code/06_check_and_finalize_production.py \
   --finalize
 ```
 
-Finalization is fail-closed: it proceeds only when structural QA and completion QA both pass. It leaves the raw inference and CodeCarbon files under `runs/`, computes SHA-256 hashes for every raw run file, and writes only compact provenance artefacts to the version-controlled path:
+Finalisation is fail-closed: it proceeds only when structural QA and completion QA both pass. It leaves the raw inference and CodeCarbon files under `runs/`, computes SHA-256 hashes for every raw run file, and writes only compact provenance artefacts to the version-controlled path:
 
 ```text
 results/
@@ -354,7 +356,7 @@ results/
                 └── session_manifest.json
 ```
 
-The finalized artefacts are immutable by default. Re-running `--finalize` against unchanged raw data is a no-op; if an already-finalized artefact would change, the script refuses to overwrite it. This keeps source-code provenance in Git while allowing the larger raw production outputs to be released separately as a research-data archive.
+The finalised artefacts are immutable by default. Re-running `--finalize` against unchanged raw data is a no-op; if an already-finalised artefact would change, the script refuses to overwrite it. This keeps source-code provenance in Git while allowing the larger raw production outputs to be released separately as a research-data archive.
 
 
 ## Mistral Large 3 supplementary extension
@@ -392,13 +394,13 @@ The original six-model design contributes 72,000 decisions. The supplementary Mi
 
 ## Stability analysis
 
-After all model runs are finalized, analyse repeated-inference, prompt, and model-family stability with:
+After all model runs are finalised, analyse repeated-inference, prompt, and model-family stability with:
 
 ```bash
 pipenv run python code/07_analyze_stability.py
 ```
 
-Before calculating any statistic, the script verifies that every local raw `inference_records.jsonl` file has the SHA-256 recorded in the corresponding committed `results/production/<MODEL_KEY>/qa_summary.json`. Analysis therefore fails closed if the local raw data no longer match the finalized provenance.
+Before calculating any statistic, the script verifies that every local raw `inference_records.jsonl` file has the SHA-256 recorded in the corresponding committed `results/production/<MODEL_KEY>/qa_summary.json`. Analysis therefore fails closed if the local raw data no longer match the finalised provenance.
 
 The stability analysis keeps two concepts separate. **Operational reliability** concerns whether a scheduled decision produced a valid structured classification. **Classification stability** concerns whether valid classifications remain the same under repetition, prompt perturbation, or model-family changes. This matters for the supplementary Mistral run because observed API/parse failures are preserved rather than silently rerun.
 
@@ -478,7 +480,7 @@ If structural QA passes, resume the remaining population:
 pipenv run python code/09_run_population_deployment.py
 ```
 
-The runner is append-only and resumable. The population is loaded from the exact immutable Hugging Face revision used to freeze the 1,000-case validation sample. It records a population-ID SHA-256 and uses a deterministic randomized PCG64 schedule so elapsed API time is not mechanically aligned with the source-data order. Persistent inference failures are retained after the frozen adapter retry policy rather than silently replaced.
+The runner is append-only and resumable. The population is loaded from the exact immutable Hugging Face revision used to freeze the 1,000-case validation sample. It records a population-ID SHA-256 and uses a deterministic randomised PCG64 schedule so elapsed API time is not mechanically aligned with the source-data order. Persistent inference failures are retained after the frozen adapter retry policy rather than silently replaced.
 
 After all 28,978 population decisions are present, finalize with:
 
@@ -491,13 +493,13 @@ Raw deployment records remain under the gitignored `runs/deployment/` tree. Comp
 
 ## Prevalence error propagation
 
-After the finalized full-population deployment is committed, estimate and propagate measurement error with:
+After the finalised full-population deployment is committed, estimate and propagate measurement error with:
 
 ```bash
 pipenv run python code/11_analyze_error_propagation.py
 ```
 
-The analysis combines two frozen inputs: the one-pass GPT-5.4 Mini P0 deployment over all 28,978 GB test speeches and the design-based 1,000-speech validation sample with three repeated P0 classifications. Both raw JSONL inputs are checked against the SHA-256 hashes in their committed finalized provenance before analysis begins.
+The analysis combines two frozen inputs: the one-pass GPT-5.4 Mini P0 deployment over all 28,978 GB test speeches and the design-based 1,000-speech validation sample with three repeated P0 classifications. Both raw JSONL inputs are checked against the SHA-256 hashes in their committed finalised provenance before analysis begins.
 
 Let `pi` denote the unknown 17-label prevalence vector over the GB silver-reference support, `M` the estimated 17 × 23 misclassification matrix with entries `P(predicted=j | reference=i)`, and `q` the observed 23-label prevalence vector from the full deployment. The measurement model is
 
@@ -536,13 +538,13 @@ The final substantive demonstration for Section 4.5 is:
 pipenv run python code/12_analyze_compute_environment.py
 ```
 
-The script verifies every production raw-inference file against the SHA-256 recorded in finalized provenance before summarizing computational performance. It also verifies the finalized full-population GPT-5.4 Mini deployment.
+The script verifies every production raw-inference file against the SHA-256 recorded in finalised provenance before summarising computational performance. It also verifies the finalised full-population GPT-5.4 Mini deployment.
 
-For every model, the analysis reports request-level end-to-end latency, token accounting, valid-output rate, explicit adapter retries, and monetary cost where dated provider pricing and usage metadata were available. Latency is summarized both across all scheduled decisions and separately for valid and invalid outputs, so operational failures are not conflated with ordinary successful-request latency. Hosted and local inference are then treated differently for environmental reporting.
+For every model, the analysis reports request-level end-to-end latency, token accounting, valid-output rate, explicit adapter retries, and monetary cost where dated provider pricing and usage metadata were available. Latency is summarised both across all scheduled decisions and separately for valid and invalid outputs, so operational failures are not conflated with ordinary successful-request latency. Hosted and local inference are then treated differently for environmental reporting.
 
-For hosted API models, server-side hardware, utilization, power draw, data-centre overhead, and electricity mix are not exposed in the recorded API telemetry. The analysis therefore **does not estimate provider-side energy use or carbon emissions from latency, token counts, or price**.
+For hosted API models, server-side hardware, utilisation, power draw, data-centre overhead, and electricity mix are not exposed in the recorded API telemetry. The analysis therefore **does not estimate provider-side energy use or carbon emissions from latency, token counts, or price**.
 
-For the two local Ollama models, all production sessions were run with machine-level CodeCarbon tracking. The analysis aggregates the finalized session summaries across every session contributing to the 12,000 decisions and reports total tracked duration, total CPU/GPU/RAM energy, total machine energy, and estimated emissions. Energy and emissions per 1,000 decisions are included only as **run-average normalizations of session-level totals**; they are not presented as direct per-request carbon measurements.
+For the two local Ollama models, all production sessions were run with machine-level CodeCarbon tracking. The analysis aggregates the finalised session summaries across every session contributing to the 12,000 decisions and reports total tracked duration, total CPU/GPU/RAM energy, total machine energy, and estimated emissions. Energy and emissions per 1,000 decisions are included only as **run-average normalisations of session-level totals**; they are not presented as direct per-request carbon measurements.
 
 The local inference records also permit timing decomposition into session-start model loading, warm load overhead, prompt evaluation, generation time, and generation throughput. The first valid request in each production session is labelled a **session-start load**, not a perfect cold start, because operating-system, filesystem, driver, and other caches may persist across sessions.
 
