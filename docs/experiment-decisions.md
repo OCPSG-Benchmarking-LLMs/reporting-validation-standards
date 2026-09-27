@@ -107,9 +107,9 @@ Finalised provenance is immutable: a repeated finalisation with identical source
 
 ## 2026-09-26 — Mistral Large 3 post-production robustness extension
 
-After the original six-model stability panel had been fully run and finalised, one additional model was selected for a supplementary robustness extension: Mistral Large 3, using the exact API snapshot `mistral-large-2512`.
+After the original six-model stability panel had been fully run and finalised, Mistral Large 3 was added as a post-production model-family/provider-coverage extension, using the exact API snapshot `mistral-large-2512`.
 
-This addition does not redefine the original panel. It is labelled `stage: supplementary` and `extension_status: post_production_robustness` in the model configuration. The selection rationale was to broaden provider and model-family coverage while using available API access at feasible cost. The choice was made before inspecting any Mistral classification outcomes and therefore is not based on comparative performance against the completed six models.
+This addition does not retrospectively alter the chronology of the original panel. It remains labelled `stage: supplementary` and `extension_status: post_production_robustness` in the model configuration so that provenance is explicit. Those labels are chronological, not evaluative: in the working paper Mistral is treated alongside the other six completed models. The selection rationale was to broaden provider and model-family coverage while using available API access at feasible cost. The choice was made before inspecting any Mistral classification outcomes and therefore is not based on comparative performance against the completed six models.
 
 Mistral documents Large 3 v25.12 as an open-weight, general-purpose Mixture-of-Experts model with 41B active parameters, 675B total parameters, and a 256k context window. The exact versioned model identifier `mistral-large-2512` is used instead of the moving `mistral-large-latest` alias.
 
@@ -189,3 +189,12 @@ The two local Ollama models were measured with CodeCarbon in tracking mode `mach
 Energy or emissions per 1,000 decisions are permitted only as transparent normalisations of the complete measured session totals. They are not described as directly measured per-request carbon footprints. Likewise, the first request after a production session starts is reported as a session-start model-load observation rather than a strict cold start, because lower-level caches may survive between sessions.
 
 The analysis is implemented in `code/12_analyze_compute_environment.py`. Its governing principle is that environmental precision should not exceed infrastructure knowledge.
+
+
+## 2026-09-27 — Model-panel provenance versus manuscript presentation
+
+The existing machine-readable stage labels are retained unchanged for reproducibility. They encode the chronology and technical status of the experiment rather than a ranking of scientific importance. In particular, GPT-6 Luna is recorded as `stage: secondary` because it was included in the original six-model panel through a moving alias rather than a pinned snapshot. Mistral Large 3 is recorded as `stage: supplementary` with `extension_status: post_production_robustness` because it was added only after the original six-model panel had been completed, in order to broaden provider and model-family coverage.
+
+These provenance labels must not be interpreted as making GPT-6 Luna or Mistral Large 3 second-class comparison models. In the working paper, all seven completed models are treated as evaluated models and should normally appear together in the principal tables, figures, and substantive discussion. The chronology should be explained once in the research-design description and then separated from the interpretation of model results.
+
+The original-six versus all-seven panel distinction remains useful for analyses that depend on the pre-existing experimental boundary, especially panel-level unanimity. It is therefore preserved in analytical metadata and outputs without being used as a substantive hierarchy.
