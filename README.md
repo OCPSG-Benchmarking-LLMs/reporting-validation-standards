@@ -571,7 +571,7 @@ Generate it from the committed validation outputs with:
 pipenv run python code/13_generate_manuscript_plot.py
 ```
 
-The figure follows the comparison-oriented style used in the related Eval4SD scripts: four aligned horizontal panels with shared model labels, restrained Oxford-inspired colours, vertically offset repetition-level points, larger prompt means, no visible spines, and a legend below the plotting field. Metric axes use the original 0–1 scale rather than percentages.
+The figure follows the comparison-oriented style used in the related Eval4SD scripts: four aligned horizontal panels with shared model labels, restrained Oxford-inspired colours, aligned repetition-level points, no visible spines, and a legend below the plotting field. Metric axes use the original 0–1 scale rather than percentages.
 
 The four panels report:
 
@@ -580,7 +580,7 @@ The four panels report:
 - Macro-Recall; and
 - Macro-F1.
 
-For each of the seven evaluated models, each panel contains 12 small points: four prompt specifications × three single-repetition estimates. Prompt is encoded by colour and repetition by a small vertical offset within each prompt band. A larger outlined point shows the arithmetic mean of the three plotted repetitions for that prompt. The `repetition = 0` rows in `condition_performance.csv` are pre-computed expected-over-repetitions aggregates and are deliberately excluded from the 12-point display.
+For each of the seven evaluated models, each panel contains 12 small points: four prompt specifications × three single-repetition estimates. Prompt is encoded by colour. All 12 prompt × repetition observations for a model share the same horizontal row; the three repetitions for each prompt are shown as separate, equally sized points. The `repetition = 0` rows in `condition_performance.csv` are pre-computed expected-over-repetitions aggregates and are deliberately excluded from the 12-point display.
 
 The script creates:
 
