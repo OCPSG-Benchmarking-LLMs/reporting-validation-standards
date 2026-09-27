@@ -563,13 +563,15 @@ The governing reporting principle is: **environmental precision should not excee
 
 ## Manuscript plot
 
-The working paper retains the full validation table and adds one companion figure to make the effect of the probability-sampling design visually explicit. The figure is generated from the committed design-based validation output with:
+The working paper retains the full stability and validation tables and adds one companion figure showing how design-weighted validation performance varies across prompt specifications and repeated inference.
+
+Generate it from the committed validation outputs with:
 
 ```bash
 pipenv run python code/13_generate_manuscript_plot.py
 ```
 
-The design follows the comparison-oriented style of the related Eval4SD plotting scripts: four aligned horizontal panels with shared model labels, restrained Oxford-inspired colours, light grey connectors, minimal axis furniture, and a legend below the plotting field. The caption is not embedded in the graphic.
+The figure follows the comparison-oriented style used in the related Eval4SD scripts: four aligned horizontal panels with shared model labels, restrained Oxford-inspired colours, vertically offset repetition-level points, larger prompt means, no visible spines, and a legend below the plotting field. Metric axes use the original 0–1 scale rather than percentages.
 
 The four panels report:
 
@@ -578,12 +580,12 @@ The four panels report:
 - Macro-Recall; and
 - Macro-F1.
 
-For each of the seven evaluated models, the softened Oxford-blue point is the design-weighted operational estimate and its horizontal line is the 95% Rao-Wu bootstrap interval. The soft-terracotta point is the corresponding naïve unweighted validation-sample estimate. A light grey connector makes the weighted–unweighted difference visible without replacing the exact numerical results in the validation table. Models remain in the fixed experimental order rather than being sorted by performance.
+For each of the seven evaluated models, each panel contains 12 small points: four prompt specifications × three single-repetition estimates. Prompt is encoded by colour and repetition by a small vertical offset within each prompt band. A larger outlined point shows the arithmetic mean of the three plotted repetitions for that prompt. The `repetition = 0` rows in `condition_performance.csv` are pre-computed expected-over-repetitions aggregates and are deliberately excluded from the 12-point display.
 
 The script creates:
 
-- `outputs/figures/validation_weighted_unweighted_comparison.png`
-- `outputs/figures/validation_weighted_unweighted_comparison.pdf`
-- `outputs/figures/validation_weighted_unweighted_comparison.txt`
+- `outputs/figures/validation_prompt_repetition_profile.png`
+- `outputs/figures/validation_prompt_repetition_profile.pdf`
+- `outputs/figures/validation_prompt_repetition_profile.txt`
 
-The plotting script requires Matplotlib, which is declared in `pyproject.toml` and `Pipfile`.
+Models remain in the fixed experimental order rather than being sorted by performance. The figure complements, rather than replaces, the complete numerical results in the stability and validation tables.
