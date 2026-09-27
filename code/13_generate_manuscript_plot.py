@@ -256,7 +256,7 @@ for metric in METRICS:
 expected_rows = (
     len(MODEL_ORDER)
     * len(PROMPT_ORDER)
-    * len(REPETITION_OFFSETS)
+    * 3
 )
 
 if len(data) != expected_rows:
