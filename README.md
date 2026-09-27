@@ -563,22 +563,27 @@ The governing reporting principle is: **environmental precision should not excee
 
 ## Manuscript plot
 
-The working paper retains the detailed stability, validation, and computational results as tables. A single companion figure is generated for the prevalence-propagation demonstration, where the category-level movement from naïve classifier prevalence to corrected prevalence is more informative visually than in an aggregate table alone.
-
-Generate it from the committed analytical outputs with:
+The working paper retains the full validation table and adds one companion figure to make the effect of the probability-sampling design visually explicit. The figure is generated from the committed design-based validation output with:
 
 ```bash
-pipenv run python code/13_generate_manuscript_plots.py
+pipenv run python code/13_generate_manuscript_plot.py
 ```
 
-The figure follows the comparison-oriented style used in the related Eval4SD plotting scripts: a horizontal category layout, softened Oxford-inspired colours, restrained markers, a light x-axis guide, and minimal axis furniture. The caption is not embedded in the graphic.
+The design follows the comparison-oriented style of the related Eval4SD plotting scripts: four aligned horizontal panels with shared model labels, restrained Oxford-inspired colours, light grey connectors, minimal axis furniture, and a legend below the plotting field. The caption is not embedded in the graphic.
+
+The four panels report:
+
+- Accuracy;
+- Macro-Precision;
+- Macro-Recall; and
+- Macro-F1.
+
+For each of the seven evaluated models, the softened Oxford-blue point is the design-weighted operational estimate and its horizontal line is the 95% Rao-Wu bootstrap interval. The soft-terracotta point is the corresponding naïve unweighted validation-sample estimate. A light grey connector makes the weighted–unweighted difference visible without replacing the exact numerical results in the validation table. Models remain in the fixed experimental order rather than being sorted by performance.
 
 The script creates:
 
-- `outputs/figures/prevalence_propagation.png`
-- `outputs/figures/prevalence_propagation.pdf`
-- `outputs/figures/prevalence_propagation.txt`
-
-The 17 policy categories with positive silver-reference support are ordered by silver-reference prevalence. Grey diamonds mark known silver-reference prevalence, terracotta circles mark naïve classifier prevalence, blue squares and horizontal intervals mark corrected prevalence and its propagated 95% uncertainty, and a light connector links the naïve and corrected estimates. The aggregate propagation metrics remain in `outputs/propagation/propagation_summary.csv` and should be reported separately in the manuscript table.
+- `outputs/figures/validation_weighted_unweighted_comparison.png`
+- `outputs/figures/validation_weighted_unweighted_comparison.pdf`
+- `outputs/figures/validation_weighted_unweighted_comparison.txt`
 
 The plotting script requires Matplotlib, which is declared in `pyproject.toml` and `Pipfile`.
