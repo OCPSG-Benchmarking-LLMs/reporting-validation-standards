@@ -198,3 +198,16 @@ The existing machine-readable stage labels are retained unchanged for reproducib
 These provenance labels must not be interpreted as making GPT-6 Luna or Mistral Large 3 second-class comparison models. In the working paper, all seven completed models are treated as evaluated models and should normally appear together in the principal tables, figures, and substantive discussion. The chronology should be explained once in the research-design description and then separated from the interpretation of model results.
 
 The original-six versus all-seven panel distinction remains useful for analyses that depend on the pre-existing experimental boundary, especially panel-level unanimity. It is therefore preserved in analytical metadata and outputs without being used as a substantive hierarchy.
+
+
+## 2026-09-27 — Manuscript figure design
+
+The first manuscript-figure script is `code/13_generate_manuscript_plots.py`. It generates three figures directly from the committed stability, validation, and prevalence-propagation outputs so that graphical results remain downstream of the frozen analytical pipeline rather than introducing a separate data-processing path.
+
+The stability figure uses population-weighted **unconditional** unanimity for all three displayed quantities: repeated inference, four-prompt unanimity, and all 12 prompt × repetition decisions. Using unconditional quantities keeps the measurement scale consistent across models and ensures that retained operational failures reduce observed stability rather than disappearing through complete-case conditioning. Conditional stability remains available in the underlying tables for substantive interpretation.
+
+The validation figure juxtaposes design-weighted operational macro-F1 and its 95% Rao–Wu bootstrap interval with the corresponding unweighted sample estimate. The visual objective is not to rank models but to show simultaneously that performance is estimated with uncertainty and that ignoring the deliberately stratified probability-sample design can materially change the reported quantity.
+
+The prevalence-propagation figure is restricted to the 17 policy categories with positive silver-reference support in the frozen GB population. It shows the known silver-reference prevalence only as an ex-post diagnostic target, alongside the naïve GPT-5.4 Mini prevalence and the support-conditioned corrected prevalence with propagated bootstrap intervals. The six support-excluded categories remain documented in the analytical outputs but are not plotted as if their zero corrected prevalence were an empirical discovery.
+
+All seven completed models are treated as evaluated models in the principal stability and validation figures. The machine-readable stage labels are deliberately ignored for visual grouping because they encode experimental chronology rather than substantive importance.
