@@ -19,15 +19,9 @@ OUTPUT_NAME = OUTPUT_DIR / "prevalence_propagation"
 ## 2. Plotting palette
 ##########################################################################
 
-## Inspired by the Oxford-style softened palette used in the related
-## Eval4SD plotting scripts. The palette is intentionally restrained:
-## reference prevalence is neutral, the naive classifier estimate is warm,
-## and the corrected estimate uses softened Oxford blue.
-
 OXFORD_BLUE = "#5F7A9D"
 SOFT_TERRACOTTA = "#E6A57E"
 DARK_GREY = "#4D4D4D"
-MID_GREY = "#999999"
 LIGHT_GREY = "#D9D9D9"
 
 ##########################################################################
@@ -63,6 +57,13 @@ def save_current_figure(save_path_prefix: Path) -> None:
     plt.close()
 
 
+def clean_axes(ax) -> None:
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.grid(False)
+    ax.tick_params(axis="both", length=0)
+
+
 ##########################################################################
 ## 4. Load and prepare data
 ##########################################################################
@@ -77,8 +78,6 @@ required_cols = {
     "corrected_prevalence",
     "corrected_ci_low",
     "corrected_ci_high",
-    "naive_minus_true",
-    "corrected_minus_true",
 }
 require_columns(data, required_cols, INPUT_FILE)
 
@@ -104,8 +103,6 @@ numeric_cols = [
     "corrected_prevalence",
     "corrected_ci_low",
     "corrected_ci_high",
-    "naive_minus_true",
-    "corrected_minus_true",
 ]
 
 for column in numeric_cols:
@@ -115,15 +112,12 @@ if data[numeric_cols].isna().any().any():
     raise ValueError(f"{INPUT_FILE} contains missing prevalence values.")
 
 data["label_pretty"] = data["label"].map(pretty_label)
-data["absolute_naive_error"] = data["naive_minus_true"].abs()
-data["absolute_corrected_error"] = data["corrected_minus_true"].abs()
 
-## Order by the magnitude of the naive aggregate error. This makes the plot
-## diagnostic rather than merely descriptive: the categories for which
-## correction matters most appear first.
+## Preserve the earlier visual ordering: categories are ordered by
+## silver-reference prevalence rather than by error magnitude.
 data = data.sort_values(
-    ["absolute_naive_error", "label_pretty"],
-    ascending=[False, True],
+    ["silver_true_prevalence", "label_pretty"],
+    ascending=[True, True],
 ).reset_index(drop=True)
 
 data["ypos"] = range(len(data))
@@ -132,73 +126,67 @@ data["ypos"] = range(len(data))
 ## 5. Plot
 ##########################################################################
 
-fig, ax = plt.subplots(figsize=(12.5, 9.5))
+fig, ax = plt.subplots(figsize=(11.2, 9.0))
 
-## Direction of correction: naive estimate -> corrected estimate.
 for row in data.itertuples(index=False):
-    ax.annotate(
-        "",
-        xy=(row.corrected_prevalence, row.ypos),
-        xytext=(row.naive_classifier_prevalence, row.ypos),
-        arrowprops={
-            "arrowstyle": "-|>",
-            "color": LIGHT_GREY,
-            "linewidth": 1.6,
-            "shrinkA": 5,
-            "shrinkB": 7,
-            "mutation_scale": 10,
-        },
+    ## Light connector between the naive and corrected prevalence estimates.
+    ax.plot(
+        [
+            min(row.naive_classifier_prevalence, row.corrected_prevalence),
+            max(row.naive_classifier_prevalence, row.corrected_prevalence),
+        ],
+        [row.ypos, row.ypos],
+        color=LIGHT_GREY,
+        linewidth=1.5,
+        alpha=0.95,
         zorder=1,
     )
 
-## Corrected prevalence and propagated uncertainty.
-corrected_xerr = [
-    data["corrected_prevalence"] - data["corrected_ci_low"],
-    data["corrected_ci_high"] - data["corrected_prevalence"],
-]
+    ## Corrected prevalence and propagated uncertainty.
+    ax.errorbar(
+        row.corrected_prevalence,
+        row.ypos,
+        xerr=[
+            [row.corrected_prevalence - row.corrected_ci_low],
+            [row.corrected_ci_high - row.corrected_prevalence],
+        ],
+        fmt="s",
+        markersize=6.8,
+        color=OXFORD_BLUE,
+        ecolor=OXFORD_BLUE,
+        markeredgecolor=DARK_GREY,
+        markeredgewidth=0.5,
+        elinewidth=1.5,
+        capsize=3.0,
+        alpha=0.95,
+        zorder=3,
+    )
 
-ax.errorbar(
-    data["corrected_prevalence"],
-    data["ypos"],
-    xerr=corrected_xerr,
-    fmt="s",
-    markersize=7.5,
-    color=OXFORD_BLUE,
-    ecolor=OXFORD_BLUE,
-    markeredgecolor=DARK_GREY,
-    markeredgewidth=0.55,
-    elinewidth=1.5,
-    capsize=3.0,
-    alpha=0.95,
-    zorder=3,
-)
+    ## Naive full-population classifier prevalence.
+    ax.scatter(
+        row.naive_classifier_prevalence,
+        row.ypos,
+        s=58,
+        color=SOFT_TERRACOTTA,
+        marker="o",
+        alpha=0.92,
+        edgecolors=DARK_GREY,
+        linewidths=0.5,
+        zorder=4,
+    )
 
-## Naive full-population classifier prevalence.
-ax.scatter(
-    data["naive_classifier_prevalence"],
-    data["ypos"],
-    s=72,
-    color=SOFT_TERRACOTTA,
-    marker="o",
-    alpha=0.90,
-    edgecolors=DARK_GREY,
-    linewidths=0.55,
-    zorder=4,
-)
-
-## Known silver-reference population prevalence. This is the diagnostic target
-## and is not used to fit the correction.
-ax.scatter(
-    data["silver_true_prevalence"],
-    data["ypos"],
-    s=76,
-    color=DARK_GREY,
-    marker="D",
-    alpha=0.90,
-    edgecolors=DARK_GREY,
-    linewidths=0.50,
-    zorder=5,
-)
+    ## Known silver-reference population prevalence.
+    ax.scatter(
+        row.silver_true_prevalence,
+        row.ypos,
+        s=62,
+        color=DARK_GREY,
+        marker="D",
+        alpha=0.92,
+        edgecolors=DARK_GREY,
+        linewidths=0.5,
+        zorder=5,
+    )
 
 ##########################################################################
 ## 6. Axes
@@ -210,7 +198,6 @@ maximum = max(
     data["corrected_ci_high"].max(),
 )
 
-## Round the upper limit to the next five-percentage-point increment.
 upper = min(
     1.0,
     max(
@@ -226,20 +213,8 @@ ax.xaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
 
 ax.set_yticks(data["ypos"])
 ax.set_yticklabels(data["label_pretty"], fontsize=9.5)
-ax.invert_yaxis()
 
-## Keep only a light x-axis guide, following the clean comparison style of
-## stage_4_f1_comparison.py without adding a full grid.
-ax.grid(axis="x", color=LIGHT_GREY, linewidth=0.9, alpha=0.75, zorder=0)
-ax.grid(axis="y", visible=False)
-
-for spine in ["top", "right"]:
-    ax.spines[spine].set_visible(False)
-
-ax.spines["left"].set_color(MID_GREY)
-ax.spines["bottom"].set_color(MID_GREY)
-
-ax.tick_params(axis="both", length=0)
+clean_axes(ax)
 
 ##########################################################################
 ## 7. Legend and caption
@@ -262,7 +237,7 @@ legend_handles = [
         markersize=7,
         markerfacecolor=SOFT_TERRACOTTA,
         markeredgecolor=DARK_GREY,
-        markeredgewidth=0.55,
+        markeredgewidth=0.5,
         label="Naive GPT-5.4 Mini prevalence",
     ),
     Line2D(
@@ -273,32 +248,30 @@ legend_handles = [
         color=OXFORD_BLUE,
         markerfacecolor=OXFORD_BLUE,
         markeredgecolor=DARK_GREY,
-        markeredgewidth=0.55,
+        markeredgewidth=0.5,
         label="Corrected prevalence (95% CI)",
     ),
 ]
 
 plt.tight_layout()
-plt.subplots_adjust(bottom=0.15, left=0.24)
+plt.subplots_adjust(bottom=0.16, left=0.25)
 
 fig.legend(
     handles=legend_handles,
     loc="lower center",
-    bbox_to_anchor=(0.5, 0.035),
+    bbox_to_anchor=(0.5, 0.025),
     ncol=3,
     frameon=False,
 )
 
 caption = (
     "Propagation of classification error to policy-agenda prevalence.\n\n"
-    "Note. The figure shows the 17 policy categories with positive support in the frozen "
-    "GB silver-reference population, ordered by the absolute error of the naive GPT-5.4 Mini "
-    "prevalence estimate. Grey diamonds show the known silver-reference prevalence; terracotta "
-    "circles show the naive full-population classifier prevalence; blue squares show the "
-    "support-conditioned corrected prevalence with 95% intervals from 2,000 Rao-Wu bootstrap "
-    "replicates. Light arrows indicate the direction of correction from the naive to the corrected "
-    "estimate. Full-population silver prevalence is used only for ex-post comparison, not to fit "
-    "the correction."
+    "Note. Seventeen policy categories with positive support in the frozen GB silver-reference "
+    "population are shown. Grey diamonds show the known silver-reference prevalence; terracotta "
+    "circles show the naive GPT-5.4 Mini full-population prevalence; blue squares show the "
+    "support-conditioned corrected prevalence with propagated 95% bootstrap intervals. "
+    "Categories are ordered by silver-reference prevalence. Full-population silver prevalence "
+    "is used only for ex-post comparison, not to fit the correction."
 )
 
 write_caption(OUTPUT_NAME, caption)
