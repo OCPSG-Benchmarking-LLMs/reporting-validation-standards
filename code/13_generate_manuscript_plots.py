@@ -75,12 +75,17 @@ def pretty_label(value: str) -> str:
 
 
 def clean_axes(ax) -> None:
-    for spine in ["top", "right"]:
-        ax.spines[spine].set_visible(False)
-
-    ax.spines["left"].set_color("#999999")
-    ax.spines["bottom"].set_color("#999999")
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.grid(False)
     ax.tick_params(axis="both", length=0)
+
+
+def write_caption(save_path_prefix: Path, caption: str) -> None:
+    Path(f"{save_path_prefix}.txt").write_text(
+        caption.strip() + "\n",
+        encoding="utf-8",
+    )
 
 
 def save_current_figure(save_path_prefix: Path) -> None:
@@ -188,11 +193,10 @@ def plot_stability_profile() -> None:
     ax.set_yticklabels(data["model_name"], fontsize=10)
     ax.invert_yaxis()
 
-    ax.grid(axis="x", color=LIGHT_GREY, linewidth=1.0, alpha=0.9, zorder=0)
-    ax.grid(axis="y", color=VERY_LIGHT_GREY, linewidth=0.8, alpha=0.8, zorder=0)
     clean_axes(ax)
 
     caption = (
+        "Stability across repeated inference and prompt perturbation.\n\n"
         "Note. Population-weighted unconditional unanimity in the frozen GB probability sample. "
         "Repeated inference summarises agreement across three repetitions within a prompt; "
         "prompt perturbation summarises unanimity across the four prompt conditions at matched "
@@ -201,25 +205,16 @@ def plot_stability_profile() -> None:
     )
 
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.27, left=0.22)
+    plt.subplots_adjust(bottom=0.16, left=0.22)
 
     fig.legend(
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.15),
+        bbox_to_anchor=(0.5, 0.035),
         ncol=3,
         frameon=False,
     )
 
-    fig.text(
-        0.5,
-        0.035,
-        caption,
-        ha="center",
-        va="bottom",
-        fontsize=9,
-        wrap=True,
-    )
-
+    write_caption(STABILITY_OUTPUT, caption)
     save_current_figure(STABILITY_OUTPUT)
 
 
@@ -319,8 +314,6 @@ def plot_validation_macro_f1() -> None:
     ax.set_yticklabels(data["model_name"], fontsize=10)
     ax.invert_yaxis()
 
-    ax.grid(axis="x", color=LIGHT_GREY, linewidth=1.0, alpha=0.9, zorder=0)
-    ax.grid(axis="y", color=VERY_LIGHT_GREY, linewidth=0.8, alpha=0.8, zorder=0)
     clean_axes(ax)
 
     legend_handles = [
@@ -348,6 +341,7 @@ def plot_validation_macro_f1() -> None:
     ]
 
     caption = (
+        "Design-based silver-reference performance.\n\n"
         "Note. Canonical P0 prompt. Design-weighted operational macro-F1 uses inverse-inclusion "
         "weights and 2,000 paired Rao–Wu rescaled bootstrap replicates. Unweighted values are "
         "descriptive diagnostics for the deliberately stratified validation sample. Performance "
@@ -355,26 +349,17 @@ def plot_validation_macro_f1() -> None:
     )
 
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.29, left=0.22)
+    plt.subplots_adjust(bottom=0.17, left=0.22)
 
     fig.legend(
         handles=legend_handles,
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.16),
+        bbox_to_anchor=(0.5, 0.035),
         ncol=2,
         frameon=False,
     )
 
-    fig.text(
-        0.5,
-        0.035,
-        caption,
-        ha="center",
-        va="bottom",
-        fontsize=9,
-        wrap=True,
-    )
-
+    write_caption(VALIDATION_OUTPUT, caption)
     save_current_figure(VALIDATION_OUTPUT)
 
 
@@ -504,8 +489,6 @@ def plot_prevalence_propagation() -> None:
     ax.set_yticks(ypos)
     ax.set_yticklabels(data["label_pretty"], fontsize=9.5)
 
-    ax.grid(axis="x", color=LIGHT_GREY, linewidth=1.0, alpha=0.9, zorder=0)
-    ax.grid(axis="y", color=VERY_LIGHT_GREY, linewidth=0.8, alpha=0.8, zorder=0)
     clean_axes(ax)
 
     legend_handles = [
@@ -542,6 +525,7 @@ def plot_prevalence_propagation() -> None:
     ]
 
     caption = (
+        "Propagation of classification error to policy-agenda prevalence.\n\n"
         "Note. Seventeen policy categories with positive support in the frozen GB silver-reference "
         "population are shown. The corrected prevalence uses the misclassification mechanism "
         "estimated from the 1,000-speech probability validation sample; its 95% intervals propagate "
@@ -550,26 +534,17 @@ def plot_prevalence_propagation() -> None:
     )
 
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.24, left=0.25)
+    plt.subplots_adjust(bottom=0.16, left=0.25)
 
     fig.legend(
         handles=legend_handles,
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.135),
+        bbox_to_anchor=(0.5, 0.025),
         ncol=3,
         frameon=False,
     )
 
-    fig.text(
-        0.5,
-        0.025,
-        caption,
-        ha="center",
-        va="bottom",
-        fontsize=9,
-        wrap=True,
-    )
-
+    write_caption(PROPAGATION_OUTPUT, caption)
     save_current_figure(PROPAGATION_OUTPUT)
 
 
@@ -587,6 +562,7 @@ def main() -> None:
     for output in [STABILITY_OUTPUT, VALIDATION_OUTPUT, PROPAGATION_OUTPUT]:
         print(f"  {output}.png")
         print(f"  {output}.pdf")
+        print(f"  {output}.txt")
 
 
 if __name__ == "__main__":
