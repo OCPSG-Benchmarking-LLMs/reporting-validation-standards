@@ -25,10 +25,10 @@ OUTPUT_NAME = OUTPUT_DIR / "validation_prompt_repetition_profile"
 
 MODEL_NAMES = {
     "openai_gpt54": "GPT-5.4",
-    "openai_gpt54_mini": "GPT-5.4 Mini",
+    "openai_gpt54_mini": "GPT-5.4-mini",
     "fireworks_deepseek_v41_flash": "DeepSeek V4.1 Flash",
-    "ollama_qwen36_35b": "Qwen3.6 35B",
-    "ollama_gemma4_31b": "Gemma 4 31B",
+    "ollama_qwen36_35b": "Qwen3.6 (35B)",
+    "ollama_gemma4_31b": "Gemma 4 (31B)",
     "openai_gpt6_luna": "GPT-6 Luna",
     "mistral_large3_2512": "Mistral Large 3",
 }
@@ -353,7 +353,8 @@ for i, metric in enumerate(METRICS):
             color=PROMPT_COLOURS[prompt],
             s=REPETITION_POINT_SIZE,
             alpha=0.88,
-            edgecolors="none",
+            edgecolors=DARK_GREY,
+            linewidths=0.55,
             zorder=2,
         )
 
@@ -433,7 +434,8 @@ prompt_handles = [
         linestyle="",
         markersize=7,
         markerfacecolor=PROMPT_COLOURS[prompt],
-        markeredgecolor="none",
+        markeredgecolor=DARK_GREY,
+        markeredgewidth=0.55,
         label=PROMPT_NAMES[prompt],
     )
     for prompt in PROMPT_ORDER
