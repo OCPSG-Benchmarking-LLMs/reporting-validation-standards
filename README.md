@@ -580,7 +580,7 @@ The four panels report:
 - Macro-Recall; and
 - Macro-F1.
 
-For each of the seven evaluated models, each panel contains 12 small points: four prompt specifications × three single-repetition estimates. Prompt is encoded by colour. All 12 prompt × repetition observations for a model share the same horizontal row; the three repetitions for each prompt are shown as separate, equally sized points. The `repetition = 0` rows in `condition_performance.csv` are pre-computed expected-over-repetitions aggregates and are deliberately excluded from the 12-point display.
+For each of the seven evaluated models, each panel contains 12 small points: four prompt specifications × three single-repetition estimates. Prompt is encoded by colour. Each model is displayed as four prompt-specific horizontal rows. The three repetitions for a given prompt share the same line and are shown as separate, equally sized points. The `repetition = 0` rows in `condition_performance.csv` are pre-computed expected-over-repetitions aggregates and are deliberately excluded from the 12-point display.
 
 The script creates:
 
