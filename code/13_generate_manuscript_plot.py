@@ -102,9 +102,16 @@ METRICS = [
 ## 5. Plot geometry
 ##########################################################################
 
-## All 12 prompt × repetition observations for a model share the same
-## horizontal row. Prompt is encoded by colour; repetition is represented by
-## separate points at its observed metric value rather than by vertical jitter.
+## Each model contains four prompt-specific horizontal rows. The three
+## repetitions for a given prompt share exactly the same y-position; prompt
+## rows are vertically offset within the model group.
+
+PROMPT_OFFSETS = {
+    "p0_capbench_canonical": -0.27,
+    "p1_lexical_paraphrase": -0.09,
+    "p2_label_order_permutation": 0.09,
+    "p3_structural_format": 0.27,
+}
 
 REPETITION_POINT_SIZE = 60
 
@@ -285,10 +292,17 @@ model_to_y = {
     for index, model in enumerate(MODEL_ORDER)
 }
 
-## Every prompt × repetition observation for the same model is plotted on the
-## same horizontal row. This mirrors the comparison layout of the reference
-## plotting script and lets the x-position carry all substantive variation.
-data["y"] = data["model_key"].map(model_to_y)
+## The three repetitions of a prompt share one horizontal line. Different
+## prompts occupy four separate lines within each model group.
+data["y_base"] = data["model_key"].map(model_to_y)
+data["y"] = [
+    base + PROMPT_OFFSETS[prompt]
+    for base, prompt in zip(
+        data["y_base"],
+        data["prompt_id"],
+        strict=True,
+    )
+]
 
 ## Use one common x scale across all four panels.
 all_values = pd.concat(
@@ -317,7 +331,7 @@ x_ticks = decimal_ticks(x_lower)
 fig, axes = plt.subplots(
     1,
     4,
-    figsize=(14.5, 8.0),
+    figsize=(14.5, 9.0),
     sharey=True,
 )
 
@@ -330,8 +344,9 @@ for i, metric in enumerate(METRICS):
             data["prompt_id"].eq(prompt)
         ]
 
-        ## Three repetition-level points per prompt and model. All repetitions
-        ## share the same model row; prompt colour distinguishes conditions.
+        ## Three repetition-level points per prompt and model. The repetitions
+        ## share one prompt-specific horizontal line; prompt colour distinguishes
+        ## the four prompt conditions.
         ax.scatter(
             prompt_data[metric_column],
             prompt_data["y"],
@@ -445,13 +460,12 @@ caption = (
     "Validation performance across prompt specifications and repeated inference.\n\n"
     "Note. Each panel reports a design-weighted operational validation metric "
     "against the OCPSG silver reference: Accuracy, Macro-Precision, Macro-Recall, "
-    "and Macro-F1. Within each model row, colour identifies the four frozen prompt "
-    "conditions and the three points of each colour report the three single-repetition "
-    "estimates. All 12 prompt × repetition observations for a model are shown on the "
-    "same horizontal row. Models are shown in the fixed experimental order rather "
-    "than sorted by performance. The x-axis is reported on the original 0–1 metric "
-    "scale. The figure complements, rather than replaces, the full stability and "
-    "validation tables."
+    "and Macro-F1. Within each model group, the four frozen prompt conditions occupy "
+    "separate horizontal lines and are distinguished by colour. The three points on "
+    "each prompt line report the three single-repetition estimates. Models are shown "
+    "in the fixed experimental order rather than sorted by performance. The x-axis "
+    "is reported on the original 0–1 metric scale. The figure complements, rather "
+    "than replaces, the full stability and validation tables."
 )
 
 
