@@ -102,23 +102,11 @@ METRICS = [
 ## 5. Plot geometry
 ##########################################################################
 
-## Four prompt bands inside each model row.
-PROMPT_OFFSETS = {
-    "p0_capbench_canonical": -0.24,
-    "p1_lexical_paraphrase": -0.08,
-    "p2_label_order_permutation": 0.08,
-    "p3_structural_format": 0.24,
-}
+## All 12 prompt × repetition observations for a model share the same
+## horizontal row. Prompt is encoded by colour; repetition is represented by
+## separate points at its observed metric value rather than by vertical jitter.
 
-## Three tiny vertical offsets inside each prompt band.
-REPETITION_OFFSETS = {
-    1: -0.035,
-    2: 0.000,
-    3: 0.035,
-}
-
-REPETITION_POINT_SIZE = 25
-PROMPT_MEAN_POINT_SIZE = 88
+REPETITION_POINT_SIZE = 60
 
 
 ##########################################################################
@@ -297,42 +285,10 @@ model_to_y = {
     for index, model in enumerate(MODEL_ORDER)
 }
 
-data["y_base"] = data["model_key"].map(model_to_y)
-
-data["y"] = [
-    base
-    + PROMPT_OFFSETS[prompt]
-    + REPETITION_OFFSETS[repetition]
-    for base, prompt, repetition in zip(
-        data["y_base"],
-        data["prompt_id"],
-        data["repetition"],
-        strict=True,
-    )
-]
-
-## Arithmetic prompt means are calculated directly from the three plotted
-## repetition-level metric values. The repetition-0 aggregate is deliberately
-## excluded because some non-linear metrics are not identical to the arithmetic
-## mean of the three single-repetition scores.
-prompt_means = (
-    data.groupby(
-        ["model_key", "prompt_id"],
-        as_index=False,
-    )[[metric["column"] for metric in METRICS]]
-    .mean()
-)
-
-prompt_means["y_base"] = prompt_means["model_key"].map(model_to_y)
-
-prompt_means["y"] = [
-    base + PROMPT_OFFSETS[prompt]
-    for base, prompt in zip(
-        prompt_means["y_base"],
-        prompt_means["prompt_id"],
-        strict=True,
-    )
-]
+## Every prompt × repetition observation for the same model is plotted on the
+## same horizontal row. This mirrors the comparison layout of the reference
+## plotting script and lets the x-position carry all substantive variation.
+data["y"] = data["model_key"].map(model_to_y)
 
 ## Use one common x scale across all four panels.
 all_values = pd.concat(
@@ -374,31 +330,16 @@ for i, metric in enumerate(METRICS):
             data["prompt_id"].eq(prompt)
         ]
 
-        ## Three small repetition-level points per prompt and model.
+        ## Three repetition-level points per prompt and model. All repetitions
+        ## share the same model row; prompt colour distinguishes conditions.
         ax.scatter(
             prompt_data[metric_column],
             prompt_data["y"],
             color=PROMPT_COLOURS[prompt],
             s=REPETITION_POINT_SIZE,
-            alpha=0.78,
+            alpha=0.88,
             edgecolors="none",
             zorder=2,
-        )
-
-        ## One larger point at the arithmetic mean of the three repetitions.
-        mean_data = prompt_means.loc[
-            prompt_means["prompt_id"].eq(prompt)
-        ]
-
-        ax.scatter(
-            mean_data[metric_column],
-            mean_data["y"],
-            color=PROMPT_COLOURS[prompt],
-            s=PROMPT_MEAN_POINT_SIZE,
-            alpha=0.98,
-            edgecolors=DARK_GREY,
-            linewidths=0.55,
-            zorder=4,
         )
 
     ax.set_title(
@@ -483,36 +424,10 @@ prompt_handles = [
     for prompt in PROMPT_ORDER
 ]
 
-repetition_handle = Line2D(
-    [],
-    [],
-    marker="o",
-    linestyle="",
-    markersize=4.5,
-    markerfacecolor=LIGHT_GREY,
-    markeredgecolor="none",
-    label="Single repetition",
-)
-
-mean_handle = Line2D(
-    [],
-    [],
-    marker="o",
-    linestyle="",
-    markersize=8.5,
-    markerfacecolor="white",
-    markeredgecolor=DARK_GREY,
-    markeredgewidth=0.7,
-    label="Prompt mean",
-)
-
 fig.legend(
-    handles=prompt_handles + [
-        repetition_handle,
-        mean_handle,
-    ],
+    handles=prompt_handles,
     loc="lower center",
-    ncol=3,
+    ncol=4,
     frameon=False,
     fontsize=9,
     bbox_to_anchor=(0.5, 0.01),
@@ -531,12 +446,12 @@ caption = (
     "Note. Each panel reports a design-weighted operational validation metric "
     "against the OCPSG silver reference: Accuracy, Macro-Precision, Macro-Recall, "
     "and Macro-F1. Within each model row, colour identifies the four frozen prompt "
-    "conditions. For each prompt, three small vertically offset points report the "
-    "three single-repetition estimates and the larger outlined point reports their "
-    "arithmetic mean. Models are shown in the fixed experimental order rather than "
-    "sorted by performance. The x-axis is reported on the original 0–1 metric scale. "
-    "The figure complements, rather than replaces, the full stability and validation "
-    "tables."
+    "conditions and the three points of each colour report the three single-repetition "
+    "estimates. All 12 prompt × repetition observations for a model are shown on the "
+    "same horizontal row. Models are shown in the fixed experimental order rather "
+    "than sorted by performance. The x-axis is reported on the original 0–1 metric "
+    "scale. The figure complements, rather than replaces, the full stability and "
+    "validation tables."
 )
 
 
