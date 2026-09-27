@@ -286,10 +286,11 @@ def plot_inter_model_agreement() -> None:
         dtype=float,
     )
 
-    np.fill_diagonal(
-        matrix.values,
-        1.0,
-    )
+    ## Assign the diagonal through pandas rather than mutating matrix.values.
+    ## With recent pandas/NumPy combinations, the NumPy view returned by
+    ## DataFrame.values can be read-only under copy-on-write semantics.
+    for model in MODEL_ORDER:
+        matrix.loc[model, model] = 1.0
 
     for row in data.itertuples(index=False):
         left = str(row.model_key_left)
