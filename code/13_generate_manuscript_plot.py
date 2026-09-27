@@ -1,8 +1,9 @@
 from pathlib import Path
+import math
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.ticker import PercentFormatter
+import numpy as np
 import pandas as pd
 
 
@@ -10,12 +11,12 @@ import pandas as pd
 ## 1. Paths
 ##########################################################################
 
-INPUT_FILE = Path("outputs/validation/primary_model_performance.csv")
+INPUT_FILE = Path("outputs/validation/condition_performance.csv")
 
 OUTPUT_DIR = Path("outputs/figures")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-OUTPUT_NAME = OUTPUT_DIR / "validation_weighted_unweighted_comparison"
+OUTPUT_NAME = OUTPUT_DIR / "validation_prompt_repetition_profile"
 
 
 ##########################################################################
@@ -44,60 +45,84 @@ MODEL_ORDER = [
 
 
 ##########################################################################
-## 3. Oxford-inspired palette
+## 3. Prompt display names and Oxford-inspired palette
 ##########################################################################
 
-## These colours follow the softened Oxford-style palette used in the
-## related Eval4SD plotting scripts.
+PROMPT_ORDER = [
+    "p0_capbench_canonical",
+    "p1_lexical_paraphrase",
+    "p2_label_order_permutation",
+    "p3_structural_format",
+]
 
-OXFORD_BLUE = "#5F7A9D"
-SOFT_TERRACOTTA = "#E6A57E"
+PROMPT_NAMES = {
+    "p0_capbench_canonical": "P0 Canonical",
+    "p1_lexical_paraphrase": "P1 Lexical paraphrase",
+    "p2_label_order_permutation": "P2 Label-order permutation",
+    "p3_structural_format": "P3 Structural format",
+}
+
+## Softened Oxford-style plotting tones, following the related Eval4SD scripts.
+PROMPT_COLOURS = {
+    "p0_capbench_canonical": "#5F7A9D",       # softened Oxford blue
+    "p1_lexical_paraphrase": "#E6A57E",       # soft terracotta
+    "p2_label_order_permutation": "#A8C5A1",  # sage
+    "p3_structural_format": "#D9B8D0",        # muted mauve
+}
+
 DARK_GREY = "#4D4D4D"
-CONNECTOR_GREY = "#D9D9D9"
+LIGHT_GREY = "#D9D9D9"
 
 
 ##########################################################################
 ## 4. Metrics
 ##########################################################################
 
-## Each panel compares the design-weighted population estimate with the
-## corresponding naïve unweighted validation-sample estimate. The weighted
-## estimate also carries its design-based 95% Rao-Wu bootstrap interval.
-
 METRICS = [
     {
         "title": "Accuracy",
-        "weighted": "weighted_operational_accuracy",
-        "unweighted": "unweighted_operational_accuracy",
-        "ci_low": "weighted_operational_accuracy_ci_low",
-        "ci_high": "weighted_operational_accuracy_ci_high",
+        "column": "weighted_operational_accuracy",
     },
     {
         "title": "Macro-Precision",
-        "weighted": "weighted_operational_macro_precision",
-        "unweighted": "unweighted_operational_macro_precision",
-        "ci_low": "weighted_operational_macro_precision_ci_low",
-        "ci_high": "weighted_operational_macro_precision_ci_high",
+        "column": "weighted_operational_macro_precision",
     },
     {
         "title": "Macro-Recall",
-        "weighted": "weighted_operational_macro_recall",
-        "unweighted": "unweighted_operational_macro_recall",
-        "ci_low": "weighted_operational_macro_recall_ci_low",
-        "ci_high": "weighted_operational_macro_recall_ci_high",
+        "column": "weighted_operational_macro_recall",
     },
     {
         "title": "Macro-F1",
-        "weighted": "weighted_operational_macro_f1",
-        "unweighted": "unweighted_operational_macro_f1",
-        "ci_low": "weighted_operational_macro_f1_ci_low",
-        "ci_high": "weighted_operational_macro_f1_ci_high",
+        "column": "weighted_operational_macro_f1",
     },
 ]
 
 
 ##########################################################################
-## 5. Helpers
+## 5. Plot geometry
+##########################################################################
+
+## Four prompt bands inside each model row.
+PROMPT_OFFSETS = {
+    "p0_capbench_canonical": -0.24,
+    "p1_lexical_paraphrase": -0.08,
+    "p2_label_order_permutation": 0.08,
+    "p3_structural_format": 0.24,
+}
+
+## Three tiny vertical offsets inside each prompt band.
+REPETITION_OFFSETS = {
+    1: -0.035,
+    2: 0.000,
+    3: 0.035,
+}
+
+REPETITION_POINT_SIZE = 25
+PROMPT_MEAN_POINT_SIZE = 88
+
+
+##########################################################################
+## 6. Helpers
 ##########################################################################
 
 
@@ -141,8 +166,18 @@ def save_figure(
     plt.close(fig)
 
 
+def decimal_ticks(lower: float) -> list[float]:
+    start = math.ceil(lower * 10 - 1e-9) / 10
+    ticks = list(np.arange(start, 1.0001, 0.1))
+
+    if 1.0 not in ticks:
+        ticks.append(1.0)
+
+    return [round(value, 1) for value in ticks]
+
+
 ##########################################################################
-## 6. Load and prepare data
+## 7. Load and prepare data
 ##########################################################################
 
 data = pd.read_csv(
@@ -153,17 +188,10 @@ data = pd.read_csv(
 required_cols = {
     "model_key",
     "prompt_id",
+    "repetition",
+    "aggregation",
+    *[metric["column"] for metric in METRICS],
 }
-
-for metric in METRICS:
-    required_cols.update(
-        {
-            metric["weighted"],
-            metric["unweighted"],
-            metric["ci_low"],
-            metric["ci_high"],
-        }
-    )
 
 require_columns(
     data,
@@ -171,17 +199,17 @@ require_columns(
     INPUT_FILE,
 )
 
-if not (
-    data["prompt_id"].astype(str) == "p0_capbench_canonical"
-).all():
-    raise ValueError(
-        "Primary validation output contains a non-canonical prompt."
-    )
+## condition_performance.csv contains four rows per model × prompt:
+## repetitions 1–3 are the actual single-repetition estimates, while
+## repetition 0 is the pre-computed expected-over-repetitions aggregate.
+## The figure needs exactly the 12 underlying prompt × repetition points,
+## so repetition 0 must not be treated as a fourth repetition.
+data = data.loc[
+    data["aggregation"].astype(str).eq("single_repetition")
+    & data["repetition"].isin([1, 2, 3])
+].copy()
 
-observed_models = set(
-    data["model_key"].astype(str)
-)
-
+observed_models = set(data["model_key"].astype(str))
 expected_models = set(MODEL_ORDER)
 
 missing_models = expected_models - observed_models
@@ -197,145 +225,220 @@ if unexpected_models:
         f"Unexpected models: {sorted(unexpected_models)}"
     )
 
-data = (
-    data.set_index("model_key")
-    .reindex(MODEL_ORDER)
-    .reset_index()
+observed_prompts = set(data["prompt_id"].astype(str))
+expected_prompts = set(PROMPT_ORDER)
+
+if observed_prompts != expected_prompts:
+    raise ValueError(
+        "Expected exactly the four frozen prompt conditions; "
+        f"found {sorted(observed_prompts)}."
+    )
+
+observed_repetitions = sorted(
+    pd.to_numeric(
+        data["repetition"],
+        errors="raise",
+    )
+    .astype(int)
+    .unique()
+    .tolist()
 )
+
+if observed_repetitions != [1, 2, 3]:
+    raise ValueError(
+        "Expected single-repetition rows 1, 2, and 3 after filtering; "
+        f"found {observed_repetitions}."
+    )
+
+data["repetition"] = data["repetition"].astype(int)
 
 for metric in METRICS:
-    for column in (
-        metric["weighted"],
-        metric["unweighted"],
-        metric["ci_low"],
-        metric["ci_high"],
-    ):
-        data[column] = pd.to_numeric(
-            data[column],
-            errors="coerce",
+    column = metric["column"]
+
+    data[column] = pd.to_numeric(
+        data[column],
+        errors="coerce",
+    )
+
+    if data[column].isna().any():
+        raise ValueError(
+            f"{INPUT_FILE} contains missing values in {column}."
         )
 
-        if data[column].isna().any():
-            raise ValueError(
-                f"{INPUT_FILE} contains missing values in {column}."
-            )
-
-data["model_name"] = (
-    data["model_key"]
-    .map(MODEL_NAMES)
+expected_rows = (
+    len(MODEL_ORDER)
+    * len(PROMPT_ORDER)
+    * len(REPETITION_OFFSETS)
 )
 
-y_vals = list(
-    range(len(data))
+if len(data) != expected_rows:
+    raise ValueError(
+        "Single-repetition validation output is incomplete. "
+        f"Expected {expected_rows} rows, found {len(data)}."
+    )
+
+duplicate_cells = data.duplicated(
+    subset=[
+        "model_key",
+        "prompt_id",
+        "repetition",
+    ],
+    keep=False,
 )
+
+if duplicate_cells.any():
+    raise ValueError(
+        "Duplicate model × prompt × repetition rows found in "
+        f"{INPUT_FILE}."
+    )
+
+model_to_y = {
+    model: index
+    for index, model in enumerate(MODEL_ORDER)
+}
+
+data["y_base"] = data["model_key"].map(model_to_y)
+
+data["y"] = [
+    base
+    + PROMPT_OFFSETS[prompt]
+    + REPETITION_OFFSETS[repetition]
+    for base, prompt, repetition in zip(
+        data["y_base"],
+        data["prompt_id"],
+        data["repetition"],
+        strict=True,
+    )
+]
+
+## Arithmetic prompt means are calculated directly from the three plotted
+## repetition-level metric values. The repetition-0 aggregate is deliberately
+## excluded because some non-linear metrics are not identical to the arithmetic
+## mean of the three single-repetition scores.
+prompt_means = (
+    data.groupby(
+        ["model_key", "prompt_id"],
+        as_index=False,
+    )[[metric["column"] for metric in METRICS]]
+    .mean()
+)
+
+prompt_means["y_base"] = prompt_means["model_key"].map(model_to_y)
+
+prompt_means["y"] = [
+    base + PROMPT_OFFSETS[prompt]
+    for base, prompt in zip(
+        prompt_means["y_base"],
+        prompt_means["prompt_id"],
+        strict=True,
+    )
+]
+
+## Use one common x scale across all four panels.
+all_values = pd.concat(
+    [
+        data[metric["column"]]
+        for metric in METRICS
+    ],
+    ignore_index=True,
+)
+
+global_min = float(all_values.min())
+
+x_lower = max(
+    0.0,
+    math.floor((global_min - 0.025) / 0.05) * 0.05,
+)
+
+x_upper = 1.01
+x_ticks = decimal_ticks(x_lower)
 
 
 ##########################################################################
-## 7. Plot
+## 8. Plot
 ##########################################################################
 
 fig, axes = plt.subplots(
     1,
     4,
-    figsize=(14, 7.8),
+    figsize=(14.5, 8.0),
     sharey=True,
 )
 
 for i, metric in enumerate(METRICS):
     ax = axes[i]
+    metric_column = metric["column"]
 
-    weighted = data[metric["weighted"]]
-    unweighted = data[metric["unweighted"]]
-    ci_low = data[metric["ci_low"]]
-    ci_high = data[metric["ci_high"]]
+    for prompt in PROMPT_ORDER:
+        prompt_data = data.loc[
+            data["prompt_id"].eq(prompt)
+        ]
 
-    ## Light connectors make the design effect visible for each model.
-    for y, weighted_value, unweighted_value in zip(
-        y_vals,
-        weighted,
-        unweighted,
-        strict=True,
-    ):
-        ax.plot(
-            [weighted_value, unweighted_value],
-            [y, y],
-            color=CONNECTOR_GREY,
-            linewidth=1.2,
-            zorder=1,
+        ## Three small repetition-level points per prompt and model.
+        ax.scatter(
+            prompt_data[metric_column],
+            prompt_data["y"],
+            color=PROMPT_COLOURS[prompt],
+            s=REPETITION_POINT_SIZE,
+            alpha=0.78,
+            edgecolors="none",
+            zorder=2,
         )
 
-    ## Design-weighted population estimates with 95% design-based intervals.
-    for y, estimate, low, high in zip(
-        y_vals,
-        weighted,
-        ci_low,
-        ci_high,
-        strict=True,
-    ):
-        ax.errorbar(
-            estimate,
-            y,
-            xerr=[
-                [estimate - low],
-                [high - estimate],
-            ],
-            fmt="o",
-            markersize=7.2,
-            color=OXFORD_BLUE,
-            ecolor=OXFORD_BLUE,
-            markeredgecolor="none",
-            elinewidth=1.35,
-            capsize=2.8,
-            alpha=0.95,
-            zorder=3,
-        )
+        ## One larger point at the arithmetic mean of the three repetitions.
+        mean_data = prompt_means.loc[
+            prompt_means["prompt_id"].eq(prompt)
+        ]
 
-    ## Naïve unweighted sample estimates.
-    ax.scatter(
-        unweighted,
-        y_vals,
-        color=SOFT_TERRACOTTA,
-        s=58,
-        alpha=0.92,
-        edgecolors="none",
-        zorder=4,
-    )
+        ax.scatter(
+            mean_data[metric_column],
+            mean_data["y"],
+            color=PROMPT_COLOURS[prompt],
+            s=PROMPT_MEAN_POINT_SIZE,
+            alpha=0.98,
+            edgecolors=DARK_GREY,
+            linewidths=0.55,
+            zorder=4,
+        )
 
     ax.set_title(
         metric["title"],
-        fontsize=13,
+        fontsize=14,
     )
 
     ax.set_xlim(
-        0.70,
-        1.01,
+        x_lower,
+        x_upper,
     )
 
     ax.set_xticks(
-        [0.70, 0.80, 0.90, 1.00]
+        x_ticks
     )
 
-    ax.xaxis.set_major_formatter(
-        PercentFormatter(
-            xmax=1.0,
-            decimals=0,
-        )
+    ax.set_xticklabels(
+        [
+            f"{value:.1f}"
+            for value in x_ticks
+        ],
+        fontsize=9,
     )
 
     ax.tick_params(
         axis="x",
         length=0,
-        labelsize=9,
     )
 
     ax.set_yticks(
-        y_vals
+        range(len(MODEL_ORDER))
     )
 
     if i == 0:
         ax.set_yticklabels(
-            data["model_name"],
-            fontsize=9,
+            [
+                MODEL_NAMES[model]
+                for model in MODEL_ORDER
+            ],
+            fontsize=9.5,
         )
 
         ax.tick_params(
@@ -358,75 +461,87 @@ for i, metric in enumerate(METRICS):
     ]:
         ax.spines[spine].set_visible(False)
 
-## Put the first model at the top while preserving the fixed experimental order.
+## Preserve the fixed experimental order with GPT-5.4 at the top.
 axes[0].invert_yaxis()
 
 
 ##########################################################################
-## 8. Legend and caption
+## 9. Legend and caption
 ##########################################################################
 
-weighted_handle = Line2D(
-    [],
-    [],
-    marker="o",
-    linestyle="-",
-    markersize=7,
-    color=OXFORD_BLUE,
-    markerfacecolor=OXFORD_BLUE,
-    markeredgecolor="none",
-    linewidth=1.35,
-    label="Design-weighted estimate (95% CI)",
-)
+prompt_handles = [
+    Line2D(
+        [],
+        [],
+        marker="o",
+        linestyle="",
+        markersize=7,
+        markerfacecolor=PROMPT_COLOURS[prompt],
+        markeredgecolor="none",
+        label=PROMPT_NAMES[prompt],
+    )
+    for prompt in PROMPT_ORDER
+]
 
-unweighted_handle = Line2D(
+repetition_handle = Line2D(
     [],
     [],
     marker="o",
     linestyle="",
-    markersize=7,
-    markerfacecolor=SOFT_TERRACOTTA,
+    markersize=4.5,
+    markerfacecolor=LIGHT_GREY,
     markeredgecolor="none",
-    label="Unweighted sample estimate",
+    label="Single repetition",
+)
+
+mean_handle = Line2D(
+    [],
+    [],
+    marker="o",
+    linestyle="",
+    markersize=8.5,
+    markerfacecolor="white",
+    markeredgecolor=DARK_GREY,
+    markeredgewidth=0.7,
+    label="Prompt mean",
 )
 
 fig.legend(
-    handles=[
-        weighted_handle,
-        unweighted_handle,
+    handles=prompt_handles + [
+        repetition_handle,
+        mean_handle,
     ],
     loc="lower center",
-    ncol=2,
+    ncol=3,
     frameon=False,
-    fontsize=9.5,
-    bbox_to_anchor=(0.5, 0.015),
+    fontsize=9,
+    bbox_to_anchor=(0.5, 0.01),
 )
 
 plt.subplots_adjust(
-    bottom=0.14,
+    bottom=0.16,
 )
 
 plt.tight_layout(
-    rect=[0, 0.065, 1, 1]
+    rect=[0, 0.08, 1, 1]
 )
 
 caption = (
-    "Design-weighted and unweighted validation performance across four "
-    "goodness-of-prediction indicators.\n\n"
-    "Note. Each panel compares the design-weighted population estimate with "
-    "the corresponding naïve unweighted estimate from the deliberately "
-    "label-stratified 1,000-speech validation sample. Blue points report "
-    "inverse-inclusion-weighted operational estimates; horizontal intervals "
-    "are 95% confidence intervals from 2,000 paired Rao-Wu rescaled bootstrap "
-    "replicates. Terracotta points report the corresponding unweighted sample "
-    "estimates. Models are shown in the fixed experimental order rather than "
-    "ordered by performance. Performance is measured against the OCPSG silver "
-    "reference, not an independent human gold standard."
+    "Validation performance across prompt specifications and repeated inference.\n\n"
+    "Note. Each panel reports a design-weighted operational validation metric "
+    "against the OCPSG silver reference: Accuracy, Macro-Precision, Macro-Recall, "
+    "and Macro-F1. Within each model row, colour identifies the four frozen prompt "
+    "conditions. For each prompt, three small vertically offset points report the "
+    "three single-repetition estimates and the larger outlined point reports their "
+    "arithmetic mean. Models are shown in the fixed experimental order rather than "
+    "sorted by performance. The x-axis is reported on the original 0–1 metric scale. "
+    "The figure complements, rather than replaces, the full stability and validation "
+    "tables."
 )
 
 
 ##########################################################################
-## 9. Save
+## 10. Save
 ##########################################################################
 
 save_figure(
@@ -435,6 +550,11 @@ save_figure(
     caption,
 )
 
+print(
+    "Single-repetition rows: "
+    f"{len(data):,} "
+    f"({len(MODEL_ORDER)} models × {len(PROMPT_ORDER)} prompts × 3 repetitions)"
+)
 print(f"Wrote: {OUTPUT_NAME}.png")
 print(f"Wrote: {OUTPUT_NAME}.pdf")
 print(f"Wrote: {OUTPUT_NAME}.txt")
