@@ -561,22 +561,24 @@ Outputs are written to `outputs/compute_environment/`:
 The governing reporting principle is: **environmental precision should not exceed infrastructure knowledge**.
 
 
-## Manuscript plots
+## Manuscript plot
 
-The three principal figures for the working-paper demonstrations are generated from the committed analytical outputs with:
+The working paper retains the detailed stability, validation, and computational results as tables. A single companion figure is generated for the prevalence-propagation demonstration, where the category-level movement from naïve classifier prevalence to corrected prevalence is more informative visually than in an aggregate table alone.
+
+Generate it from the committed analytical outputs with:
 
 ```bash
 pipenv run python code/13_generate_manuscript_plots.py
 ```
 
-The script follows the restrained plotting style used in the related Eval4SD analysis: softened Oxford-inspired colours, transparent backgrounds, no visible axis spines, no background grid, and paired PNG/PDF output at 300 dpi. Figure captions are not embedded in the graphics; each plot has a separate UTF-8 TXT caption file in the same folder.
+The figure follows the comparison-oriented style used in the related Eval4SD plotting scripts: a horizontal category layout, softened Oxford-inspired colours, restrained markers, a light x-axis guide, and minimal axis furniture. The caption is not embedded in the graphic.
 
-It creates:
+The script creates:
 
-- `outputs/figures/stability_profile.{png,pdf,txt}` — weighted unconditional unanimity for repeated inference, prompt perturbation, and the complete 12-decision specification across all seven evaluated models;
-- `outputs/figures/validation_macro_f1.{png,pdf,txt}` — design-weighted operational macro-F1 with 95% Rao–Wu bootstrap intervals alongside the corresponding unweighted sample estimates; and
-- `outputs/figures/prevalence_propagation.{png,pdf,txt}` — silver-reference, naïve GPT-5.4 Mini, and corrected prevalence for the 17 supported GB categories, with propagated 95% intervals around the corrected estimates.
+- `outputs/figures/prevalence_propagation.png`
+- `outputs/figures/prevalence_propagation.pdf`
+- `outputs/figures/prevalence_propagation.txt`
 
-All seven completed models are shown together in the stability and validation figures. Existing `core`, `secondary`, and `supplementary` values remain in machine-readable provenance only to preserve experimental chronology; the plotting script does not use them to stratify or visually downgrade models.
+The 17 policy categories with positive silver-reference support are ordered by the absolute error of the naïve GPT-5.4 Mini prevalence estimate. Grey diamonds mark known silver-reference prevalence, terracotta circles mark naïve classifier prevalence, blue squares and horizontal intervals mark corrected prevalence and its propagated 95% uncertainty, and light arrows show the direction of the correction. The aggregate propagation metrics remain in `outputs/propagation/propagation_summary.csv` and should be reported separately in the manuscript table.
 
-The plotting script requires Matplotlib, which is declared in `pyproject.toml` and `Pipfile`. After pulling the plotting stage, refresh the local Pipenv environment and lock file before running the script.
+The plotting script requires Matplotlib, which is declared in `pyproject.toml` and `Pipfile`.
