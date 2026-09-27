@@ -211,3 +211,8 @@ The validation figure juxtaposes design-weighted operational macro-F1 and its 95
 The prevalence-propagation figure is restricted to the 17 policy categories with positive silver-reference support in the frozen GB population. It shows the known silver-reference prevalence only as an ex-post diagnostic target, alongside the naïve GPT-5.4 Mini prevalence and the support-conditioned corrected prevalence with propagated bootstrap intervals. The six support-excluded categories remain documented in the analytical outputs but are not plotted as if their zero corrected prevalence were an empirical discovery.
 
 All seven completed models are treated as evaluated models in the principal stability and validation figures. The machine-readable stage labels are deliberately ignored for visual grouping because they encode experimental chronology rather than substantive importance.
+
+
+### Figure rendering convention
+
+The manuscript figures use a deliberately clean background consistent with the related Eval4SD plotting scripts: transparent export, no visible axis spines, no background grid, and no caption text embedded inside the image. Each PNG/PDF pair is accompanied by a same-basename UTF-8 TXT file containing the proposed manuscript caption. This keeps the graphical object reusable across manuscript, slides, and supplementary material without hard-coding prose into the image.
