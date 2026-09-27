@@ -569,13 +569,13 @@ The three principal figures for the working-paper demonstrations are generated f
 pipenv run python code/13_generate_manuscript_plots.py
 ```
 
-The script follows the restrained pastel plotting style used in the related Eval4SD analysis: softened Oxford-inspired colours, light grey grids, minimal spines, manuscript-style notes, and paired PNG/PDF output at 300 dpi.
+The script follows the restrained plotting style used in the related Eval4SD analysis: softened Oxford-inspired colours, transparent backgrounds, no visible axis spines, no background grid, and paired PNG/PDF output at 300 dpi. Figure captions are not embedded in the graphics; each plot has a separate UTF-8 TXT caption file in the same folder.
 
 It creates:
 
-- `outputs/figures/stability_profile.{png,pdf}` — weighted unconditional unanimity for repeated inference, prompt perturbation, and the complete 12-decision specification across all seven evaluated models;
-- `outputs/figures/validation_macro_f1.{png,pdf}` — design-weighted operational macro-F1 with 95% Rao–Wu bootstrap intervals alongside the corresponding unweighted sample estimates; and
-- `outputs/figures/prevalence_propagation.{png,pdf}` — silver-reference, naïve GPT-5.4 Mini, and corrected prevalence for the 17 supported GB categories, with propagated 95% intervals around the corrected estimates.
+- `outputs/figures/stability_profile.{png,pdf,txt}` — weighted unconditional unanimity for repeated inference, prompt perturbation, and the complete 12-decision specification across all seven evaluated models;
+- `outputs/figures/validation_macro_f1.{png,pdf,txt}` — design-weighted operational macro-F1 with 95% Rao–Wu bootstrap intervals alongside the corresponding unweighted sample estimates; and
+- `outputs/figures/prevalence_propagation.{png,pdf,txt}` — silver-reference, naïve GPT-5.4 Mini, and corrected prevalence for the 17 supported GB categories, with propagated 95% intervals around the corrected estimates.
 
 All seven completed models are shown together in the stability and validation figures. Existing `core`, `secondary`, and `supplementary` values remain in machine-readable provenance only to preserve experimental chronology; the plotting script does not use them to stratify or visually downgrade models.
 
