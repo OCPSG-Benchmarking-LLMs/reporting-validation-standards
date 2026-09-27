@@ -1,5 +1,7 @@
 # Experiment decisions and environment notes
 
+Documentation uses British English. Existing source-code identifiers and machine-readable provenance retain their original American-English spellings for compatibility and reproducibility.
+
 This file records methodological decisions that should later be reflected in the working paper and reproducibility documentation. Runtime manifests remain the authoritative source for the exact environment used in each completed run.
 
 ## 2026-09-23 — Local inference environment
@@ -40,7 +42,7 @@ For local Ollama models, a single wall-clock latency statistic is insufficient. 
 3. generation time and generation throughput;
 4. client-side end-to-end latency and residual overhead.
 
-The first request in a run is treated as a model-load/first-request observation, while subsequent requests measure resident-model behavior. A first-request load time should not be interpreted as a fully controlled storage-level cold start because operating-system and filesystem caches may persist across nearby runs.
+The first request in a run is treated as a model-load/first-request observation, while subsequent requests measure resident-model behaviour. A first-request load time should not be interpreted as a fully controlled storage-level cold start because operating-system and filesystem caches may persist across nearby runs.
 
 Run-level CodeCarbon measurement includes the complete run, including model loading, because loading is part of the computational cost of deploying the measurement instrument. Steady-state timing metrics are reported separately.
 
@@ -85,7 +87,7 @@ Increasing the runtime context from 4,096 to 8,192 had negligible observed effec
 
 ## 2026-09-23 — Production decision ordering and resumability
 
-The production prompt-stability experiment uses the same deterministic randomized decision schedule for every model. The base design contains 1,000 frozen observations × four frozen prompts × three repetitions = 12,000 cells per model. Cells are permuted with NumPy PCG64 using seed 20260923 under schedule algorithm `randomized_cells_pcg64_v1`.
+The production prompt-stability experiment uses the same deterministic randomised decision schedule for every model. The base design contains 1,000 frozen observations × four frozen prompts × three repetitions = 12,000 cells per model. Cells are permuted with NumPy PCG64 using seed 20260923 under schedule algorithm `randomized_cells_pcg64_v1`.
 
 Randomizing cells rather than running complete prompt or repetition blocks reduces the alignment between prompt condition and elapsed run time, and separates repeated classifications of the same observation. The schedule seed, algorithm, and SHA-256 are recorded in every model's production manifest.
 
@@ -96,16 +98,16 @@ For local production runs, CodeCarbon tracking is mandatory for every session. I
 
 ## 2026-09-23 — Production data archival policy
 
-Raw production inference records and local CodeCarbon artefacts remain under the gitignored `runs/` tree rather than being committed to ordinary Git history. Completed model runs are checked and finalized with a single script, `code/06_check_and_finalize_production.py`.
+Raw production inference records and local CodeCarbon artefacts remain under the gitignored `runs/` tree rather than being committed to ordinary Git history. Completed model runs are checked and finalised with a single script, `code/06_check_and_finalize_production.py`.
 
-The script operates in check-only mode by default so it can be used safely on partial runs. Explicit `--finalize` is allowed only when both structural QA and completion QA pass. Finalization records SHA-256 hashes for every raw run file and copies only lightweight provenance into `results/production/<model_key>/`: the frozen experiment manifest, a machine-readable QA summary, a raw-file hash inventory, and session manifests.
+The script operates in check-only mode by default so it can be used safely on partial runs. Explicit `--finalize` is allowed only when both structural QA and completion QA pass. Finalisation records SHA-256 hashes for every raw run file and copies only lightweight provenance into `results/production/<model_key>/`: the frozen experiment manifest, a machine-readable QA summary, a raw-file hash inventory, and session manifests.
 
-Finalized provenance is immutable: a repeated finalization with identical source data is a no-op, while changed source data or changed archival content causes the script to refuse a silent overwrite. The eventual full raw inference corpus can therefore be deposited as a separate versioned research-data release while remaining cryptographically linked to the Git repository.
+Finalised provenance is immutable: a repeated finalisation with identical source data is a no-op, while changed source data or changed archival content causes the script to refuse a silent overwrite. The eventual full raw inference corpus can therefore be deposited as a separate versioned research-data release while remaining cryptographically linked to the Git repository.
 
 
 ## 2026-09-26 — Mistral Large 3 post-production robustness extension
 
-After the original six-model stability panel had been fully run and finalized, one additional model was selected for a supplementary robustness extension: Mistral Large 3, using the exact API snapshot `mistral-large-2512`.
+After the original six-model stability panel had been fully run and finalised, one additional model was selected for a supplementary robustness extension: Mistral Large 3, using the exact API snapshot `mistral-large-2512`.
 
 This addition does not redefine the original panel. It is labelled `stage: supplementary` and `extension_status: post_production_robustness` in the model configuration. The selection rationale was to broaden provider and model-family coverage while using available API access at feasible cost. The choice was made before inspecting any Mistral classification outcomes and therefore is not based on comparative performance against the completed six models.
 
@@ -115,7 +117,7 @@ For API inference, the project uses Mistral's documented OpenAI-compatible base 
 
 The dated standard-tier pricing configuration is `config/pricing/mistral_2026-09-26.yaml`, recording $0.50 per million ordinary input tokens, $0.05 per million cached input tokens, and $1.50 per million output tokens. As with other hosted providers, no provider-side energy or carbon estimate is inferred from API latency or token usage.
 
-The extension reuses the identical frozen 1,000-observation × four-prompt × three-repetition randomized schedule. The original six-model experiment therefore remains 72,000 decisions; Mistral contributes a separate additional 12,000 decisions.
+The extension reuses the identical frozen 1,000-observation × four-prompt × three-repetition randomised schedule. The original six-model experiment therefore remains 72,000 decisions; Mistral contributes a separate additional 12,000 decisions.
 
 
 ### Initial Mistral smoke-test correction
@@ -125,11 +127,11 @@ The first one-case connectivity test failed before returning token usage or a mo
 
 ## 2026-09-26 — Stability analysis estimands and failure handling
 
-The first post-production analysis is implemented in `code/07_analyze_stability.py`. It verifies every local raw inference file against the SHA-256 stored in finalized provenance before reading classifications.
+The first post-production analysis is implemented in `code/07_analyze_stability.py`. It verifies every local raw inference file against the SHA-256 stored in finalised provenance before reading classifications.
 
 The analysis separates operational reliability from classification stability. API or parse failures remain observed outcomes and are not converted into substantive policy labels. Stability statistics are therefore reported in two forms where relevant: an unconditional quantity in which a missing/invalid classification prevents the cell from being counted as stable, and a conditional quantity restricted to cells for which all classifications required by that comparison are valid. This distinction is particularly important for Mistral Large 3, which completed the scheduled design but retained observed failed classifications under the frozen no-silent-rerun policy.
 
-Repeated-inference stability is measured within model × prompt × observation triads across the three repetitions. Prompt stability compares P0 with each perturbation at matched observation × repetition cells and also examines unanimity across all four prompt conditions. Observation-level stability summarizes all 12 model-specific decisions (four prompts × three repetitions) using complete-case unanimity, the number of distinct valid labels, modal share, and Shannon entropy in bits. Model-family dependence is summarized through pairwise exact agreement for matched decisions, with P0 reported separately from all-prompt agreement. Panel-level unanimity is reported both for the original six-model panel and for all seven models including the post-production Mistral extension.
+Repeated-inference stability is measured within model × prompt × observation triads across the three repetitions. Prompt stability compares P0 with each perturbation at matched observation × repetition cells and also examines unanimity across all four prompt conditions. Observation-level stability summarizes all 12 model-specific decisions (four prompts × three repetitions) using complete-case unanimity, the number of distinct valid labels, modal share, and Shannon entropy in bits. Model-family dependence is summarised through pairwise exact agreement for matched decisions, with P0 reported separately from all-prompt agreement. Panel-level unanimity is reported both for the original six-model panel and for all seven models including the post-production Mistral extension.
 
 Because the frozen sample deliberately oversamples rare reference labels, primary aggregate stability quantities use inverse-inclusion sampling weights. Unweighted counterparts are retained as descriptive sample diagnostics. Confidence intervals are not mixed into this diagnostic stage; uncertainty estimation is reserved for the subsequent design-based validation analysis.
 
@@ -158,14 +160,14 @@ The downstream prevalence-error demonstration is separated from the seven-model 
 
 The selected deployment instrument is the pinned GPT-5.4 Mini snapshot, `gpt-5.4-mini-2026-03-17`. This choice was made after completion of the comparative validation analysis for a practical downstream demonstration: GPT-5.4 Mini has substantially lower observed API cost than GPT-5.4, while their paired design-based P0 macro-F1 difference was -0.11 percentage points with a 95% paired bootstrap interval of approximately [-1.68, +1.67] percentage points. The interval including zero is treated only as absence of evidence of a difference at this precision, not as a formal equivalence result or a claim that Mini is superior.
 
-The population deployment is frozen in `config/deployment.yaml`: canonical P0 prompt, `text_en` input mode, one decision per observation, temperature 0, 40-token output cap, the model's no-reasoning configuration, deterministic randomized PCG64 ordering, and the existing explicit adapter retry policy. The source population is loaded from the same immutable Hugging Face dataset revision used to draw the validation sample. A SHA-256 of the complete population ID set and the exact randomized schedule hash are stored in the deployment manifest.
+The population deployment is frozen in `config/deployment.yaml`: canonical P0 prompt, `text_en` input mode, one decision per observation, temperature 0, 40-token output cap, the model's no-reasoning configuration, deterministic randomised PCG64 ordering, and the existing explicit adapter retry policy. The source population is loaded from the same immutable Hugging Face dataset revision used to draw the validation sample. A SHA-256 of the complete population ID set and the exact randomised schedule hash are stored in the deployment manifest.
 
-The full-population run is append-only and resumable. Persistent provider/API failures are retained as deployment outcomes rather than silently rerun. The completed deployment is checked and finalized separately under `results/deployment/` before any prevalence correction is estimated.
+The full-population run is append-only and resumable. Persistent provider/API failures are retained as deployment outcomes rather than silently rerun. The completed deployment is checked and finalised separately under `results/deployment/` before any prevalence correction is estimated.
 
 
 ## 2026-09-27 — Constrained prevalence correction estimator
 
-The prevalence-propagation demonstration uses the finalized GPT-5.4 Mini P0 census deployment together with the design-based P0 validation sample. The classifier can output all 23 benchmark labels, whereas the GB silver-reference population has positive support on 17 labels. Consequently, the estimated forward misclassification operator is 23 × 17 and is not suitable for direct matrix inversion.
+The prevalence-propagation demonstration uses the finalised GPT-5.4 Mini P0 census deployment together with the design-based P0 validation sample. The classifier can output all 23 benchmark labels, whereas the GB silver-reference population has positive support on 17 labels. Consequently, the estimated forward misclassification operator is 23 × 17 and is not suitable for direct matrix inversion.
 
 The primary correction therefore estimates the 17-dimensional reference prevalence vector by simplex-constrained least squares: minimize `||M^T pi - q||_2^2` subject to non-negativity and unit sum. Here `M` is the 17 × 23 conditional misclassification matrix estimated from the validation sample and `q` is the observed 23-label full-deployment prevalence vector. The constrained estimator respects prevalence geometry and remains well-defined when unconstrained least squares would yield negative components or non-unit total mass. The unconstrained solution is retained only as a conditioning/diagnostic comparison.
 
@@ -178,12 +180,12 @@ The correction does use one piece of information from the frozen benchmark sampl
 
 Section 4.5 separates request-level computational accounting from infrastructure-level environmental measurement.
 
-Across all seven production models, request-level records support reporting of end-to-end latency, provider/runtime token accounting, explicit adapter retries, structured-output failures, and monetary cost where a dated price table and provider token usage were available. These quantities can be summarized directly from the finalized inference records.
+Across all seven production models, request-level records support reporting of end-to-end latency, provider/runtime token accounting, explicit adapter retries, structured-output failures, and monetary cost where a dated price table and provider token usage were available. These quantities can be summarised directly from the finalised inference records.
 
-Environmental claims depend on infrastructure observability. Hosted API providers do not expose the server hardware, utilization, power draw, PUE, regional execution location, or contemporaneous electricity mix required for a defensible run-level energy/carbon estimate. Consequently, the analysis records hosted-provider energy and carbon as unobserved and does not infer them from latency, tokens, model size, or monetary price.
+Environmental claims depend on infrastructure observability. Hosted API providers do not expose the server hardware, utilisation, power draw, PUE, regional execution location, or contemporaneous electricity mix required for a defensible run-level energy/carbon estimate. Consequently, the analysis records hosted-provider energy and carbon as unobserved and does not infer them from latency, tokens, model size, or monetary price.
 
-The two local Ollama models were measured with CodeCarbon in tracking mode `machine` for every production session. Section 4.5 therefore reports session/run-level CPU, GPU, RAM, total energy, and estimated emissions for those models, alongside the recorded country assumption, CodeCarbon version, hardware, driver, Ollama version, exact model digest, quantisation, runtime context length, and observed CPU/GPU residency. Session summaries are summed because the 12,000-decision production run for each model was completed across multiple resumable sessions. The initial staged five-decision session is included because those five records are part of the finalized production schedule.
+The two local Ollama models were measured with CodeCarbon in tracking mode `machine` for every production session. Section 4.5 therefore reports session/run-level CPU, GPU, RAM, total energy, and estimated emissions for those models, alongside the recorded country assumption, CodeCarbon version, hardware, driver, Ollama version, exact model digest, quantisation, runtime context length, and observed CPU/GPU residency. Session summaries are summed because the 12,000-decision production run for each model was completed across multiple resumable sessions. The initial staged five-decision session is included because those five records are part of the finalised production schedule.
 
-Energy or emissions per 1,000 decisions are permitted only as transparent normalizations of the complete measured session totals. They are not described as directly measured per-request carbon footprints. Likewise, the first request after a production session starts is reported as a session-start model-load observation rather than a strict cold start, because lower-level caches may survive between sessions.
+Energy or emissions per 1,000 decisions are permitted only as transparent normalisations of the complete measured session totals. They are not described as directly measured per-request carbon footprints. Likewise, the first request after a production session starts is reported as a session-start model-load observation rather than a strict cold start, because lower-level caches may survive between sessions.
 
 The analysis is implemented in `code/12_analyze_compute_environment.py`. Its governing principle is that environmental precision should not exceed infrastructure knowledge.
