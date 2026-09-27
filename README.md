@@ -106,7 +106,7 @@ When `--overwrite` is used and an existing metadata manifest is present, the scr
 
 The experiment specification is stored separately from provider code:
 
-- `config/models.yaml` — five core models plus the secondary GPT-6 Luna efficiency model;
+- `config/models.yaml` — seven evaluated models; machine-readable stage fields preserve the chronology and reproducibility status of the original experiment;
 - `config/prompts.yaml` — the canonical CapBench prompt and three semantically equivalent perturbations;
 - `schemas/inference_record.schema.json` — provider-neutral per-observation inference contract;
 - `src/reporting_validation_standards/experiment_specs.py` — configuration validation and prompt rendering;
@@ -119,7 +119,7 @@ The four frozen prompt conditions are:
 3. `p2_label_order_permutation` — fixed permutation of the official label order;
 4. `p3_structural_format` — layout/format perturbation with unchanged substantive instructions.
 
-The original six-model panel contains the two pinned GPT-5.4 snapshots, Fireworks DeepSeek V4.1 Flash, local Qwen3.6 35B and Gemma 4 31B, plus `gpt-6-luna` as a secondary moving-alias run. After completion of that panel, Mistral Large 3 (`mistral-large-2512`) was added explicitly as a supplementary post-production robustness extension to broaden provider/model-family coverage.
+Seven models are evaluated in the completed demonstrations: GPT-5.4, GPT-5.4 Mini, DeepSeek V4.1 Flash, Qwen3.6 35B, Gemma 4 31B, GPT-6 Luna, and Mistral Large 3. The machine-readable provenance retains the original stage labels because they record experimental chronology rather than scientific importance: GPT-6 Luna was part of the original six-model panel but used a moving alias, while Mistral Large 3 was added after that panel had been completed to broaden provider and model-family coverage. In the working paper, all seven are presented together as evaluated models; the provenance labels do not imply a hierarchy of evidential status or substantive importance.
 
 Validate the frozen specifications locally with:
 
@@ -359,9 +359,9 @@ results/
 The finalised artefacts are immutable by default. Re-running `--finalize` against unchanged raw data is a no-op; if an already-finalised artefact would change, the script refuses to overwrite it. This keeps source-code provenance in Git while allowing the larger raw production outputs to be released separately as a research-data archive.
 
 
-## Mistral Large 3 supplementary extension
+## Mistral Large 3 post-production addition
 
-Mistral Large 3 is included as a post-production robustness extension rather than being retroactively treated as part of the original frozen six-model panel. The exact API snapshot is `mistral-large-2512`. The selection was made after the original panel had been completed, on the basis of additional provider/model-family coverage and feasible API access, not after observing Mistral classification outcomes.
+Mistral Large 3 was added after the original six-model panel had been completed. The exact API snapshot is `mistral-large-2512`. The selection was made on the basis of additional provider/model-family coverage and feasible API access, not after observing Mistral classification outcomes. The existing machine-readable `supplementary`/extension labels are retained to preserve this chronology; they should not be read as assigning Mistral lower scientific status. The working paper treats Mistral alongside the other six models in the main comparative results.
 
 The adapter uses Mistral's documented OpenAI-compatible Chat Completions endpoint at `https://api.mistral.ai/v1`, allowing the existing pinned OpenAI SDK dependency to be reused without changing the Python environment. It requests the same frozen prompts, `temperature=0`, a 40-token output cap, JSON-schema structured output, and the standard service tier. Mistral Large 3 does not document adjustable reasoning support, so the adapter does not send `reasoning_effort`; the run manifest records this as `not_exposed_for_model`. Pricing is recorded separately in `config/pricing/mistral_2026-09-26.yaml`.
 
@@ -418,7 +418,7 @@ Generated files are written to `outputs/stability/`:
 - `observation_instability.csv` — observation-level instability for case inspection; and
 - `analysis_manifest.json` — source hashes, panel definitions, and analysis rules.
 
-The original six-model panel remains distinct from the supplementary Mistral extension in all metadata and panel-level summaries.
+The original six-model panel remains distinguishable from the later Mistral addition in metadata and panel-level summaries so that experimental chronology is recoverable. This provenance distinction is not used as a substantive hierarchy: the working paper treats all seven models as evaluated models and reports their main results together.
 
 
 ## Design-based validation analysis
