@@ -12,7 +12,6 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.ticker import PercentFormatter
 import numpy as np
 import pandas as pd
 
@@ -22,11 +21,15 @@ from reporting_validation_standards.stability_analysis import sha256_file
 from reporting_validation_standards.validation_analysis import rao_wu_rescaled_bootstrap_weights
 
 
-BLUE = "#002147"      # Oxford blue
-AQUA = "#3A8995"      # muted teal, legible with the blue line
-CORAL = "#C06E50"     # muted coral
-GREY = "#666D78"
-PALE = "#E5E9ED"
+# Soft Oxford-inspired palette used by stage_4_f1_comparison.py and
+# the repository's existing validation_prompt_repetition_profile figure.
+BLUE = "#5F7A9D"         # softened Oxford blue
+TERRACOTTA = "#E6A57E"   # reference / random-selection baseline
+SAGE = "#A8C5A1"         # weighted-mass histogram
+MAUVE = "#D9B8D0"        # pointwise confidence intervals
+DARK_GREY = "#4D4D4D"
+GRID_X = "#D9D9D9"
+GRID_Y = "#E6E6E6"
 
 
 def parse_args():
@@ -104,138 +107,157 @@ def load_frozen_inputs(args):
     return design, valid, confidence, correct, weights, metrics, manifest, raw_hash
 
 
-def setup_axes(ax):
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_color(PALE)
-    ax.spines["bottom"].set_color(PALE)
-    ax.tick_params(colors=GREY, labelsize=9, length=3)
-    ax.grid(axis="y", color=PALE, linewidth=.7, zorder=0)
+def clean_axes(ax, *, grid_axis: str = "both"):
+    """Match the existing manuscript plots: no spines or tick marks."""
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.tick_params(axis="both", length=0, labelsize=9, colors=DARK_GREY)
     ax.set_axisbelow(True)
+    if grid_axis in ("both", "x"):
+        ax.grid(axis="x", color=GRID_X, linewidth=.8, alpha=.65, zorder=0)
+    if grid_axis in ("both", "y"):
+        ax.grid(axis="y", color=GRID_Y, linewidth=.8, alpha=.8, zorder=0)
 
 
 def save_with_caption(fig, stem: Path, caption: str):
+    """Match stage_2 and script 13: transparent PNG/PDF, 300 dpi, tight crop."""
     stem.parent.mkdir(parents=True, exist_ok=True)
-    for extension in ("pdf", "svg", "png"):
+    for extension in ("png", "pdf", "svg"):
         fig.savefig(
             stem.with_suffix("." + extension),
             dpi=300,
             bbox_inches="tight",
-            facecolor="white",
+            transparent=True,
         )
     stem.with_suffix(".txt").write_text(caption.strip() + "\n", encoding="utf-8")
     plt.close(fig)
 
 
 def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int):
-    fig = plt.figure(figsize=(7.3, 7.0), constrained_layout=True)
-    grid = fig.add_gridspec(2, 1, height_ratios=[3.8, 1.2], hspace=.05)
-    ax = fig.add_subplot(grid[0])
-    bx = fig.add_subplot(grid[1], sharex=ax)
-    setup_axes(ax)
-    setup_axes(bx)
-    ax.plot([0, 1], [0, 1], linestyle="--", color=GREY, lw=1.2,
-            label="Perfect calibration", zorder=1)
-    error_below = np.maximum(0, data["observed_accuracy"] - data["ci_low"])
-    error_above = np.maximum(0, data["ci_high"] - data["observed_accuracy"])
-    ax.errorbar(
+    """Minimal calibration points with weighted confidence-bin mass below."""
+    fig, (ax, bx) = plt.subplots(
+        2, 1, figsize=(8.5, 7.2), sharex=True,
+        gridspec_kw={"height_ratios": [3.2, 1.1]},
+    )
+    clean_axes(ax)
+    clean_axes(bx, grid_axis="y")
+
+    reference, = ax.plot(
+        [0, 1], [0, 1], linestyle="--", color=TERRACOTTA,
+        lw=1.8, alpha=.95, label="Perfect calibration", zorder=2,
+    )
+    errors = ax.errorbar(
         data["mean_confidence"], data["observed_accuracy"],
-        yerr=np.vstack([error_below, error_above]),
-        fmt="o", linestyle="none", markersize=6.5, color=BLUE, ecolor=AQUA,
-        markeredgecolor="white", markeredgewidth=.8,
-        elinewidth=1.5, capsize=3.5,
-        label="Design-weighted bin accuracy (95% CI)", zorder=3,
+        yerr=np.vstack([
+            np.maximum(0, data["observed_accuracy"] - data["ci_low"]),
+            np.maximum(0, data["ci_high"] - data["observed_accuracy"]),
+        ]),
+        fmt="o", linestyle="none", markersize=7, color=BLUE,
+        ecolor=BLUE, alpha=.9, markeredgecolor=DARK_GREY,
+        markeredgewidth=.5, elinewidth=1.25, capsize=3.5,
+        label="Observed accuracy (95% CI)", zorder=4,
     )
     ax.set_xlim(0, 1.02)
-    ax.set_ylim(0, 1.02)
-    ax.set_ylabel("Agreement with silver reference", fontsize=10)
-    ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
-    ax.xaxis.set_major_formatter(PercentFormatter(1, decimals=0))
-    ax.legend(loc="upper left", frameon=False, fontsize=9)
-    ax.set_title("JEV | Reliability of top-class probabilities",
-                 loc="left", color=BLUE, fontsize=13, weight="bold", pad=16)
+    ax.set_ylim(0, 1.05)
+    ax.set_yticks(np.arange(0, 1.01, .2))
+    ax.set_ylabel("Observed accuracy", fontsize=12)
     plt.setp(ax.get_xticklabels(), visible=False)
 
     centres = (data["lower"].to_numpy() + data["upper"].to_numpy()) / 2
-    bx.bar(centres, data["estimated_population_mass"], width=.082,
-           color=AQUA, alpha=.72, edgecolor=BLUE, linewidth=.5, zorder=3)
-    for centre, mass, n in zip(
-        centres, data["estimated_population_mass"], data["n"], strict=True
-    ):
-        bx.annotate(f"n={n}", xy=(centre, mass), xytext=(0, 3),
-                    textcoords="offset points", ha="center", va="bottom",
-                    fontsize=7.5, color=BLUE)
-    bx.set_ylim(0, max(.10, float(data["estimated_population_mass"].max()) * 1.25))
-    bx.set_ylabel("Weighted mass", fontsize=10)
-    bx.set_xlabel("Predicted probability of the selected category", fontsize=10)
-    bx.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
-    bx.xaxis.set_major_formatter(PercentFormatter(1, decimals=0))
+    bx.bar(
+        centres, data["estimated_population_mass"], width=.078,
+        color=SAGE, edgecolor=DARK_GREY, linewidth=.5,
+        alpha=.88, zorder=3,
+    )
+    bx.set_ylim(0, max(.1, float(data["estimated_population_mass"].max()) * 1.17))
+    bx.set_ylabel("Weighted share", fontsize=11)
+    bx.set_xlabel("Predicted top-class probability", fontsize=12)
+    bx.set_xticks(np.arange(0, 1.01, .2))
+
+    fig.legend(
+        handles=[errors, reference],
+        labels=["Observed accuracy (95% CI)", "Perfect calibration"],
+        loc="lower center", bbox_to_anchor=(.5, .025),
+        ncol=2, frameon=False, fontsize=9.5,
+    )
+    fig.subplots_adjust(left=.13, right=.98, top=.98, bottom=.19, hspace=.20)
+
     caption = (
-        "JEV calibration against the automated OCPSG silver reference. "
-        f"All {n_valid} first-pass valid outputs contribute, weighted by inverse "
-        "sampling probability. Points compare the mean top-class probability with "
-        "observed accuracy within prespecified 0.1-wide confidence bins. "
-        f"Whiskers are percentile 95% intervals from {reps:,} stratified Rao–Wu "
-        "rescaled bootstrap replicates; empty-bin replicates are excluded only "
-        "from that bin's interval. The dashed line marks perfect calibration. "
-        "The histogram shows each bin's proportion of valid weighted mass; "
-        "annotations give unweighted case counts. Small bins have imprecise "
-        "estimates. Results do not establish calibration to independent human truth, "
-        "nor do they include the 17 rejected first-pass outputs."
+        "Note. JEV top-class calibration relative to the automated OCPSG "
+        "silver reference. "
+        f"All {n_valid} valid first-pass outputs are inverse-probability "
+        "weighted. Observed accuracy and mean confidence are summarised in "
+        "prespecified 0.1-wide probability bins; error bars are pointwise "
+        f"95% percentile intervals from {reps:,} stratified Rao–Wu rescaled "
+        "bootstrap replicates. The orange dashed line marks perfect "
+        "calibration; the lower panel shows each bin's weighted share "
+        "among valid outcomes. Bin counts and nonempty bootstrap replicate "
+        "counts are available in calibration_figure_data.csv. "
+        "Intervals can be imprecise in low-support bins. The 17 invalid "
+        "first-pass responses and diagnostic reruns are excluded; this "
+        "does not evaluate calibration against independent human labels."
     )
     save_with_caption(fig, stem, caption)
 
 
 def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
                          stem: Path, reps: int):
-    fig, ax = plt.subplots(figsize=(7.5, 5.2), constrained_layout=True)
-    setup_axes(ax)
-    coverage = data["coverage"].to_numpy()
-    ax.fill_between(coverage, data["ci_low"], data["ci_high"],
-                    color=AQUA, alpha=.19, lw=0, label="Selective risk: 95% CI")
-    ax.plot(coverage, data["selective_error"], lw=2.3, color=BLUE,
-            label="Highest-confidence cases first", zorder=4)
-    ax.axhspan(baseline["random_review_ci_low"], baseline["random_review_ci_high"],
-               color=CORAL, alpha=.10, lw=0)
-    ax.axhline(baseline["random_review_expected_error"], color=CORAL,
-               ls="--", lw=1.8, label="Random-selection benchmark", zorder=3)
-    for target in (.75, .90, 1.0):
-        index = int(np.argmin(abs(coverage - target)))
-        ax.scatter(coverage[index], data["selective_error"].iloc[index],
-                   marker="o", s=37, color=BLUE, zorder=6,
-                   edgecolors="white", linewidths=.8)
-        if target < 1:
-            ax.annotate(f"{data['selective_error'].iloc[index]:.1%}",
-                        (coverage[index], data["selective_error"].iloc[index]),
-                        xytext=(-5, 9), textcoords="offset points",
-                        fontsize=8.5, color=BLUE, ha="right")
-    ax.set_xlim(.10, 1.01)
-    upper = max(.12, float(data["ci_high"].max()),
-                baseline["random_review_ci_high"]) * 1.12
-    ax.set_ylim(0, min(1, upper))
-    ax.xaxis.set_major_formatter(PercentFormatter(1, decimals=0))
-    ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
+    """Soft-palette risk–coverage plot with below-figure legend and no title."""
+    fig, ax = plt.subplots(figsize=(8.7, 5.6))
+    clean_axes(ax)
+
+    coverage = data["coverage"].to_numpy(dtype=float)
+    ribbon = ax.fill_between(
+        coverage, data["ci_low"], data["ci_high"],
+        color=MAUVE, alpha=.48, linewidth=0,
+        label="Pointwise 95% CI", zorder=2,
+    )
+    selected, = ax.plot(
+        coverage, data["selective_error"],
+        color=BLUE, lw=2.2, alpha=.95,
+        label="Highest confidence first", zorder=4,
+    )
+    ax.axhspan(
+        baseline["random_review_ci_low"], baseline["random_review_ci_high"],
+        color=TERRACOTTA, alpha=.13, lw=0, zorder=1,
+    )
+    random_line = ax.axhline(
+        baseline["random_review_expected_error"],
+        color=TERRACOTTA, linestyle="--", lw=1.8,
+        alpha=.95, label="Random-selection benchmark", zorder=3,
+    )
+    ax.set_xlim(.1, 1.02)
+    upper = max(
+        .12, float(data["ci_high"].max()),
+        baseline["random_review_ci_high"],
+    ) * 1.13
+    ax.set_ylim(0, min(1., upper))
     ax.set_xticks(np.arange(.1, 1.01, .1))
-    ax.set_xlabel("Automated coverage among valid JEV outputs", fontsize=10)
-    ax.set_ylabel("Error among retained classifications", fontsize=10)
-    ax.set_title("JEV | Risk under confidence-based selective classification",
-                 loc="left", color=BLUE, fontsize=12.5, weight="bold", pad=14)
-    ax.legend(loc="upper left", frameon=False, fontsize=8.6)
+    ax.set_xlabel("Automated coverage among valid outputs", fontsize=12)
+    ax.set_ylabel("Classification error rate", fontsize=12)
+
+    fig.legend(
+        handles=[selected, ribbon, random_line],
+        labels=["Highest confidence first", "95% CI", "Random selection"],
+        loc="lower center", bbox_to_anchor=(.5, .045),
+        ncol=3, frameon=False, fontsize=9.5,
+    )
+    fig.subplots_adjust(left=.12, right=.98, top=.97, bottom=.22)
+
     caption = (
-        "Selective-classification risk–coverage curve for JEV's "
-        f"{n_valid} first-pass valid outputs, evaluated against the automated "
-        "silver reference with inverse-probability sampling weights. At each "
-        "coverage value, observations with the largest native top-class "
-        "probabilities are retained for automated classification; ties are "
-        "fractionally averaged in expectation to avoid arbitrary sample-order "
-        "effects. The shaded envelope gives percentile 95% intervals from "
-        f"{reps:,} stratified Rao–Wu rescaled bootstrap replicates. The dashed "
-        "horizontal benchmark shows the expected error rate under random "
-        "selection of the same proportion of cases, with a faint bootstrap "
-        "interval. Low-confidence cases omitted from the curve would require "
-        "separate human adjudication; no human-review outcomes are observed "
-        "or assumed here. Coverage is conditional on valid first-pass outputs "
-        "and does not include the 17 rejected responses."
+        "Note. JEV selective-classification error against the automated "
+        f"OCPSG silver reference, based on {n_valid} first-pass valid outputs "
+        "and inverse-probability design weights. The blue line shows "
+        "expected error at each coverage threshold when retaining the "
+        "most confident observations; exactly tied confidences are "
+        "fractionally averaged, independently of row order. The mauve "
+        f"ribbon shows pointwise 95% percentile intervals from {reps:,} "
+        "stratified Rao–Wu rescaled bootstrap replicates. The orange "
+        "dashed line denotes expected error under random selection, with "
+        "a faint corresponding uncertainty band. The excluded low-confidence "
+        "observations are not assumed to have been successfully human-reviewed. "
+        "Coverage and error are conditional on valid first-pass responses "
+        "and exclude the 17 invalid outputs and all diagnostic reruns."
     )
     save_with_caption(fig, stem, caption)
 
