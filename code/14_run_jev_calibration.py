@@ -11,7 +11,8 @@ from pathlib import Path
 import pandas as pd
 
 from reporting_validation_standards.experiment_specs import load_prompt_config
-from reporting_validation_standards.jev import digest, extract_choice
+from reporting_validation_standards.jev import (digest, extract_choice,
+                                                probability_response_diagnostics)
 
 ENDPOINT = "https://api.typesafe.ai/v1/systemone"
 INSTRUCTIONS = ("Choose the single best-fitting major policy agenda label for "
@@ -91,6 +92,7 @@ def main():
             record = {"observation_id": row.id, "reference_label": row.predicted_label,
                       "specification_sha256": stamp, "started_at":
                       datetime.now(timezone.utc).isoformat(), "status": "failed"}
+            response_body = None
             try:
                 request = urllib.request.Request(
                     ENDPOINT, json.dumps(payload).encode("utf-8"),
@@ -98,14 +100,18 @@ def main():
                      "Authorization": "Bearer " + key}, method="POST")
                 before = time.monotonic()
                 with urllib.request.urlopen(request, timeout=120) as response:
-                    result = json.load(response)
-                record.update(extract_choice(result, labels))
-                record.update({"model_returned": result["model"], "usage": result["usage"],
+                    response_body = json.load(response)
+                parsed = extract_choice(response_body, labels)
+                record.update(parsed)
+                record.update({"model_returned": response_body.get("model"),
+                               "usage": response_body.get("usage"),
                                "latency_seconds": time.monotonic() - before,
                                "status": "valid"})
             except Exception as exc:
                 record.update({"error_type": type(exc).__name__,
                                "error": str(exc)[:240]})
+                if isinstance(response_body, dict):
+                    record.update(probability_response_diagnostics(response_body, labels))
             record["completed_at"] = datetime.now(timezone.utc).isoformat()
             output.write(json.dumps(record, ensure_ascii=False) + "\n")
             output.flush()
