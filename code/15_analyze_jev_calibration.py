@@ -57,6 +57,11 @@ def main():
     y = np.asarray([labels.index(r["reference_label"]) for r in good])
     w = weights_all[valid]
     primary = weighted_metrics(prob, y, w)
+    # Operational accuracy counts an invalid response as incorrect, retaining
+    # its frozen probability-sampling weight.
+    operational_correct = np.zeros(len(design), dtype=float)
+    operational_correct[valid] = (prob.argmax(axis=1) == y).astype(float)
+    operational_accuracy = float(np.dot(weights_all, operational_correct) / weights_all.sum())
     boot, ids = rao_wu_rescaled_bootstrap_weights(
         design.reset_index(drop=True), bootstrap_reps=args.bootstrap_reps, seed=args.seed)
     if list(ids) != design.id.tolist():
@@ -67,6 +72,19 @@ def main():
         if bw.sum() <= 0:
             continue
         estimates.append(weighted_metrics(prob, y, np.maximum(bw, 1e-15)))
+    boot_totals = boot.sum(axis=1)
+    valid_rate_replicates = np.dot(boot, valid.astype(float)) / boot_totals
+    operational_replicates = np.dot(boot, operational_correct) / boot_totals
+    operational_summary = {
+        "estimate": operational_accuracy,
+        "ci_low": float(np.quantile(operational_replicates, .025)),
+        "ci_high": float(np.quantile(operational_replicates, .975)),
+    }
+    valid_rate_summary = {
+        "estimate": valid_mass,
+        "ci_low": float(np.quantile(valid_rate_replicates, .025)),
+        "ci_high": float(np.quantile(valid_rate_replicates, .975)),
+    }
     columns = [key for key in primary if key != "n"]
     uncertainty = {key: {"estimate": primary[key],
                          "ci_low": float(np.quantile([d[key] for d in estimates], .025)),
@@ -92,6 +110,8 @@ def main():
         "reference_population": "GB frozen test sample",
         "valid_observations": int(valid.sum()), "attempted_observations": len(valid),
         "design_weighted_valid_rate": valid_mass,
+        "design_weighted_valid_rate_ci": valid_rate_summary,
+        "operational_accuracy_treating_invalid_as_errors": operational_summary,
         "probabilistic_scores_conditional_on_valid_outputs": uncertainty,
         "bootstrap": {"method": "Rao-Wu rescaled stratified bootstrap",
                       "replicates": len(estimates), "seed": args.seed},
@@ -102,7 +122,9 @@ def main():
                            "prevalence comparison is descriptive, not a census deployment.")
     }, indent=2) + "\n", encoding="utf-8")
     print(f"Valid {sum(valid)}/{len(valid)}; weighted valid rate {valid_mass:.4f}")
-    print(f"Accuracy {primary['accuracy']:.4f}; Brier {primary['brier_multiclass']:.4f}")
+    print(f"Conditional accuracy {primary['accuracy']:.4f}; "
+          f"operational accuracy {operational_accuracy:.4f}; "
+          f"Brier {primary['brier_multiclass']:.4f}")
     print("Saved to", args.output)
 
 
