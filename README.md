@@ -283,7 +283,7 @@ code/       executable research scripts
 src/        reusable Python package
 tests/      automated tests
 data/       manifests and locally generated data
-outputs/    generated analytical outputs (gitignored)
+outputs/    generated research tables and publication figures (selected outputs tracked)
 runs/       raw smoke/production run artefacts (gitignored)
 results/    compact finalized production provenance (version controlled)
 ```
