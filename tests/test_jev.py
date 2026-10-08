@@ -35,4 +35,4 @@ def test_weighted_metrics_respects_weights():
     metrics = weighted_metrics(np.array([[.9, .1], [.9, .1]]),
                                np.array([0, 1]), np.array([3., 1.]))
     assert metrics["accuracy"] == .75
-    assert metrics["brier_multiclass"] == pytest.approx(.25 * .02 + .75 * .02 + .25 * 1.6) if False else metrics["brier_multiclass"] > 0
+    assert metrics["brier_multiclass"] == pytest.approx(.75 * .02 + .25 * 1.62)
