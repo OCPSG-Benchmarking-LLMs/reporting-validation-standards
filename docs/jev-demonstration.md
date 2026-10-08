@@ -56,11 +56,15 @@ captions, under `outputs/figures/`:
 
 - `jev_calibration.[png|pdf|svg|txt]` — observed bin accuracy and design-based
   95% bootstrap intervals against mean native top-class probability, plus
-  a weighted-mass histogram. Raw bin counts remain in the CSV, not as
-  annotations crowding the figure.
+  a weighted-mass histogram. The standalone caption now includes the
+  unweighted `n` for every nonempty confidence bin; raw bin counts also
+  remain in the CSV, not as annotations crowding the figure.
 - `jev_risk_coverage.[png|pdf|svg|txt]` — weighted error versus automated
   coverage, pointwise 95% bootstrap interval, and the expected constant error
-  benchmark under random selection.
+  benchmark under random selection. A small annotation identifies any
+  initial error-free coverage region where the empirical bootstrap interval
+  collapses to zero. This **cannot** establish that the underlying true
+  error probability is zero.
 
 ### Established manuscript plotting standard
 
@@ -70,14 +74,16 @@ and the supplied Eval4SD stage 2/4 plotting scripts. The figure style uses:
 - softened Oxford blue (`#5F7A9D`) for the empirical series, pastel terracotta
   (`#E6A57E`) for reference lines, sage (`#A8C5A1`) for the
   histogram, and pastel mauve (`#D9B8D0`) for the risk interval;
-- **no embedded chart titles**, frameless legends below the axes, no visible
-  spines or tick marks, restrained grey gridlines, and decimal [0, 1]
+- **no embedded chart titles**, frameless legends below the axes, **no
+  gridlines**, no visible spines or tick marks, and decimal [0, 1]
   probability axes;
 - **transparent** PNG/PDF/SVG exports with 300-dpi raster output, alongside
   full source notes in separate text captions (not overlaid on the chart).
 
-The statistical calculations and raw records are unchanged; this update is
-visual only.
+The statistical calculations, confidence estimands and raw records are
+unchanged. These revisions remove the gridlines, describe bin support in the
+caption, and flag a statistical limitation of the zero-error region; they do
+not create an unsupported upper confidence bound.
 
 The underlying tables are `outputs/jev/calibration_figure_data.csv`
 and `outputs/jev/risk_coverage_figure_data.csv`.
@@ -100,6 +106,68 @@ agreement only with the automated silver reference. The risk curve describes
 The random-review line is a hypothetical expectation, not an observed
 treatment arm. The bootstrap interval is pointwise, not a simultaneous band.
 Neither figure estimates deployment performance in a new domain.
+
+## How to read the two JEV figures
+
+JEV is TypeSafe's focused, structured decision model. Here we send one GB
+parliamentary speech and a closed inventory of 23 official major CAP policy
+categories. In `choice` mode, JEV returns one selected class **and a probability
+for each class**, rather than generating an unconstrained text response.
+The figure scripts compute a **top-class probability** as the maximum of the
+23 returned class probabilities. **This is not the provider's separate
+`confidence` field**, which is a distinct summary of the distribution.
+
+As a deliberately hypothetical example, if JEV assigns Health 0.80,
+Social Welfare 0.15 and Education 0.05, it selects Health with a top-class
+probability of 0.80. The class probabilities are informative only if their
+relationship to actual outcomes is empirically evaluated; a probability of
+0.80 is not by itself a guarantee of 80% accuracy.
+
+**Calibration plot (diagnosis):** Each point groups speeches into
+prespecified top-class probability bands. The horizontal position is
+**design-weighted average predicted probability**, and the vertical position
+is the **design-weighted share whose top-choice matches the automated silver
+reference**. The diagonal is the hypothetical situation in which the two
+quantities agree exactly. A point **below** the diagonal indicates
+overconfidence relative to that reference, while a point **above** it indicates
+underconfidence. Vertical whiskers reflect bootstrap sampling uncertainty.
+The lower histogram reports each bin's share of the *weighted mass among
+valid responses*, not its unweighted case count. The latter is reported in
+the accompanying caption. The high-probability bin contains most of the
+weight; low-confidence bins are relatively sparsely observed. These are
+top-label reliability results, not a demonstration of full multiclass
+calibration or agreement with human gold labels.
+
+**Risk–coverage plot (selective classification):** Sort valid speeches
+from highest to lowest **top-class probability**. At 75% coverage, keep
+the highest-confidence 75% of the *design-weighted valid-output mass* in
+automated classification, and set the remaining 25% aside for **potential**
+human review. The horizontal axis is this **conditional automated
+coverage**, not the share of all originally attempted speeches. The
+vertical axis is the design-weighted disagreement rate within the
+retained subset, measured against the automated silver reference.
+The blue line is the error observed under this ranking; the orange line
+is the expected error if an equally large subset were selected at random.
+No actual reviewer outcomes were observed, and the plot does not assume
+that human adjudication would be perfect.
+
+**Zero-error caveat:** At the left of the risk–coverage figure, JEV may
+have no disagreements with silver among the highest-ranked cases. The
+resampled bootstrap then also finds zero errors and its percentile interval
+can collapse to exactly zero. This is **a limitation of the empirical
+bootstrap with no observed failures**, not a scientific claim that
+unobserved failures are impossible. The figure marks this region and
+its standalone caption states the limitation. We do not add an ad hoc
+binomial or pseudo-count upper bound because it would not automatically
+respect the original label-stratified sampling design. The existing
+bootstrap intervals are pointwise (not simultaneous) and conditional
+on this single JEV realisation and the automated reference.
+
+For reporting, distinguish **first-pass validity** (98.60% weighted,
+983/1,000 unweighted), **conditional agreement** (92.84% among valid
+outputs), and **operational agreement** (91.53% when original rejected
+outputs count as errors). The 17 later successful diagnostic reruns do
+not replace the original failed responses.
 
 ## Estimands
 
