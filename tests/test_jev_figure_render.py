@@ -2,6 +2,7 @@
 from pathlib import Path
 from runpy import run_path
 
+import matplotlib.image as mpimg
 import numpy as np
 
 from reporting_validation_standards.jev_figure_analysis import plot_data_with_uncertainty
@@ -12,6 +13,25 @@ SCRIPT = Path(__file__).resolve().parents[1] / "code" / "16_generate_jev_figures
 
 def test_figures_export_pdf_svg_png_and_caption(tmp_path):
     namespace = run_path(str(SCRIPT))
+    assert namespace["BLUE"] == "#5F7A9D"
+    assert namespace["TERRACOTTA"] == "#E6A57E"
+
+    original_save = namespace["save_with_caption"]
+    inspected = []
+
+    def inspect_before_save(fig, stem, caption):
+        # Every manuscript plot is title-free, visually restrained and frameless.
+        assert all(not axes.get_title() for axes in fig.axes)
+        assert all(not spine.get_visible() for axes in fig.axes
+                   for spine in axes.spines.values())
+        assert len(fig.legends) == 1
+        assert not fig.legends[0].get_frame_on()
+        assert not fig.texts  # Full notes belong in an external caption file.
+        inspected.append(stem)
+        return original_save(fig, stem, caption)
+
+    # run_path() returns a namespace copy; function globals hold the live namespace.
+    namespace["calibration_figure"].__globals__["save_with_caption"] = inspect_before_save
     confidence = np.array([.38, .52, .61, .72, .83, .91, .97, 1.])
     correct = np.array([0., 0., 1., 0., 1., 1., 1., 1.])
     weights = np.array([1., 2., 3., 1., 2., 3., 5., 2.])
@@ -33,3 +53,11 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
             exported = stem.with_suffix("." + extension)
             assert exported.exists()
             assert exported.stat().st_size > 30
+
+    assert len(inspected) == 2
+    for stem in (calibration_stem, risk_stem):
+        png = mpimg.imread(stem.with_suffix(".png"))
+        assert png.ndim == 3 and png.shape[2] == 4
+        assert np.any(png[..., 3] < 1), "PNG must preserve transparency"
+        caption = stem.with_suffix(".txt").read_text(encoding="utf-8")
+        assert caption.startswith("Note.")
