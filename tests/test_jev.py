@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 
-from reporting_validation_standards.jev import extract_choice, reliability_bins, weighted_metrics
+from reporting_validation_standards.jev import (extract_choice, probability_response_diagnostics,
+                                                reliability_bins, weighted_metrics)
 
 
 def test_extract_choice_accepts_complete_probability_distribution():
@@ -52,3 +53,25 @@ def test_reliability_bins_cover_boundaries_exactly_once():
 def test_reliability_bins_reject_invalid_confidence():
     with pytest.raises(ValueError):
         reliability_bins(np.array([1.01]), np.array([1]), np.array([1]))
+
+
+def test_rejected_sum_preserves_original_values_and_provenance():
+    response = {"model": "jev-test", "usage": {"input_tokens": 123}, "answers": {
+        "policy": {"type": "choice", "choice": "A", "confidence": .6,
+                   "probabilities": {"A": .61, "B": .4}}
+    }}
+    with pytest.raises(ValueError, match="sum to one"):
+        extract_choice(response, ["A", "B"])
+    diagnostics = probability_response_diagnostics(response, ["A", "B"])
+    assert diagnostics["probability_sum"] == pytest.approx(1.01)
+    assert diagnostics["probability_sum_minus_one"] == pytest.approx(.01)
+    assert diagnostics["raw_probabilities"] == {"A": .61, "B": .4}
+    assert diagnostics["model_returned"] == "jev-test"
+
+
+def test_missing_probability_label_is_retained_as_diagnostic():
+    response = {"answers": {"policy": {"probabilities": {"A": .9}}}}
+    diagnostics = probability_response_diagnostics(response, ["A", "B"])
+    assert diagnostics["probability_diagnostics_status"] == "incomplete_or_non_numeric"
+    assert diagnostics["probability_missing_labels"] == ["B"]
+    assert diagnostics["raw_probabilities"] == {"A": .9}
