@@ -15,6 +15,7 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
     namespace = run_path(str(SCRIPT))
     assert namespace["BLUE"] == "#5F7A9D"
     assert namespace["TERRACOTTA"] == "#E6A57E"
+    assert namespace["AQUA"] == "#3A8995"
 
     original_save = namespace["save_with_caption"]
     inspected = []
@@ -32,6 +33,14 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
             for axes in fig.axes
             for line in axes.get_xgridlines() + axes.get_ygridlines()
         ), "Manuscript figures must have no visible gridlines"
+        if stem.name == "jev_calibration":
+            from matplotlib.colors import to_rgba
+
+            assert len(fig.axes) == 2
+            bars = fig.axes[1].patches
+            assert bars
+            assert all(np.allclose(bar.get_facecolor(), to_rgba("#3A8995", .78))
+                       for bar in bars), "Calibration bars must use website aqua at 78% opacity"
         if stem.name == "jev_risk_coverage":
             assert any(
                 "Bootstrap interval collapses at zero" in note.get_text()
