@@ -75,3 +75,44 @@ def weighted_metrics(probabilities: np.ndarray, truth: np.ndarray,
             np.dot(w[indices], 1 - correct[indices]) / w[indices].sum()
         )
     return out
+
+
+def reliability_bins(confidence: np.ndarray, correct: np.ndarray,
+                     weights: np.ndarray) -> list[dict]:
+    """Exhaustive weighted 0.1-wide bins; rightmost bin includes exactly 1.0.
+
+    Bin indices, rather than repeated floating-point bounds, prevent
+    boundary values such as 0.6 from falling between adjacent bins.
+    """
+    conf = np.asarray(confidence, dtype=float)
+    acc = np.asarray(correct, dtype=float)
+    w = np.asarray(weights, dtype=float)
+    if conf.ndim != 1 or acc.shape != conf.shape or w.shape != conf.shape:
+        raise ValueError("Reliability vector shapes must agree")
+    if not np.isfinite(conf).all() or ((conf < 0) | (conf > 1)).any():
+        raise ValueError("Invalid confidence values")
+    if not np.isfinite(acc).all() or ((acc < 0) | (acc > 1)).any():
+        raise ValueError("Invalid correctness values")
+    if not np.isfinite(w).all() or (w <= 0).any():
+        raise ValueError("Reliability weights must be finite and positive")
+
+    indices = np.minimum(np.floor(conf * 10).astype(int), 9)
+    results = []
+    total = float(w.sum())
+    for index in range(10):
+        selected = indices == index
+        if not selected.any():
+            continue
+        results.append({
+            "lower": index / 10,
+            "upper": (index + 1) / 10,
+            "n": int(selected.sum()),
+            "estimated_population_mass": float(w[selected].sum() / total),
+            "mean_confidence": float(np.average(conf[selected], weights=w[selected])),
+            "observed_accuracy": float(np.average(acc[selected], weights=w[selected])),
+        })
+    if sum(row["n"] for row in results) != len(conf):
+        raise RuntimeError("Some valid classifications were omitted from reliability bins")
+    if not np.isclose(sum(row["estimated_population_mass"] for row in results), 1):
+        raise RuntimeError("Reliability bin weights do not sum to one")
+    return results
