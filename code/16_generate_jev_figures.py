@@ -28,8 +28,6 @@ TERRACOTTA = "#E6A57E"   # reference / random-selection baseline
 SAGE = "#A8C5A1"         # weighted-mass histogram
 MAUVE = "#D9B8D0"        # pointwise confidence intervals
 DARK_GREY = "#4D4D4D"
-GRID_X = "#D9D9D9"
-GRID_Y = "#E6E6E6"
 
 
 def parse_args():
@@ -107,16 +105,13 @@ def load_frozen_inputs(args):
     return design, valid, confidence, correct, weights, metrics, manifest, raw_hash
 
 
-def clean_axes(ax, *, grid_axis: str = "both"):
-    """Match the existing manuscript plots: no spines or tick marks."""
+def clean_axes(ax):
+    """Manuscript standard: no gridlines, axes spines or tick marks."""
     for spine in ax.spines.values():
         spine.set_visible(False)
     ax.tick_params(axis="both", length=0, labelsize=9, colors=DARK_GREY)
+    ax.grid(False, axis="both", which="both")
     ax.set_axisbelow(True)
-    if grid_axis in ("both", "x"):
-        ax.grid(axis="x", color=GRID_X, linewidth=.8, alpha=.65, zorder=0)
-    if grid_axis in ("both", "y"):
-        ax.grid(axis="y", color=GRID_Y, linewidth=.8, alpha=.8, zorder=0)
 
 
 def save_with_caption(fig, stem: Path, caption: str):
@@ -140,7 +135,7 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int):
         gridspec_kw={"height_ratios": [3.2, 1.1]},
     )
     clean_axes(ax)
-    clean_axes(bx, grid_axis="y")
+    clean_axes(bx)
 
     reference, = ax.plot(
         [0, 1], [0, 1], linestyle="--", color=TERRACOTTA,
@@ -182,6 +177,10 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int):
     )
     fig.subplots_adjust(left=.13, right=.98, top=.98, bottom=.19, hspace=.20)
 
+    bin_counts = ", ".join(
+        f"{row.lower:.1f}–{row.upper:.1f}: n={int(row.n)}"
+        for row in data.itertuples(index=False)
+    )
     caption = (
         "Note. JEV top-class calibration relative to the automated OCPSG "
         "silver reference. "
@@ -191,9 +190,10 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int):
         f"95% percentile intervals from {reps:,} stratified Rao–Wu rescaled "
         "bootstrap replicates. The orange dashed line marks perfect "
         "calibration; the lower panel shows each bin's weighted share "
-        "among valid outcomes. Bin counts and nonempty bootstrap replicate "
-        "counts are available in calibration_figure_data.csv. "
-        "Intervals can be imprecise in low-support bins. The 17 invalid "
+        "among valid outcomes. Unweighted observations by confidence bin: "
+        f"{bin_counts}. Nonempty bootstrap replicate counts are provided in "
+        "calibration_figure_data.csv. The low-confidence bins have few cases, "
+        "so their estimates and bootstrap intervals are imprecise. The 17 invalid "
         "first-pass responses and diagnostic reruns are excluded; this "
         "does not evaluate calibration against independent human labels."
     )
@@ -232,6 +232,24 @@ def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
         baseline["random_review_ci_high"],
     ) * 1.13
     ax.set_ylim(0, min(1., upper))
+    # A percentile bootstrap cannot generate unobserved errors. When all
+    # retained cases have no observed disagreements, both bounds may be zero.
+    # Make that limitation visible without inventing an unsupported upper bound.
+    zero_band = (
+        np.isclose(data["selective_error"].to_numpy(), 0, rtol=0, atol=1e-12)
+        & np.isclose(data["ci_high"].to_numpy(), 0, rtol=0, atol=1e-12)
+    )
+    zero_coverage_end = None
+    if zero_band[0]:
+        prefix = int(np.argmax(~zero_band)) if not zero_band.all() else len(zero_band)
+        zero_coverage_end = float(coverage[prefix - 1])
+        if zero_coverage_end >= .25:
+            ax.text(
+                .14, ax.get_ylim()[1] * .22,
+                f"No observed errors through {zero_coverage_end:.0%} coverage\n"
+                "Bootstrap interval collapses at zero",
+                fontsize=8.2, color=DARK_GREY, va="center", ha="left",
+            )
     ax.set_xticks(np.arange(.1, 1.01, .1))
     ax.set_xlabel("Automated coverage among valid outputs", fontsize=12)
     ax.set_ylabel("Classification error rate", fontsize=12)
@@ -244,6 +262,14 @@ def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
     )
     fig.subplots_adjust(left=.12, right=.98, top=.97, bottom=.22)
 
+    zero_interval_note = (
+        f" No disagreements were observed through {zero_coverage_end:.1%} "
+        "automated coverage on the plotted grid. In this region the "
+        "bootstrap interval can collapse to zero because resampling cannot "
+        "produce errors absent from the retained observations; zero observed "
+        "risk must not be interpreted as a zero true error probability."
+        if zero_coverage_end is not None else ""
+    )
     caption = (
         "Note. JEV selective-classification error against the automated "
         f"OCPSG silver reference, based on {n_valid} first-pass valid outputs "
@@ -256,8 +282,10 @@ def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
         "dashed line denotes expected error under random selection, with "
         "a faint corresponding uncertainty band. The excluded low-confidence "
         "observations are not assumed to have been successfully human-reviewed. "
-        "Coverage and error are conditional on valid first-pass responses "
-        "and exclude the 17 invalid outputs and all diagnostic reruns."
+        "Coverage and error are conditional on the 983 valid first-pass "
+        "responses, not on all 1,000 attempts, and exclude the 17 invalid "
+        "outputs and all diagnostic reruns."
+        f"{zero_interval_note}"
     )
     save_with_caption(fig, stem, caption)
 
