@@ -27,6 +27,16 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
         assert len(fig.legends) == 1
         assert not fig.legends[0].get_frame_on()
         assert not fig.texts  # Full notes belong in an external caption file.
+        assert all(
+            not line.get_visible()
+            for axes in fig.axes
+            for line in axes.get_xgridlines() + axes.get_ygridlines()
+        ), "Manuscript figures must have no visible gridlines"
+        if stem.name == "jev_risk_coverage":
+            assert any(
+                "Bootstrap interval collapses at zero" in note.get_text()
+                for axes in fig.axes for note in axes.texts
+            ), "Zero-error bootstrap limitation should be visible"
         inspected.append(stem)
         return original_save(fig, stem, caption)
 
@@ -61,3 +71,9 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
         assert np.any(png[..., 3] < 1), "PNG must preserve transparency"
         caption = stem.with_suffix(".txt").read_text(encoding="utf-8")
         assert caption.startswith("Note.")
+        if stem.name == "jev_calibration":
+            assert "Unweighted observations by confidence bin:" in caption
+            assert "n=1" in caption
+        else:
+            assert "zero true error probability" in caption
+            assert "not on all 1,000 attempts" in caption
