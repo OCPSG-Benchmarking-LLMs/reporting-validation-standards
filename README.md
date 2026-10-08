@@ -46,7 +46,7 @@ The default design currently uses:
 
 The GB test-set distribution has now been reviewed and this allocation rule is the approved sampling design for the 1,000-case demonstration. The metadata manifest records the full test-population size, number of represented labels, immutable Hugging Face revision, allocation-rule version, random generator, seed, and sample-membership hash.
 
-## Setup with Pipenv
+## JEV native probability demonstration (post hoc)\n\nScripts `14_run_jev_calibration.py` and `15_analyze_jev_calibration.py` provide a separate probability-based validation demonstration on the unchanged frozen GB sample. See [`docs/jev-demonstration.md`](docs/jev-demonstration.md) for the pinned-model requirement, smoke-test commands, design-weighted scoring, calibration and risk–coverage analysis, and interpretation limitations. This is not an eighth model in the seven-model P0 panel.\n\n## Setup with Pipenv
 
 The project uses a `src/` package layout. Therefore the local project itself must be installed in the environment; installing only its third-party dependencies is not enough.
 
