@@ -25,7 +25,7 @@ from reporting_validation_standards.validation_analysis import rao_wu_rescaled_b
 # the repository's existing validation_prompt_repetition_profile figure.
 BLUE = "#5F7A9D"         # softened Oxford blue
 TERRACOTTA = "#E6A57E"   # reference / random-selection baseline
-SAGE = "#A8C5A1"         # weighted-mass histogram
+AQUA = "#3A8995"         # Oxford aqua; weighted-mass histogram
 MAUVE = "#D9B8D0"        # pointwise confidence intervals
 DARK_GREY = "#4D4D4D"
 
@@ -161,8 +161,8 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int):
     centres = (data["lower"].to_numpy() + data["upper"].to_numpy()) / 2
     bx.bar(
         centres, data["estimated_population_mass"], width=.078,
-        color=SAGE, edgecolor=DARK_GREY, linewidth=.5,
-        alpha=.88, zorder=3,
+        color=AQUA, edgecolor=DARK_GREY, linewidth=.5,
+        alpha=.78, zorder=3,
     )
     bx.set_ylim(0, max(.1, float(data["estimated_population_mass"].max()) * 1.17))
     bx.set_ylabel("Weighted share", fontsize=11)
