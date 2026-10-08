@@ -35,6 +35,36 @@ def extract_choice(response: dict, labels: list[str]) -> dict:
             "probabilities": {k: float(probabilities[k]) for k in labels}}
 
 
+def probability_response_diagnostics(response: dict, labels: list[str]) -> dict:
+    """Preserve provider metadata and raw probabilities from rejected responses."""
+    answer = response.get("answers", {}).get("policy", {})
+    result = {"model_returned": response.get("model"), "usage": response.get("usage")}
+    if not isinstance(answer, dict):
+        return result
+    for source, target in (("choice", "raw_choice"), ("confidence", "raw_confidence")):
+        if source in answer:
+            result[target] = answer[source]
+    raw = answer.get("probabilities")
+    if not isinstance(raw, dict):
+        result["probability_diagnostics_status"] = "absent_or_unexpected_type"
+        return result
+    result["raw_probabilities"] = raw
+    result["probability_missing_labels"] = sorted(set(labels) - set(raw))
+    result["probability_unexpected_labels"] = sorted(set(raw) - set(labels))
+    try:
+        values = np.asarray([raw[label] for label in labels], dtype=float)
+    except (KeyError, TypeError, ValueError):
+        result["probability_diagnostics_status"] = "incomplete_or_non_numeric"
+        return result
+    if not np.isfinite(values).all():
+        result["probability_diagnostics_status"] = "non_finite"
+        return result
+    result["probability_sum"] = float(values.sum())
+    result["probability_sum_minus_one"] = float(values.sum() - 1.0)
+    result["probability_diagnostics_status"] = "complete"
+    return result
+
+
 def weighted_metrics(probabilities: np.ndarray, truth: np.ndarray,
                      weights: np.ndarray) -> dict:
     """Multiclass proper scores, top-label calibration and risk at fixed coverage."""
