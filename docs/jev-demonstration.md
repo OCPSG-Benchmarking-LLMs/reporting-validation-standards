@@ -66,3 +66,38 @@ because the provider calls probabilities 'calibrated'. Treat post hoc experiment
 selection and the difference between API-native criteria and the P0 prompt
 as explicit limitations. Store the API pricing date separately if a cost
 comparison is subsequently added.
+
+## 2026-10-08 — Probability-sum audit
+
+The completed first-pass run has 983 valid and 17 invalid outputs. All 17
+failures are recorded as `ValueError: Probabilities do not sum to one` under
+the original strict `np.isclose(sum, 1, atol=1e-4)` acceptance rule.
+The official TypeSafe API specifies that choice probabilities sum to
+**approximately** one; it does not prescribe the repository's chosen tolerance.
+
+The original runner recorded the failure reason but **did not preserve the
+17 rejected probability vectors**, so we cannot infer the magnitude of the
+original deviations retrospectively. Do not silently mark these outputs valid,
+normalise them, raise the tolerance, or overwrite the first-pass records.
+
+An optional, separate diagnostic runner repeats only the original 17
+probability-sum failures using the exact saved request specification. These
+are explicitly **new inference realisations**, not recovered original responses:
+
+```cmd
+pipenv run python code/14b_audit_jev_probability_failures.py --plan-only
+pipenv run python code/14b_audit_jev_probability_failures.py --max-decisions 1
+pipenv run python code/14b_audit_jev_probability_failures.py --max-decisions 0
+```
+
+It records the returned probability sum, signed deviation from one, class
+probabilities, selected label, provider model, usage and original-parser status
+under `runs/jev/probability_sum_audit.jsonl` (gitignored). It never changes
+`runs/jev/calibration/inference_records.jsonl`. The audit is opt-in and each
+observation is audited at most once by this runner. It is not a scientific basis
+for selecting a favourable acceptance tolerance after observing accuracy.
+
+Script 15 now additionally reports **operational accuracy**, counting an
+invalid response as an incorrect measurement, with a separate design-based
+bootstrap interval. Its pre-existing Brier, log-loss, calibration and
+risk–coverage estimates remain **conditional on valid probability vectors**.
