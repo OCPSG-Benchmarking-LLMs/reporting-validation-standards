@@ -101,3 +101,16 @@ Script 15 now additionally reports **operational accuracy**, counting an
 invalid response as an incorrect measurement, with a separate design-based
 bootstrap interval. Its pre-existing Brier, log-loss, calibration and
 risk–coverage estimates remain **conditional on valid probability vectors**.
+
+### Diagnostic audit outcome (8 October 2026)
+
+The reported secondary audit completed all 17 selected reruns: **17/17**
+passed the unchanged original parser, with each returned probability sum
+exactly `1.0` (maximum absolute deviation `0.0`). This documents
+**non-reproduction on a subsequent request**, not the original sums or
+the cause of their initial rejection. Do not overwrite the first pass.
+
+For future first-pass experiments, script 14 now retains raw class
+probabilities, totals, signed sum deviation, returned choice, confidence,
+model and usage when an API response is received but parsing rejects it.
+This change does not alter the original 1,000-record run.
