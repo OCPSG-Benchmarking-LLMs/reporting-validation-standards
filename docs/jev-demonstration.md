@@ -72,8 +72,8 @@ These plots follow the visual conventions in `code/13_generate_manuscript_plot.p
 and the supplied Eval4SD stage 2/4 plotting scripts. The figure style uses:
 
 - softened Oxford blue (`#5F7A9D`) for the empirical series, pastel terracotta
-  (`#E6A57E`) for reference lines, sage (`#A8C5A1`) for the
-  histogram, and pastel mauve (`#D9B8D0`) for the risk interval;
+  (`#E6A57E`) for reference lines, Oxford aqua (`#3A8995`) for the
+  calibration histogram, and pastel mauve (`#D9B8D0`) for the risk interval;
 - **no embedded chart titles**, frameless legends below the axes, **no
   gridlines**, no visible spines or tick marks, and decimal [0, 1]
   probability axes;
