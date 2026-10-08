@@ -50,16 +50,34 @@ pipenv run python code/16_generate_jev_figures.py
 ```
 
 Script 16 defaults to the **same 2,000 Rao–Wu rescaled bootstrap draws and
-seed** recorded by script 15. It writes publication-ready, white-background
-300-dpi PNG, vector PDF and editable-text SVG, with standalone `.txt`
+seed** recorded by script 15. It writes publication-ready, **transparent-background**
+300-dpi PNG, vector PDF and text-preserving SVG, with standalone `.txt`
 captions, under `outputs/figures/`:
 
 - `jev_calibration.[png|pdf|svg|txt]` — observed bin accuracy and design-based
   95% bootstrap intervals against mean native top-class probability, plus
-  a weighted-mass histogram and raw bin counts.
+  a weighted-mass histogram. Raw bin counts remain in the CSV, not as
+  annotations crowding the figure.
 - `jev_risk_coverage.[png|pdf|svg|txt]` — weighted error versus automated
   coverage, pointwise 95% bootstrap interval, and the expected constant error
   benchmark under random selection.
+
+### Established manuscript plotting standard
+
+These plots follow the visual conventions in `code/13_generate_manuscript_plot.py`
+and the supplied Eval4SD stage 2/4 plotting scripts. The figure style uses:
+
+- softened Oxford blue (`#5F7A9D`) for the empirical series, pastel terracotta
+  (`#E6A57E`) for reference lines, sage (`#A8C5A1`) for the
+  histogram, and pastel mauve (`#D9B8D0`) for the risk interval;
+- **no embedded chart titles**, frameless legends below the axes, no visible
+  spines or tick marks, restrained grey gridlines, and decimal [0, 1]
+  probability axes;
+- **transparent** PNG/PDF/SVG exports with 300-dpi raster output, alongside
+  full source notes in separate text captions (not overlaid on the chart).
+
+The statistical calculations and raw records are unchanged; this update is
+visual only.
 
 The underlying tables are `outputs/jev/calibration_figure_data.csv`
 and `outputs/jev/risk_coverage_figure_data.csv`.
