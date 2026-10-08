@@ -35,6 +35,54 @@ archive them externally with their SHA-256; `outputs/jev/metrics.json`
 records the raw file hash. No token-cost or energy claim is made without
 an independently dated provider tariff or energy measurement.
 
+## Publication figures (script 16)
+
+The plotting step reads the **original** 1,000-row inference file and the
+frozen probability-sample design. It verifies the original inference SHA-256
+and experiment-specification hash against `outputs/jev/metrics.json` before
+producing any figure. There are **no** JEV API calls, retries or data repairs.
+
+Run scripts 15 and 16 in order:
+
+```cmd
+pipenv run python code/15_analyze_jev_calibration.py
+pipenv run python code/16_generate_jev_figures.py
+```
+
+Script 16 defaults to the **same 2,000 Rao–Wu rescaled bootstrap draws and
+seed** recorded by script 15. It writes publication-ready, white-background
+300-dpi PNG, vector PDF and editable-text SVG, with standalone `.txt`
+captions, under `outputs/figures/`:
+
+- `jev_calibration.[png|pdf|svg|txt]` — observed bin accuracy and design-based
+  95% bootstrap intervals against mean native top-class probability, plus
+  a weighted-mass histogram and raw bin counts.
+- `jev_risk_coverage.[png|pdf|svg|txt]` — weighted error versus automated
+  coverage, pointwise 95% bootstrap interval, and the expected constant error
+  benchmark under random selection.
+
+The underlying tables are `outputs/jev/calibration_figure_data.csv`
+and `outputs/jev/risk_coverage_figure_data.csv`.
+`outputs/jev/figure_manifest.json` records the source hashes, bootstrap
+specification and confidence-tie policy.
+
+**Coverage estimand:** The new curve **averages over random selection within
+groups of exactly equal top-class probabilities**. This makes risk
+independent of arbitrary observation order, even if many probabilities
+are exactly 1.0. Earlier point estimates under `risk_75` / `risk_90`
+in script 15 rely on stable record-order tie breaking; the figure's
+tie-averaged estimates are an explicitly different, more defensible
+publication estimand and must not silently be identified with those earlier
+numbers. At 100% valid-output coverage the estimates coincide.
+
+Both plots **condition on the original 983 valid first-pass outputs**,
+exclude the 17 original failures (and all diagnostic reruns), and assess
+agreement only with the automated silver reference. The risk curve describes
+*which cases would remain automated*, not achieved human-review outcomes.
+The random-review line is a hypothetical expectation, not an observed
+treatment arm. The bootstrap interval is pointwise, not a simultaneous band.
+Neither figure estimates deployment performance in a new domain.
+
 ## Estimands
 
 The target is agreement with **automated silver reference labels**, not
