@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from reporting_validation_standards.jev import digest, weighted_metrics
+from reporting_validation_standards.jev import digest, reliability_bins, weighted_metrics
 from reporting_validation_standards.validation_analysis import rao_wu_rescaled_bootstrap_weights
 from reporting_validation_standards.stability_analysis import sha256_file
 
@@ -82,17 +82,7 @@ def main():
     # Fixed-width descriptive reliability bins, with effective mass and outcomes.
     confidence = prob.max(axis=1)
     correct = (prob.argmax(axis=1) == y).astype(float)
-    bins = []
-    for lower in np.arange(0, 1, .1):
-        upper = round(float(lower + .1), 10)
-        mask = (confidence >= lower) & ((confidence <= upper) if upper == 1 else
-                                        (confidence < upper))
-        if not mask.any():
-            continue
-        bins.append({"lower": float(lower), "upper": upper, "n": int(mask.sum()),
-                     "estimated_population_mass": float(w[mask].sum() / w.sum()),
-                     "mean_confidence": float(np.average(confidence[mask], weights=w[mask])),
-                     "observed_accuracy": float(np.average(correct[mask], weights=w[mask]))})
+    bins = reliability_bins(confidence, correct, w)
     args.output.mkdir(parents=True, exist_ok=True)
     prevalence.to_csv(args.output / "prevalence_comparison.csv", index=False)
     pd.DataFrame(bins).to_csv(args.output / "reliability_bins.csv", index=False)
