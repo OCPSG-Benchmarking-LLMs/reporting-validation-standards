@@ -1,0 +1,83 @@
+{
+  "validation_target": "automated_silver_reference_not_independent_human_gold",
+  "probability_status": "native_JEV_choice",
+  "reference_population": "GB frozen test sample",
+  "valid_observations": 983,
+  "attempted_observations": 1000,
+  "design_weighted_valid_rate": 0.985957403556932,
+  "design_weighted_valid_rate_ci": {
+    "estimate": 0.985957403556932,
+    "ci_low": 0.9785850669839684,
+    "ci_high": 0.9926348263612548
+  },
+  "operational_accuracy_treating_invalid_as_errors": {
+    "estimate": 0.9153274468967757,
+    "ci_low": 0.8972509218233694,
+    "ci_high": 0.9324318242163686
+  },
+  "probabilistic_scores_conditional_on_valid_outputs": {
+    "accuracy": {
+      "estimate": 0.9283640891529874,
+      "ci_low": 0.9109010271334211,
+      "ci_high": 0.9444532937188398
+    },
+    "brier_multiclass": {
+      "estimate": 0.09741550845136511,
+      "ci_low": 0.08004308927022692,
+      "ci_high": 0.11548957344675627
+    },
+    "log_loss": {
+      "estimate": 0.20074377738546317,
+      "ci_low": 0.14800215095939828,
+      "ci_high": 0.28484778616996315
+    },
+    "mean_top_probability": {
+      "estimate": 0.9250867241203419,
+      "ci_low": 0.9166214669976201,
+      "ci_high": 0.9333574672658959
+    },
+    "top_probability_calibration_gap": {
+      "estimate": -0.0032773650326456075,
+      "ci_low": -0.017026651584628228,
+      "ci_high": 0.011363002099615504
+    },
+    "coverage_75": {
+      "estimate": 0.7502593260776959,
+      "ci_low": 0.7500228578768863,
+      "ci_high": 0.7537485111747855
+    },
+    "risk_75": {
+      "estimate": 0.005135445900805663,
+      "ci_low": 4.723122006500879e-05,
+      "ci_high": 0.01302901343019691
+    },
+    "coverage_90": {
+      "estimate": 0.9002298701562775,
+      "ci_low": 0.9000217825585233,
+      "ci_high": 0.9038236224673972
+    },
+    "risk_90": {
+      "estimate": 0.029984089699827965,
+      "ci_low": 0.019061794370269728,
+      "ci_high": 0.04382808794018199
+    },
+    "coverage_100": {
+      "estimate": 0.9999999999999999,
+      "ci_low": 0.9999999999999999,
+      "ci_high": 1.0000000000000002
+    },
+    "risk_100": {
+      "estimate": 0.07163591084701207,
+      "ci_low": 0.05554670628115993,
+      "ci_high": 0.08909897286657864
+    }
+  },
+  "bootstrap": {
+    "method": "Rao-Wu rescaled stratified bootstrap",
+    "replicates": 2000,
+    "seed": 20261008
+  },
+  "manifest_sha256": "94c28870ed14af09efd519614b129ec87b6822f16eeff7c78292515374c5ab1a",
+  "raw_inference_sha256": "d030d1072f7e0d33e32342fe288fe43950e7f9e23f48819a4d9df05c4f3163f5",
+  "interpretation": "Intervals reflect sampling uncertainty conditional on the silver benchmark and the observed single JEV realisation; the soft prevalence comparison is descriptive, not a census deployment."
+}
