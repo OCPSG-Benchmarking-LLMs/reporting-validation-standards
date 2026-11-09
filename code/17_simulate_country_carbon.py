@@ -223,6 +223,8 @@ def make_map(
     ax.set_ylim(-59, 84)
     ax.set_aspect("equal")
     ax.set_axis_off()
+    for spine in ax.spines.values():
+        spine.set_visible(False)
     ax.grid(False, which="both")
 
     colorbar_ax = fig.add_axes((0.29, 0.108, 0.42, 0.027))
