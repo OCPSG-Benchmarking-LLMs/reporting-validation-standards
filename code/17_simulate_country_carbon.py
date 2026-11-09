@@ -190,7 +190,11 @@ def make_map(
         "counterfactual_g_co2e_per_1000_decisions"
     ].to_dict()
     cmap = LinearSegmentedColormap.from_list("oxford_carbon", MAP_COLORS, N=256)
-    norm = Normalize(vmin=0, vmax=max(lookup.values()))
+    # Keep the absolute-emissions colour scale common across both model maps.
+    norm = Normalize(
+        vmin=0,
+        vmax=float(counterfactuals["counterfactual_g_co2e_per_1000_decisions"].max()),
+    )
 
     patches = []
     fills = []
