@@ -46,6 +46,19 @@ The default design currently uses:
 
 The GB test-set distribution has now been reviewed and this allocation rule is the approved sampling design for the 1,000-case demonstration. The metadata manifest records the full test-population size, number of represented labels, immutable Hugging Face revision, allocation-rule version, random generator, seed, and sample-membership hash.
 
+## Offline country-carbon sensitivity maps (local Ollama models)
+
+Script `code/17_simulate_country_carbon.py` reuses the finalised CodeCarbon
+machine-level energy measured for **Qwen 3.6 35B** and **Gemma 4 31B**. It holds
+energy fixed across 212 countries with pinned CodeCarbon v3.3.1 national-average
+electricity-intensity factors and produces **two title-free, transparent,
+grid-free world choropleths** in PNG/PDF/SVG plus a complete CSV and provenance
+manifest. The script makes **no additional inference or CodeCarbon measurements**,
+and does not simulate provider-side energy for hosted APIs. See
+[`docs/country-carbon-counterfactuals.md`](docs/country-carbon-counterfactuals.md)
+for Windows commands, source years, safeguards, outputs, limitations and the
+three-paragraph manuscript interpretation.
+
 ## JEV native probability demonstration (post hoc)
 
 Scripts `14_run_jev_calibration.py` and `15_analyze_jev_calibration.py` provide a separate probability-based validation demonstration on the unchanged frozen GB sample. See [`docs/jev-demonstration.md`](docs/jev-demonstration.md) for the pinned-model requirement, smoke-test commands, design-weighted scoring, calibration and risk–coverage analysis, and interpretation limitations. This is not an eighth model in the seven-model P0 panel. Script `16_generate_jev_figures.py` creates calibration and risk–coverage figures with the existing softened Oxford palette, transparent PNG/PDF/SVG exports, design-based bootstrap intervals and source tables; the figures have no gridlines, follow the existing pastel plotting style, and include the zero-observed-error bootstrap caveat. The coverage curve uses tie-averaged confidence thresholds rather than the earlier row-order tie breaking in `risk_75`/`risk_90`. An opt-in probability-sum audit (`code/14b_audit_jev_probability_failures.py`) preserves the original 1,000-case run and records separate diagnostics for rejected provider responses; details and commands are in the methodology notes.
