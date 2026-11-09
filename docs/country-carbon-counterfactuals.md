@@ -31,8 +31,10 @@ OpenAI, Fireworks, Mistral or TypeSafe JEV.
   retaining country, ISO-alpha-3 code, source year and positive
   `carbon_intensity` values (g CO₂e/kWh). The original CodeCarbon country
   dataset derives from Our World in Data / Ember, using annual-average
-  electricity *lifecycle* intensities. Source years differ (mostly 2022–2023):
-  **these are not 2026 real-time readings**.
+  electricity *lifecycle* intensities. Most source years are 2022–2023, but
+  some territories have 2021 values and Western Sahara has a 2009 value.
+  **These are not 2026 real-time readings**; consult the source-year column
+  before interpreting an individual country's estimate.
 - **No silent fallback:** 212 positive country intensities are retained.
   Central African Republic's zero sentinel is excluded rather than treated
   as genuinely zero-carbon electricity; the script does **not** substitute
