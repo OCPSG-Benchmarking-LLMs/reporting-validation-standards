@@ -105,8 +105,10 @@ gridlines, no title embedded in the illustration, white country boundaries,
 and a horizontal colour legend below the map. Countries omitted by the
 low-resolution boundary dataset appear uncoloured; the CSV retains the full
 factor table. The colour scales refer to **absolute emissions per 1,000
-classifications**, so the Qwen and Gemma legends have different maximum values;
-do not infer equal absolute emissions from equal-looking colours between maps.
+classifications** and use a **shared maximum across both models** when both
+maps are generated together, making the differences in measured energy
+visually comparable. When selecting just one model, its map scales to that
+model's simulated maximum; compare models using the default paired run.
 
 ## Interpretation for the working paper
 
