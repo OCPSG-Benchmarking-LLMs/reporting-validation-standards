@@ -13,14 +13,17 @@ import math
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from matplotlib.cm import ScalarMappable
 from matplotlib.collections import PatchCollection
-from matplotlib.colors import LinearSegmentedColormap, Normalize
-from matplotlib.patches import Polygon
-import pandas as pd
+from matplotlib.colors import Normalize
+from matplotlib.patches import Patch, Polygon
 
+from reporting_validation_standards import plot_style as ps
 
 SUMMARY = Path("outputs/compute_environment/local_environment_summary.csv")
 FACTORS = Path("config/geography/codecarbon_country_intensity_v3.3.1.csv")
@@ -41,12 +44,12 @@ GEOGRAPHY_SOURCE = (
     "https://github.com/nvkelso/natural-earth-vector/blob/master/"
     "geojson/ne_110m_admin_0_countries.geojson"
 )
-# Same restrained Oxford-inspired family used by the manuscript plots;
-# the sequential ramp moves from pale aqua to muted blue and terracotta.
-MAP_COLORS = ["#EBF4F3", "#A8DADC", "#3A8995", "#5F7A9D", "#B5837B", "#A35C55"]
-INK = "#394B56"
-NO_DATA = "#E4E7E8"
-
+# Display names in the manuscript; LOCAL_MODELS keeps the names in the CSV.
+PANEL_TITLES = {
+    "ollama_qwen36_35b": "Qwen3.6 (35B)",
+    "ollama_gemma4_31b": "Gemma 4 (31B)",
+}
+FIGURE_STEM = "local_carbon_country_ollama"
 
 def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -178,106 +181,133 @@ def polygon_outlines(geometry: dict) -> list[list[list[float]]]:
     return [polygon[0] for polygon in coordinates]
 
 
-def make_map(
+def equal_earth(lon_deg: np.ndarray, lat_deg: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Equal Earth projection (Šavrič, Patterson and Jenny 2018) on the unit sphere."""
+    lon = np.radians(lon_deg)
+    theta = np.arcsin(np.sqrt(3) / 2 * np.sin(np.radians(lat_deg)))
+    a1, a2, a3, a4 = 1.340264, -0.081106, 0.000893, 0.003796
+    t2 = theta ** 2
+    t6 = t2 ** 3
+    x = (2 * np.sqrt(3) * lon * np.cos(theta)
+         / (3 * (9 * a4 * t6 * t2 + 7 * a3 * t6 + 3 * a2 * t2 + a1)))
+    y = theta * (a1 + a2 * t2 + t6 * (a3 + a4 * t2))
+    return x, y
+
+
+def _projected_rings(feature: dict) -> list[np.ndarray]:
+    rings = []
+    for ring in polygon_outlines(feature["geometry"]):
+        if len(ring) < 3:
+            continue
+        coordinates = np.asarray(ring, dtype=float)
+        x, y = equal_earth(coordinates[:, 0], coordinates[:, 1])
+        rings.append(np.column_stack([x, y]))
+    return rings
+
+
+def make_maps(
     counterfactuals: pd.DataFrame, boundaries: list[dict], *,
-    model_key: str,
+    model_keys: list[str],
 ):
-    """Return a title-free, grid-free, transparent cartographic figure."""
-    data = counterfactuals.loc[counterfactuals["model_key"] == model_key]
-    if data.empty:
-        raise ValueError(f"No counterfactual rows for {model_key}")
-    lookup = data.set_index("country_iso3")[
-        "counterfactual_g_co2e_per_1000_decisions"
-    ].to_dict()
-    cmap = LinearSegmentedColormap.from_list("oxford_carbon", MAP_COLORS, N=256)
-    # Keep the absolute-emissions colour scale common across both model maps.
+    """One panel per model on a shared absolute colour scale, with missing data hatched."""
+    ps.use_style()
+    cmap = ps.SEQUENTIAL
+    # Keep the absolute-emissions colour scale common across the model panels.
     norm = Normalize(
         vmin=0,
         vmax=float(counterfactuals["counterfactual_g_co2e_per_1000_decisions"].max()),
     )
+    x_edge, _ = equal_earth(np.array([180.0]), np.array([0.0]))
+    _, y_bounds = equal_earth(np.zeros(2), np.array([-58.0, 84.0]))
 
-    patches = []
-    fills = []
-    mapped = set()
-    for feature in boundaries:
-        code = feature["properties"]["iso3"]
-        value = lookup.get(code)
-        if value is not None:
-            mapped.add(code)
-        for ring in polygon_outlines(feature["geometry"]):
-            if len(ring) < 3:
-                continue
-            patches.append(Polygon(ring, closed=True))
-            fills.append(cmap(norm(value)) if value is not None else NO_DATA)
-
-    fig, ax = plt.subplots(figsize=(13.6, 6.1), dpi=300)
-    fig.patch.set_alpha(0)
-    ax.patch.set_alpha(0)
-    fig.subplots_adjust(left=0.012, right=0.988, top=0.985, bottom=0.15)
-    collection = PatchCollection(
-        patches, facecolor=fills, edgecolor="#FFFFFF", linewidth=0.26,
-        antialiased=True, rasterized=False,
+    fig, axes = plt.subplots(
+        len(model_keys), 1, figsize=(ps.PRINT_WIDTH_IN, 1.0 + 2.6 * len(model_keys)),
+        squeeze=False,
     )
-    ax.add_collection(collection)
-    ax.set_xlim(-180, 180)
-    ax.set_ylim(-59, 84)
-    ax.set_aspect("equal")
-    ax.set_axis_off()
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-    ax.grid(False, which="both")
+    mapped: dict[str, int] = {}
+    for ax, model_key in zip(axes[:, 0], model_keys, strict=True):
+        data = counterfactuals.loc[counterfactuals["model_key"] == model_key]
+        if data.empty:
+            raise ValueError(f"No counterfactual rows for {model_key}")
+        lookup = data.set_index("country_iso3")[
+            "counterfactual_g_co2e_per_1000_decisions"
+        ].to_dict()
+        filled, fills, missing = [], [], []
+        matched = set()
+        for feature in boundaries:
+            code = feature["properties"]["iso3"]
+            value = lookup.get(code)
+            rings = [Polygon(ring, closed=True) for ring in _projected_rings(feature)]
+            if value is None:
+                missing.extend(rings)
+                continue
+            matched.add(code)
+            filled.extend(rings)
+            fills.extend([cmap(norm(value))] * len(rings))
+        ax.add_collection(PatchCollection(
+            filled, facecolor=fills, edgecolor=ps.BORDER, linewidth=0.25,
+        ))
+        ax.add_collection(PatchCollection(
+            missing, facecolor=ps.NO_DATA, edgecolor=ps.BORDER, linewidth=0.25,
+            hatch="//////",
+        ))
+        ax.set_xlim(-x_edge[0] * 1.01, x_edge[0] * 1.01)
+        ax.set_ylim(y_bounds[0], y_bounds[1])
+        ax.set_aspect("equal")
+        ax.set_axis_off()
+        ax.set_title(PANEL_TITLES[model_key])
+        mapped[model_key] = len(matched)
 
-    colorbar_ax = fig.add_axes((0.29, 0.108, 0.42, 0.027))
+    fig.tight_layout(rect=(0, 0.13, 1, 1), h_pad=0.8)
+    colorbar_ax = fig.add_axes((0.2, 0.085, 0.48, 0.022))
     colorbar = fig.colorbar(
         ScalarMappable(norm=norm, cmap=cmap), cax=colorbar_ax, orientation="horizontal"
     )
     colorbar.outline.set_visible(False)
-    colorbar.ax.tick_params(
-        labelsize=9, labelcolor=INK, length=0, pad=6, bottom=False, top=False
-    )
-    colorbar.set_label(
-        "Counterfactual g CO₂e per 1,000 classifications",
-        fontsize=10, color=INK, labelpad=10,
-    )
-    colorbar.ax.grid(False, which="both")
+    colorbar.ax.tick_params(length=0, pad=3)
+    colorbar.set_label("Counterfactual g CO₂e per 1,000 classifications", labelpad=5)
+    no_data = Patch(facecolor=ps.NO_DATA, edgecolor=ps.BORDER, linewidth=0.25,
+                    hatch="//////", label="No data")
+    fig.legend(handles=[no_data], loc="center left", bbox_to_anchor=(0.71, 0.096),
+               frameon=False, handlelength=1.6, handleheight=1.1)
     return fig, mapped
 
 
-def write_map(fig, stem: Path, caption: str) -> None:
-    stem.parent.mkdir(parents=True, exist_ok=True)
-    for extension in (".png", ".pdf", ".svg"):
-        fig.savefig(
-            stem.with_suffix(extension),
-            dpi=300, transparent=True, facecolor="none",
-            bbox_inches="tight", pad_inches=0.12,
-        )
-    stem.with_suffix(".txt").write_text(caption + "\n", encoding="utf-8")
+def write_maps(fig, stem: Path, caption: str) -> list[Path]:
+    paths = ps.save(fig, stem, caption)
     plt.close(fig)
+    return paths
 
 
 def caption_for(data: pd.DataFrame, n_mapped: int) -> str:
-    first = data.iloc[0]
-    model_key = str(first["model_key"])
+    models = data.drop_duplicates("model_key").set_index("model_key")
+    keys = [key for key in LOCAL_MODELS if key in models.index]
+    names = [PANEL_TITLES[key] for key in keys]
+    energies = "; ".join(
+        f"{PANEL_TITLES[key]}: {models.loc[key, 'measured_energy_kwh']:.6f} kWh" for key in keys
+    )
+    n_decisions = int(models["n_decisions"].iloc[0])
+    title_models = " and ".join(names)
     return (
-        "Counterfactual electricity-related emissions for "
-        f"{LOCAL_MODELS[model_key]} across national electricity grids. "
-        f"Measured machine-level CodeCarbon energy ({first['measured_energy_kwh']:.6f} kWh) "
-        f"for {int(first['n_decisions']):,} classifications in the Netherlands is "
-        "held constant across countries; it is multiplied by the annual "
-        "national-average lifecycle electricity carbon intensity reported in "
-        "CodeCarbon v3.3.1 (country data years vary). "
-        "The mapped functional unit is g CO2e per 1,000 classifications, not "
-        "a directly observed per-request footprint. "
-        f"{n_mapped} countries with matched Natural Earth 110m boundaries are coloured. "
-        "Grey denotes missing matching country factors or omitted source coverage; "
-        "some microstates are not drawn at this resolution. "
-        "Country differences are counterfactual location assumptions, not "
-        "measurements in each country. The analysis excludes hosted API models "
-        "and does not estimate energy or emissions from their token usage or latency. "
-        "Hardware embodied emissions, transport, location-dependent cooling, "
-        "grid time-of-day variation and differences in hardware are excluded. "
-        "Source: pinned measured production summary, CodeCarbon country factors "
-        "v3.3.1 and Natural Earth 1:110m public-domain boundaries."
+        f"Counterfactual Electricity-Related Emissions for {title_models} across National "
+        "Electricity Grids\n\n"
+        "Note. Measured machine-level CodeCarbon energy for "
+        f"{n_decisions:,} classifications in the Netherlands ({energies}) is held "
+        "constant across countries and multiplied by the annual national-average "
+        "lifecycle electricity carbon intensity reported in CodeCarbon v3.3.1 (country "
+        "data years vary). "
+        + ("Both panels share one colour scale in " if len(keys) > 1 else "The map shows ")
+        + "g CO2e per 1,000 classifications, a functional unit rather than a directly "
+        f"observed per-request footprint. In total, {n_mapped} countries with matched "
+        "Natural Earth 1:110m boundaries are coloured; hatched grey areas have no "
+        "matching country factor, and some microstates are not drawn at this resolution. "
+        "Country differences are counterfactual location assumptions, not measurements "
+        "in each country. The analysis excludes hosted API models and does not estimate "
+        "energy or emissions from their token usage or latency. Hardware embodied "
+        "emissions, transport, location-dependent cooling, grid time-of-day variation "
+        "and differences in hardware are excluded. Source: measured production summary, "
+        "CodeCarbon country factors v3.3.1 and Natural Earth 1:110m public-domain "
+        "boundaries."
     )
 
 
@@ -308,16 +338,14 @@ def main() -> None:
     n_mapped = {}
     if not args.table_only:
         boundaries = read_boundaries(args.boundaries)
-        for model_key in selected:
-            fig, mapped = make_map(simulated, boundaries, model_key=model_key)
-            stem = args.figures / f"local_carbon_country_{model_key}"
-            caption = caption_for(
-                simulated.loc[simulated["model_key"] == model_key], len(mapped)
-            )
-            write_map(fig, stem, caption)
-            n_mapped[model_key] = len(mapped)
-            figure_files.extend(str(stem.with_suffix(ext)) for ext in
-                                (".png", ".pdf", ".svg", ".txt"))
+        ordered = [key for key in LOCAL_MODELS if key in selected]
+        fig, n_mapped = make_maps(simulated, boundaries, model_keys=ordered)
+        stem = args.figures / FIGURE_STEM
+        caption = caption_for(
+            simulated.loc[simulated["model_key"].isin(ordered)],
+            max(n_mapped.values()),
+        )
+        figure_files = [path.as_posix() for path in write_maps(fig, stem, caption)]
     manifest = {
         "analysis": "fixed_local_energy_country_carbon_counterfactual",
         "schema_version": 1,
@@ -343,7 +371,7 @@ def main() -> None:
         ),
         "countries_with_factors": len(factors),
         "mapped_countries": n_mapped,
-        "table": str(args.table),
+        "table": args.table.as_posix(),
         "figure_files": figure_files,
     }
     manifest_path = args.table.with_name("local_country_emissions_manifest.json")
@@ -364,7 +392,7 @@ def main() -> None:
             "counterfactual_g_co2e_per_1000_decisions",
         ]].to_string(index=False, float_format=lambda value: f"{value:.2f}"))
         if not args.table_only:
-            print(f"  map: {args.figures}/local_carbon_country_{model_key}.*")
+            print(f"  map panel in: {(args.figures / FIGURE_STEM).as_posix()}.*")
 
 
 if __name__ == "__main__":

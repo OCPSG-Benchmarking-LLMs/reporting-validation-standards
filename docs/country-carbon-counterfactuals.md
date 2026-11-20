@@ -44,7 +44,7 @@ OpenAI, Fireworks, Mistral or TypeSafe JEV.
   in `config/geography/natural_earth_110m_countries_simplified.geojson`.
   The snapshot excludes Antarctica. Not all microstates appear at 1:110m,
   and country boundaries/recognition may differ across datasets; unmatched
-  regions are grey rather than assigned a guessed factor.
+  regions are hatched grey rather than assigned a guessed factor.
 - **Observed energy:** the finalised, committed
   `outputs/compute_environment/local_environment_summary.csv`. The simulation
   checks that its measured Netherlands emissions equal measured energy times
@@ -68,27 +68,26 @@ The mapped value divides total grams by the 12,000 completed
 classifications and multiplies by 1,000. It is therefore a **run-average
 normalisation per 1,000 classifications**, not a measurement per request.
 
-### Run from Windows Cmder
+### Running the simulation
 
 From the root of the repository:
 
-~~~cmd
-git pull --ff-only
+```bash
 pipenv run pytest
 pipenv run python code/17_simulate_country_carbon.py
-~~~
+```
 
-By default, both local model maps are produced. To generate just one model:
+By default, both local models are mapped. To map a single model:
 
-~~~cmd
+```bash
 pipenv run python code/17_simulate_country_carbon.py --model-key ollama_qwen36_35b
-~~~
+```
 
-For computation/validation without rendering figures:
+For the computation and its checks without rendering the figure:
 
-~~~cmd
+```bash
 pipenv run python code/17_simulate_country_carbon.py --table-only
-~~~
+```
 
 The script creates:
 
@@ -98,21 +97,21 @@ The script creates:
   relative to the Netherlands).
 - `outputs/compute_environment/local_country_emissions_manifest.json`
   (source hashes and scope).
-- `outputs/figures/local_carbon_country_ollama_qwen36_35b.{png,pdf,svg,txt}`
-  and `outputs/figures/local_carbon_country_ollama_gemma4_31b.{png,pdf,svg,txt}`
-  (transparent 300-dpi PNG, vector PDF/SVG, and separate explanatory captions).
+- `outputs/figures/local_carbon_country_ollama.{png,pdf,svg,txt}`
+  (transparent 300-dpi PNG, vector PDF and SVG, and a separate caption).
 
-Figures use a softened Oxford blue/aqua–terracotta sequential palette, no
-gridlines, no title embedded in the illustration, white country boundaries,
-and a horizontal colour legend below the map. Countries omitted by the
-low-resolution boundary dataset appear uncoloured; the CSV retains the full
-factor table. The colour scales refer to **absolute emissions per 1,000
-classifications** and use a **shared maximum across both models** when both
-maps are generated together, making the differences in measured energy
-visually comparable. When selecting just one model, its map scales to that
-model's simulated maximum; compare models using the default paired run.
+The figure stacks one Equal Earth map per model (Qwen above Gemma), drawn at
+its printed width with the shared style in
+`src/reporting_validation_standards/plot_style.py`: a single-hue sequential
+blue scale, grey country borders, no gridlines or embedded title, and one
+horizontal colour bar below both panels. Countries in the boundary snapshot
+without a matching factor are hatched grey and named "No data" in the legend;
+the CSV retains the full factor table. The colour scale refers to **absolute
+emissions per 1,000 classifications** and is **shared across both models**,
+so the difference in measured energy is visible. When a single model is
+selected, the scale runs to that model's simulated maximum.
 
-## Interpretation for the working paper
+## Interpretation
 
 Holding the measured computation constant reveals substantial geographical
 variation in its electricity-related carbon footprint. For Qwen 3.6 35B,

@@ -5,23 +5,23 @@ from runpy import run_path
 import matplotlib.image as mpimg
 import numpy as np
 
+from reporting_validation_standards import plot_style as ps
 from reporting_validation_standards.jev_figure_analysis import plot_data_with_uncertainty
-
 
 SCRIPT = Path(__file__).resolve().parents[1] / "code" / "16_generate_jev_figures.py"
 
 
 def test_figures_export_pdf_svg_png_and_caption(tmp_path):
     namespace = run_path(str(SCRIPT))
-    assert namespace["BLUE"] == "#5F7A9D"
-    assert namespace["TERRACOTTA"] == "#E6A57E"
-    assert namespace["AQUA"] == "#3A8995"
 
     original_save = namespace["save_with_caption"]
     inspected = []
 
     def inspect_before_save(fig, stem, caption):
-        # Every manuscript plot is title-free, visually restrained and frameless.
+        # Every manuscript plot is title-free, visually restrained and frameless,
+        # and is drawn at the width at which it is printed.
+        assert ps.paper_problems(fig) == []
+        assert fig.get_figwidth() == ps.PRINT_WIDTH_IN
         assert all(not axes.get_title() for axes in fig.axes)
         assert all(not spine.get_visible() for axes in fig.axes
                    for spine in axes.spines.values())
@@ -39,13 +39,11 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
             assert len(fig.axes) == 2
             bars = fig.axes[1].patches
             assert bars
-            assert all(np.allclose(bar.get_facecolor(), to_rgba("#3A8995", .78))
-                       for bar in bars), "Calibration bars must use website aqua at 78% opacity"
+            assert all(np.allclose(bar.get_facecolor(), to_rgba(ps.LIGHT_GREY))
+                       for bar in bars), "Calibration bars use light grey, not a second hue"
         if stem.name == "jev_risk_coverage":
-            assert any(
-                "Bootstrap interval collapses at zero" in note.get_text()
-                for axes in fig.axes for note in axes.texts
-            ), "Zero-error bootstrap limitation should be visible"
+            labels = [text.get_text() for text in fig.legends[0].get_texts()]
+            assert "Random selection (95% CI)" in labels, "Every band is named in the legend"
         inspected.append(stem)
         return original_save(fig, stem, caption)
 
@@ -79,10 +77,12 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
         assert png.ndim == 3 and png.shape[2] == 4
         assert np.any(png[..., 3] < 1), "PNG must preserve transparency"
         caption = stem.with_suffix(".txt").read_text(encoding="utf-8")
-        assert caption.startswith("Note.")
+        title, note = caption.split("\n\n", 1)
+        assert title.startswith("JEV ") and "\n" not in title
+        assert note.startswith("Note.")
         if stem.name == "jev_calibration":
             assert "Unweighted observations by confidence bin:" in caption
-            assert "n=1" in caption
+            assert "0.3–0.4: 1" in caption
         else:
             assert "zero true error probability" in caption
             assert "not on all 1,000 attempts" in caption

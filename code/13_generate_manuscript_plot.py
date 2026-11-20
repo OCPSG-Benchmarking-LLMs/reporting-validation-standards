@@ -1,27 +1,27 @@
+"""Validation performance across prompt specifications and repeated inference.
+
+Reads the committed outputs/validation/condition_performance.csv and draws a 2 x 2 figure
+(Accuracy, Macro-Precision, Macro-Recall, Macro-F1) with one row per model x prompt and
+the three single-repetition estimates as separate points.
+"""
+
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
-import math
+
+import matplotlib
+
+matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-import numpy as np
 import pandas as pd
+from matplotlib.lines import Line2D
 
-
-##########################################################################
-## 1. Paths
-##########################################################################
+from reporting_validation_standards import plot_style as ps
 
 INPUT_FILE = Path("outputs/validation/condition_performance.csv")
-
-OUTPUT_DIR = Path("outputs/figures")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-OUTPUT_NAME = OUTPUT_DIR / "validation_prompt_repetition_profile"
-
-
-##########################################################################
-## 2. Model display names and fixed experimental order
-##########################################################################
+OUTPUT_STEM = Path("outputs/figures/validation_prompt_repetition_profile")
 
 MODEL_NAMES = {
     "openai_gpt54": "GPT-5.4",
@@ -32,28 +32,7 @@ MODEL_NAMES = {
     "openai_gpt6_luna": "GPT-6 Luna",
     "mistral_large3_2512": "Mistral Large 3",
 }
-
-MODEL_ORDER = [
-    "openai_gpt54",
-    "openai_gpt54_mini",
-    "fireworks_deepseek_v41_flash",
-    "ollama_qwen36_35b",
-    "ollama_gemma4_31b",
-    "openai_gpt6_luna",
-    "mistral_large3_2512",
-]
-
-
-##########################################################################
-## 3. Prompt display names and Oxford-inspired palette
-##########################################################################
-
-PROMPT_ORDER = [
-    "p0_capbench_canonical",
-    "p1_lexical_paraphrase",
-    "p2_label_order_permutation",
-    "p3_structural_format",
-]
+MODEL_ORDER = list(MODEL_NAMES)
 
 PROMPT_NAMES = {
     "p0_capbench_canonical": "P0 Canonical",
@@ -61,431 +40,148 @@ PROMPT_NAMES = {
     "p2_label_order_permutation": "P2 Label-order permutation",
     "p3_structural_format": "P3 Structural format",
 }
+PROMPT_ORDER = list(PROMPT_NAMES)
+PROMPT_COLOURS = dict(zip(PROMPT_ORDER, ps.SERIES[:4], strict=True))
 
-## Softened Oxford-style plotting tones, following the related Eval4SD scripts.
-PROMPT_COLOURS = {
-    "p0_capbench_canonical": "#5F7A9D",       # softened Oxford blue
-    "p1_lexical_paraphrase": "#E6A57E",       # soft terracotta
-    "p2_label_order_permutation": "#A8C5A1",  # sage
-    "p3_structural_format": "#D9B8D0",        # muted mauve
+# The four prompt rows of a model sit around its integer position; the three
+# repetitions of a prompt share one row.
+PROMPT_OFFSETS = dict(zip(PROMPT_ORDER, (-0.3, -0.1, 0.1, 0.3), strict=True))
+
+METRICS = {
+    "Accuracy": "weighted_operational_accuracy",
+    "Macro-Precision": "weighted_operational_macro_precision",
+    "Macro-Recall": "weighted_operational_macro_recall",
+    "Macro-F1": "weighted_operational_macro_f1",
 }
 
-DARK_GREY = "#4D4D4D"
-LIGHT_GREY = "#D9D9D9"
+X_LIMITS = (0.7, 1.0)
+X_TICKS = (0.7, 0.8, 0.9, 1.0)
+FIGSIZE = (ps.PRINT_WIDTH_IN, 7.0)
+POINT_AREA = 22
+
+CAPTION = (
+    "Validation Performance across Prompt Specifications and Repeated Inference\n\n"
+    "Note. Each panel reports a design-weighted operational validation metric against the "
+    "OCPSG silver reference: Accuracy, Macro-Precision, Macro-Recall and Macro-F1. Within "
+    "each model group, the four frozen prompt conditions occupy separate horizontal lines "
+    "and are distinguished by colour. The three points on each prompt line report the three "
+    "single-repetition estimates. Models are shown in the fixed experimental order rather "
+    "than sorted by performance, and the x-axis keeps the original 0–1 metric scale. The "
+    "figure complements, rather than replaces, the full stability and validation tables."
+)
 
 
-##########################################################################
-## 4. Metrics
-##########################################################################
+def prepare(data: pd.DataFrame, source: Path = INPUT_FILE) -> pd.DataFrame:
+    """Keep the 12 single-repetition estimates per model and check completeness.
 
-METRICS = [
-    {
-        "title": "Accuracy",
-        "column": "weighted_operational_accuracy",
-    },
-    {
-        "title": "Macro-Precision",
-        "column": "weighted_operational_macro_precision",
-    },
-    {
-        "title": "Macro-Recall",
-        "column": "weighted_operational_macro_recall",
-    },
-    {
-        "title": "Macro-F1",
-        "column": "weighted_operational_macro_f1",
-    },
-]
-
-
-##########################################################################
-## 5. Plot geometry
-##########################################################################
-
-## Each model contains four prompt-specific horizontal rows. The three
-## repetitions for a given prompt share exactly the same y-position; prompt
-## rows are vertically offset within the model group.
-
-PROMPT_OFFSETS = {
-    "p0_capbench_canonical": -0.27,
-    "p1_lexical_paraphrase": -0.09,
-    "p2_label_order_permutation": 0.09,
-    "p3_structural_format": 0.27,
-}
-
-REPETITION_POINT_SIZE = 60
-
-
-##########################################################################
-## 6. Helpers
-##########################################################################
-
-
-def require_columns(
-    df: pd.DataFrame,
-    required: set[str],
-    source: Path,
-) -> None:
-    missing = required - set(df.columns)
-
+    condition_performance.csv holds four rows per model x prompt: repetitions 1-3 are
+    single-repetition estimates, while repetition 0 is the expected-over-repetitions
+    aggregate and must not be drawn as a fourth repetition.
+    """
+    required = {"model_key", "prompt_id", "repetition", "aggregation", *METRICS.values()}
+    missing = required - set(data.columns)
     if missing:
+        raise ValueError(f"{source} is missing columns: {sorted(missing)}")
+
+    data = data.loc[
+        data["aggregation"].astype(str).eq("single_repetition")
+        & data["repetition"].isin([1, 2, 3])
+    ].copy()
+
+    models = set(data["model_key"].astype(str))
+    if models != set(MODEL_ORDER):
         raise ValueError(
-            f"{source} is missing columns: {sorted(missing)}"
+            f"Expected models {sorted(MODEL_ORDER)}; found {sorted(models)}."
         )
+    prompts = set(data["prompt_id"].astype(str))
+    if prompts != set(PROMPT_ORDER):
+        raise ValueError(
+            "Expected exactly the four frozen prompt conditions; "
+            f"found {sorted(prompts)}."
+        )
+    data["repetition"] = pd.to_numeric(data["repetition"], errors="raise").astype(int)
+    if sorted(data["repetition"].unique().tolist()) != [1, 2, 3]:
+        raise ValueError("Expected single-repetition rows 1, 2 and 3 after filtering.")
+
+    for column in METRICS.values():
+        data[column] = pd.to_numeric(data[column], errors="coerce")
+        if data[column].isna().any():
+            raise ValueError(f"{source} contains missing values in {column}.")
+        outside = data[column].lt(X_LIMITS[0]) | data[column].gt(X_LIMITS[1])
+        if outside.any():
+            raise ValueError(
+                f"{column} has values outside the plotted range {X_LIMITS}; widen X_LIMITS."
+            )
+
+    expected_rows = len(MODEL_ORDER) * len(PROMPT_ORDER) * 3
+    if len(data) != expected_rows:
+        raise ValueError(
+            "Single-repetition validation output is incomplete. "
+            f"Expected {expected_rows} rows, found {len(data)}."
+        )
+    if data.duplicated(subset=["model_key", "prompt_id", "repetition"]).any():
+        raise ValueError(f"Duplicate model x prompt x repetition rows found in {source}.")
+
+    model_to_y = {model: index for index, model in enumerate(MODEL_ORDER)}
+    data["y"] = [
+        model_to_y[model] + PROMPT_OFFSETS[prompt]
+        for model, prompt in zip(data["model_key"], data["prompt_id"], strict=True)
+    ]
+    return data
 
 
-def save_figure(
-    fig,
-    output_name: Path,
-    caption: str,
-) -> None:
-    Path(f"{output_name}.txt").write_text(
-        caption.strip() + "\n",
-        encoding="utf-8",
-    )
+def build_figure(data: pd.DataFrame):
+    ps.use_style()
+    fig, axes = plt.subplots(2, 2, figsize=FIGSIZE, sharex=True, sharey=True)
 
-    fig.savefig(
-        f"{output_name}.png",
-        dpi=300,
-        bbox_inches="tight",
-        transparent=True,
-    )
+    for ax, (title, column) in zip(axes.flat, METRICS.items(), strict=True):
+        for prompt in PROMPT_ORDER:
+            rows = data.loc[data["prompt_id"].eq(prompt)]
+            ax.scatter(
+                rows[column], rows["y"], s=POINT_AREA, color=PROMPT_COLOURS[prompt],
+                alpha=0.85, edgecolors=ps.EDGE, linewidths=0.45, zorder=2,
+            )
+        ax.set_title(title)
+        ax.set_xlim(X_LIMITS[0] - 0.01, X_LIMITS[1] + 0.01)
+        ax.set_xticks(X_TICKS, [f"{tick:.1f}" for tick in X_TICKS])
+        ax.set_yticks(range(len(MODEL_ORDER)), [MODEL_NAMES[m] for m in MODEL_ORDER])
+        ax.set_ylim(len(MODEL_ORDER) - 0.5, -0.5)   # GPT-5.4 at the top
+        ps.clean_axes(ax)
+        ax.tick_params(axis="x", labelbottom=True)
 
-    fig.savefig(
-        f"{output_name}.pdf",
-        dpi=300,
-        bbox_inches="tight",
-        transparent=True,
-    )
+    handles = [
+        Line2D(
+            [], [], marker="o", linestyle="", markersize=5.5,
+            markerfacecolor=PROMPT_COLOURS[prompt], markeredgecolor=ps.EDGE,
+            markeredgewidth=0.45, label=PROMPT_NAMES[prompt],
+        )
+        for prompt in PROMPT_ORDER
+    ]
+    fig.tight_layout(rect=(0, 0.06, 1, 1), h_pad=1.6, w_pad=3.0)
+    ps.bottom_legend(fig, handles, ncol=2, y=0.055)
+    return fig
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, default=INPUT_FILE)
+    parser.add_argument("--output-stem", type=Path, default=OUTPUT_STEM)
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    data = prepare(pd.read_csv(args.input, encoding="utf-8-sig"), args.input)
+    fig = build_figure(data)
+    paths = ps.save(fig, args.output_stem, CAPTION)
     plt.close(fig)
-
-
-def decimal_ticks(lower: float) -> list[float]:
-    start = math.ceil(lower * 10 - 1e-9) / 10
-    ticks = list(np.arange(start, 1.0001, 0.1))
-
-    if 1.0 not in ticks:
-        ticks.append(1.0)
-
-    return [round(value, 1) for value in ticks]
-
-
-##########################################################################
-## 7. Load and prepare data
-##########################################################################
-
-data = pd.read_csv(
-    INPUT_FILE,
-    encoding="utf-8-sig",
-)
-
-required_cols = {
-    "model_key",
-    "prompt_id",
-    "repetition",
-    "aggregation",
-    *[metric["column"] for metric in METRICS],
-}
-
-require_columns(
-    data,
-    required_cols,
-    INPUT_FILE,
-)
-
-## condition_performance.csv contains four rows per model × prompt:
-## repetitions 1–3 are the actual single-repetition estimates, while
-## repetition 0 is the pre-computed expected-over-repetitions aggregate.
-## The figure needs exactly the 12 underlying prompt × repetition points,
-## so repetition 0 must not be treated as a fourth repetition.
-data = data.loc[
-    data["aggregation"].astype(str).eq("single_repetition")
-    & data["repetition"].isin([1, 2, 3])
-].copy()
-
-observed_models = set(data["model_key"].astype(str))
-expected_models = set(MODEL_ORDER)
-
-missing_models = expected_models - observed_models
-unexpected_models = observed_models - expected_models
-
-if missing_models:
-    raise ValueError(
-        f"Missing expected models: {sorted(missing_models)}"
+    print(
+        f"Single-repetition rows: {len(data):,} "
+        f"({len(MODEL_ORDER)} models x {len(PROMPT_ORDER)} prompts x 3 repetitions)"
     )
-
-if unexpected_models:
-    raise ValueError(
-        f"Unexpected models: {sorted(unexpected_models)}"
-    )
-
-observed_prompts = set(data["prompt_id"].astype(str))
-expected_prompts = set(PROMPT_ORDER)
-
-if observed_prompts != expected_prompts:
-    raise ValueError(
-        "Expected exactly the four frozen prompt conditions; "
-        f"found {sorted(observed_prompts)}."
-    )
-
-observed_repetitions = sorted(
-    pd.to_numeric(
-        data["repetition"],
-        errors="raise",
-    )
-    .astype(int)
-    .unique()
-    .tolist()
-)
-
-if observed_repetitions != [1, 2, 3]:
-    raise ValueError(
-        "Expected single-repetition rows 1, 2, and 3 after filtering; "
-        f"found {observed_repetitions}."
-    )
-
-data["repetition"] = data["repetition"].astype(int)
-
-for metric in METRICS:
-    column = metric["column"]
-
-    data[column] = pd.to_numeric(
-        data[column],
-        errors="coerce",
-    )
-
-    if data[column].isna().any():
-        raise ValueError(
-            f"{INPUT_FILE} contains missing values in {column}."
-        )
-
-expected_rows = (
-    len(MODEL_ORDER)
-    * len(PROMPT_ORDER)
-    * 3
-)
-
-if len(data) != expected_rows:
-    raise ValueError(
-        "Single-repetition validation output is incomplete. "
-        f"Expected {expected_rows} rows, found {len(data)}."
-    )
-
-duplicate_cells = data.duplicated(
-    subset=[
-        "model_key",
-        "prompt_id",
-        "repetition",
-    ],
-    keep=False,
-)
-
-if duplicate_cells.any():
-    raise ValueError(
-        "Duplicate model × prompt × repetition rows found in "
-        f"{INPUT_FILE}."
-    )
-
-model_to_y = {
-    model: index
-    for index, model in enumerate(MODEL_ORDER)
-}
-
-## The three repetitions of a prompt share one horizontal line. Different
-## prompts occupy four separate lines within each model group.
-data["y_base"] = data["model_key"].map(model_to_y)
-data["y"] = [
-    base + PROMPT_OFFSETS[prompt]
-    for base, prompt in zip(
-        data["y_base"],
-        data["prompt_id"],
-        strict=True,
-    )
-]
-
-## Use one common x scale across all four panels.
-all_values = pd.concat(
-    [
-        data[metric["column"]]
-        for metric in METRICS
-    ],
-    ignore_index=True,
-)
-
-global_min = float(all_values.min())
-
-x_lower = max(
-    0.0,
-    math.floor((global_min - 0.025) / 0.05) * 0.05,
-)
-
-x_upper = 1.01
-x_ticks = decimal_ticks(x_lower)
+    for path in paths:
+        print(f"Wrote: {path}")
 
 
-##########################################################################
-## 8. Plot
-##########################################################################
-
-fig, axes = plt.subplots(
-    1,
-    4,
-    figsize=(14.5, 9.0),
-    sharey=True,
-)
-
-for i, metric in enumerate(METRICS):
-    ax = axes[i]
-    metric_column = metric["column"]
-
-    for prompt in PROMPT_ORDER:
-        prompt_data = data.loc[
-            data["prompt_id"].eq(prompt)
-        ]
-
-        ## Three repetition-level points per prompt and model. The repetitions
-        ## share one prompt-specific horizontal line; prompt colour distinguishes
-        ## the four prompt conditions.
-        ax.scatter(
-            prompt_data[metric_column],
-            prompt_data["y"],
-            color=PROMPT_COLOURS[prompt],
-            s=REPETITION_POINT_SIZE,
-            alpha=0.88,
-            edgecolors=DARK_GREY,
-            linewidths=0.55,
-            zorder=2,
-        )
-
-    ax.set_title(
-        metric["title"],
-        fontsize=14,
-    )
-
-    ax.set_xlim(
-        x_lower,
-        x_upper,
-    )
-
-    ax.set_xticks(
-        x_ticks
-    )
-
-    ax.set_xticklabels(
-        [
-            f"{value:.1f}"
-            for value in x_ticks
-        ],
-        fontsize=9,
-    )
-
-    ax.tick_params(
-        axis="x",
-        length=0,
-    )
-
-    ax.set_yticks(
-        range(len(MODEL_ORDER))
-    )
-
-    if i == 0:
-        ax.set_yticklabels(
-            [
-                MODEL_NAMES[model]
-                for model in MODEL_ORDER
-            ],
-            fontsize=9.5,
-        )
-
-        ax.tick_params(
-            axis="y",
-            length=0,
-            labelleft=True,
-        )
-    else:
-        ax.tick_params(
-            axis="y",
-            length=0,
-            labelleft=False,
-        )
-
-    for spine in [
-        "top",
-        "right",
-        "left",
-        "bottom",
-    ]:
-        ax.spines[spine].set_visible(False)
-
-## Preserve the fixed experimental order with GPT-5.4 at the top.
-axes[0].invert_yaxis()
-
-
-##########################################################################
-## 9. Legend and caption
-##########################################################################
-
-prompt_handles = [
-    Line2D(
-        [],
-        [],
-        marker="o",
-        linestyle="",
-        markersize=7,
-        markerfacecolor=PROMPT_COLOURS[prompt],
-        markeredgecolor=DARK_GREY,
-        markeredgewidth=0.55,
-        label=PROMPT_NAMES[prompt],
-    )
-    for prompt in PROMPT_ORDER
-]
-
-fig.legend(
-    handles=prompt_handles,
-    loc="lower center",
-    ncol=4,
-    frameon=False,
-    fontsize=9,
-    bbox_to_anchor=(0.5, 0.01),
-)
-
-plt.subplots_adjust(
-    bottom=0.16,
-)
-
-plt.tight_layout(
-    rect=[0, 0.08, 1, 1]
-)
-
-caption = (
-    "Validation performance across prompt specifications and repeated inference.\n\n"
-    "Note. Each panel reports a design-weighted operational validation metric "
-    "against the OCPSG silver reference: Accuracy, Macro-Precision, Macro-Recall, "
-    "and Macro-F1. Within each model group, the four frozen prompt conditions occupy "
-    "separate horizontal lines and are distinguished by colour. The three points on "
-    "each prompt line report the three single-repetition estimates. Models are shown "
-    "in the fixed experimental order rather than sorted by performance. The x-axis "
-    "is reported on the original 0–1 metric scale. The figure complements, rather "
-    "than replaces, the full stability and validation tables."
-)
-
-
-##########################################################################
-## 10. Save
-##########################################################################
-
-save_figure(
-    fig,
-    OUTPUT_NAME,
-    caption,
-)
-
-print(
-    "Single-repetition rows: "
-    f"{len(data):,} "
-    f"({len(MODEL_ORDER)} models × {len(PROMPT_ORDER)} prompts × 3 repetitions)"
-)
-print(f"Wrote: {OUTPUT_NAME}.png")
-print(f"Wrote: {OUTPUT_NAME}.pdf")
-print(f"Wrote: {OUTPUT_NAME}.txt")
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this code or its outputs, please cite the working paper below."
+title: "Reporting and Validation Standards: code and provenance"
+type: software
+license: MIT
+repository-code: "https://github.com/OCPSG-Benchmarking-LLMs/reporting-validation-standards"
+authors:
+  - family-names: "González-Bustamante"
+    given-names: "Bastián"
+  - family-names: "Klamm"
+    given-names: "Christopher"
+  - family-names: "Bellens"
+    given-names: "Tom"
+  - family-names: "Koch"
+    given-names: "Marta"
+keywords:
+  - validation
+  - reporting standards
+  - large language models
+  - text classification
+  - political science
+  - measurement error
+preferred-citation:
+  type: report
+  title: "Report, Diagnose, Propagate: Reporting and Validation Standards for Machine-Learning and LLM Classifiers in Political Science"
+  status: preprint
+  year: 2026
+  notes: "Working paper"
+  authors:
+    - family-names: "González-Bustamante"
+      given-names: "Bastián"
+    - family-names: "Klamm"
+      given-names: "Christopher"
+    - family-names: "Bellens"
+      given-names: "Tom"
+    - family-names: "Koch"
+      given-names: "Marta"
