@@ -1,0 +1,213 @@
+iso3,country,source_year,intensity_g_co2e_per_kwh
+ABW,"Aruba",2022,561.224
+AFG,"Afghanistan",2022,132.53
+AGO,"Angola",2022,174.734
+ALB,"Albania",2022,24.286
+ARE,"United Arab Emirates",2022,561.135
+ARG,"Argentina",2023,354.103
+ARM,"Armenia",2022,264.538
+ASM,"American Samoa",2022,611.111
+ATG,"Antigua and Barbuda",2022,611.111
+AUS,"Australia",2023,548.692
+AUT,"Austria",2023,110.812
+AZE,"Azerbaijan",2022,671.389
+BDI,"Burundi",2022,250
+BEL,"Belgium",2023,138.107
+BEN,"Benin",2022,584.071
+BFA,"Burkina Faso",2022,467.533
+BGD,"Bangladesh",2023,691.411
+BGR,"Bulgaria",2023,335.334
+BHR,"Bahrain",2022,904.615
+BHS,"Bahamas",2022,660.099
+BIH,"Bosnia and Herzegovina",2023,600
+BLR,"Belarus",2022,441.74
+BLZ,"Belize",2022,225.806
+BMU,"Bermuda",2022,650.794
+BOL,"Bolivia",2023,531.687
+BRA,"Brazil",2023,98.348
+BRB,"Barbados",2022,605.505
+BRN,"Brunei",2022,893.913
+BTN,"Bhutan",2022,23.333
+BWA,"Botswana",2022,847.909
+CAN,"Canada",2023,170.043
+CHE,"Switzerland",2023,34.843
+CHL,"Chile",2023,291.113
+CHN,"China",2023,582.317
+CIV,"Cote d'Ivoire",2022,393.885
+CMR,"Cameroon",2022,305.419
+COD,"Democratic Republic of Congo",2022,24.457
+COG,"Congo",2022,700
+COK,"Cook Islands",2022,250
+COL,"Colombia",2023,259.511
+COM,"Comoros",2022,642.857
+CPV,"Cape Verde",2022,558.14
+CRI,"Costa Rica",2023,53.378
+CUB,"Cuba",2022,637.61
+CYM,"Cayman Islands",2022,642.857
+CYP,"Cyprus",2023,534.323
+CZE,"Czechia",2023,449.724
+DEU,"Germany",2023,380.95
+DJI,"Djibouti",2022,692.308
+DMA,"Dominica",2022,529.412
+DNK,"Denmark",2023,151.65
+DOM,"Dominican Republic",2022,580.78
+DZA,"Algeria",2022,634.611
+ECU,"Ecuador",2023,150.224
+EGY,"Egypt",2023,570.306
+ERI,"Eritrea",2022,631.579
+ESH,"Western Sahara",2009,666.667
+ESP,"Spain",2023,174.05
+EST,"Estonia",2023,416.667
+ETH,"Ethiopia",2022,24.643
+FIN,"Finland",2023,79.158
+FJI,"Fiji",2022,288.462
+FLK,"Falkland Islands",2022,500
+FRA,"France",2023,56.039
+FRO,"Faroe Islands",2022,404.762
+GAB,"Gabon",2022,491.597
+GBR,"United Kingdom",2023,237.589
+GEO,"Georgia",2023,167.594
+GHA,"Ghana",2022,484
+GIB,"Gibraltar",2022,600
+GIN,"Guinea",2022,236.842
+GLP,"Guadeloupe",2021,500
+GMB,"Gambia",2022,666.667
+GNB,"Guinea-Bissau",2022,625
+GNQ,"Equatorial Guinea",2022,591.837
+GRC,"Greece",2023,336.574
+GRD,"Grenada",2022,640
+GRL,"Greenland",2022,178.571
+GTM,"Guatemala",2022,328.268
+GUF,"French Guiana",2021,217.822
+GUM,"Guam",2022,622.857
+GUY,"Guyana",2022,640.351
+HKG,"Hong Kong",2022,699.499
+HND,"Honduras",2022,282.265
+HRV,"Croatia",2023,204.962
+HTI,"Haiti",2022,567.308
+HUN,"Hungary",2023,204.19
+IDN,"Indonesia",2022,675.931
+IND,"India",2023,713.441
+IRL,"Ireland",2023,290.805
+IRN,"Iran",2023,655.125
+IRQ,"Iraq",2022,688.814
+ISL,"Iceland",2022,27.68
+ISR,"Israel",2022,582.927
+ITA,"Italy",2023,330.718
+JAM,"Jamaica",2022,555.556
+JOR,"Jordan",2022,540.924
+JPN,"Japan",2023,485.392
+KAZ,"Kazakhstan",2023,821.391
+KEN,"Kenya",2023,70.492
+KGZ,"Kyrgyzstan",2022,147.292
+KHM,"Cambodia",2022,417.707
+KIR,"Kiribati",2022,666.667
+KNA,"Saint Kitts and Nevis",2022,636.364
+KOR,"South Korea",2023,430.567
+KWT,"Kuwait",2023,649.163
+LAO,"Laos",2022,265.506
+LBN,"Lebanon",2022,599.005
+LBR,"Liberia",2022,227.848
+LBY,"Libya",2022,818.692
+LCA,"Saint Lucia",2022,666.667
+LKA,"Sri Lanka",2022,509.781
+LSO,"Lesotho",2022,20
+LTU,"Lithuania",2023,160.072
+LUX,"Luxembourg",2023,105.263
+LVA,"Latvia",2023,123.2
+MAC,"Macao",2022,448.98
+MAR,"Morocco",2023,630.014
+MDA,"Moldova",2023,643.464
+MDG,"Madagascar",2022,436.441
+MDV,"Maldives",2022,611.765
+MEX,"Mexico",2023,507.245
+MKD,"North Macedonia",2023,565.345
+MLI,"Mali",2022,408
+MLT,"Malta",2023,459.144
+MMR,"Myanmar",2023,398.898
+MNE,"Montenegro",2023,417.073
+MNG,"Mongolia",2023,775.309
+MOZ,"Mozambique",2022,135.647
+MRT,"Mauritania",2022,464.706
+MSR,"Montserrat",2022,1000
+MTQ,"Martinique",2021,523.179
+MUS,"Mauritius",2022,632.479
+MWI,"Malawi",2022,66.667
+MYS,"Malaysia",2022,605.831
+NAM,"Namibia",2022,59.259
+NCL,"New Caledonia",2022,660.584
+NER,"Niger",2022,670.886
+NGA,"Nigeria",2023,523.247
+NIC,"Nicaragua",2022,265.116
+NLD,"Netherlands",2023,267.622
+NOR,"Norway",2023,30.08
+NPL,"Nepal",2022,24.44
+NRU,"Nauru",2022,750
+NZL,"New Zealand",2023,112.758
+OMN,"Oman",2023,564.635
+PAK,"Pakistan",2023,440.608
+PAN,"Panama",2022,161.677
+PER,"Peru",2023,266.478
+PHL,"Philippines",2023,610.688
+PNG,"Papua New Guinea",2022,507.246
+POL,"Poland",2023,661.926
+PRI,"Puerto Rico",2022,678.738
+PRK,"North Korea",2022,389.587
+PRT,"Portugal",2023,165.553
+PRY,"Paraguay",2023,23.755
+PSE,"Palestine",2022,516.129
+PYF,"French Polynesia",2022,442.857
+QAT,"Qatar",2023,602.5
+REU,"Reunion",2021,572.816
+ROU,"Romania",2023,240.583
+RUS,"Russia",2023,441.039
+RWA,"Rwanda",2022,316.327
+SAU,"Saudi Arabia",2022,706.791
+SDN,"Sudan",2022,263.158
+SEN,"Senegal",2022,511.598
+SGP,"Singapore",2023,470.783
+SHN,"Saint Helena",2022,1000
+SLB,"Solomon Islands",2022,700
+SLE,"Sierra Leone",2022,50
+SLV,"El Salvador",2023,271.468
+SOM,"Somalia",2022,578.947
+SPM,"Saint Pierre and Miquelon",2022,600
+SRB,"Serbia",2023,636.062
+SSD,"South Sudan",2022,629.032
+STP,"Sao Tome and Principe",2022,642.857
+SUR,"Suriname",2022,349.282
+SVK,"Slovakia",2023,116.774
+SVN,"Slovenia",2023,231.275
+SWE,"Sweden",2023,40.695
+SWZ,"Eswatini",2022,172.414
+SYC,"Seychelles",2022,564.516
+SYR,"Syria",2022,701.661
+TCA,"Turks and Caicos Islands",2022,653.846
+TCD,"Chad",2022,628.571
+TGO,"Togo",2022,443.182
+THA,"Thailand",2023,549.583
+TJK,"Tajikistan",2022,116.858
+TKM,"Turkmenistan",2022,1306.025
+TLS,"East Timor",2022,666.667
+TON,"Tonga",2022,625
+TTO,"Trinidad and Tobago",2022,681.529
+TUN,"Tunisia",2023,563.956
+TUR,"Turkey",2023,464.586
+TWN,"Taiwan",2023,642.378
+TZA,"Tanzania",2022,339.246
+UGA,"Uganda",2022,44.527
+UKR,"Ukraine",2022,259.693
+URY,"Uruguay",2023,128.788
+USA,"United States",2023,369.473
+UZB,"Uzbekistan",2022,1167.603
+VCT,"Saint Vincent and the Grenadines",2022,529.412
+VEN,"Venezuela",2022,185.802
+VGB,"British Virgin Islands",2022,647.059
+VIR,"United States Virgin Islands",2022,632.353
+VNM,"Vietnam",2023,475.449
+VUT,"Vanuatu",2022,571.429
+WSM,"Samoa",2022,473.684
+YEM,"Yemen",2022,566.102
+ZAF,"South Africa",2023,707.686
+ZMB,"Zambia",2022,111.967
+ZWE,"Zimbabwe",2022,297.872

@@ -1,0 +1,19 @@
+{
+  "bootstrap": {
+    "interval": "95% percentile",
+    "method": "Rao-Wu rescaled",
+    "replicates": 2000,
+    "seed": 20261008
+  },
+  "note": "Figures use original inference records only; no JEV API calls.",
+  "population": "frozen_GB_test_design_conditional_on_valid_JEV_responses",
+  "random_selection_ci": [
+    0.05554670628115993,
+    0.08909897286657864
+  ],
+  "random_selection_expected_error": 0.07163591084701207,
+  "reference": "automated_silver",
+  "risk_coverage_tie_policy": "uniform_random_within_equal_top_probabilities_in_expectation",
+  "source_experiment_spec_sha256": "94c28870ed14af09efd519614b129ec87b6822f16eeff7c78292515374c5ab1a",
+  "source_raw_sha256": "d030d1072f7e0d33e32342fe288fe43950e7f9e23f48819a4d9df05c4f3163f5"
+}
