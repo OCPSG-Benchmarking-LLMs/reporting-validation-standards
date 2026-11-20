@@ -1,0 +1,40 @@
+{
+  "analysis": "fixed_local_energy_country_carbon_counterfactual",
+  "codecarbon_country_factor_source": "https://github.com/mlco2/codecarbon/blob/v3.3.1/codecarbon/data/private_infra/global_energy_mix.json",
+  "codecarbon_country_factor_version": "3.3.1",
+  "countries_with_factors": 212,
+  "country_source_years": [
+    2009,
+    2021,
+    2022,
+    2023
+  ],
+  "figure_files": [
+    "outputs/figures/local_carbon_country_ollama.png",
+    "outputs/figures/local_carbon_country_ollama.pdf",
+    "outputs/figures/local_carbon_country_ollama.svg",
+    "outputs/figures/local_carbon_country_ollama.txt"
+  ],
+  "formula": "emissions_kg = measured_energy_kwh * country_gCO2e_per_kwh / 1000",
+  "functional_unit": "g CO2e per 1000 classifications",
+  "mapped_countries": {
+    "ollama_gemma4_31b": 168,
+    "ollama_qwen36_35b": 168
+  },
+  "measurement_scope": "machine_level_CodeCarbon_local_Ollama_only",
+  "model_keys": [
+    "ollama_qwen36_35b",
+    "ollama_gemma4_31b"
+  ],
+  "natural_earth_source": "https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_110m_admin_0_countries.geojson",
+  "original_measurement_country": "NLD",
+  "pue": "Use CodeCarbon energy_consumed as recorded; no second PUE multiplier",
+  "schema_version": 1,
+  "scope_limitations": "Counterfactual emissions only. Location-specific hardware energy, data-centre PUE, time-varying grid mix, embodied emissions and hosted API provider-side energy are not measured or estimated.",
+  "source_hashes_sha256": {
+    "country_intensity_snapshot": "4b0bfc53072f74fe06f8653672bb34cdfb4dd42d6cf01469b6dfa73b57520ea7",
+    "map_geometry_snapshot": "07029dd52a826190c7a323158fd56882c3ebceaa2123e95803ae0ef5bbd27598",
+    "measured_energy_summary": "73f7cdf9711d0319ea002d43dc7be0822c199f7f43fd9114472f9927eba7b054"
+  },
+  "table": "outputs/compute_environment/local_country_emissions_counterfactuals.csv"
+}

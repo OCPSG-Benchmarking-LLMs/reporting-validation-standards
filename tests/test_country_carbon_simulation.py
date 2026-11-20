@@ -4,9 +4,9 @@ from runpy import run_path
 
 import matplotlib.image as mpimg
 import numpy as np
-import pandas as pd
 import pytest
 
+from reporting_validation_standards import plot_style as ps
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = run_path(str(ROOT / "code" / "17_simulate_country_carbon.py"))
@@ -80,26 +80,36 @@ def test_rejects_mismatched_country_intensity_and_invalid_scope():
         RUNNER["load_local_runs"](SUMMARY, ["openai_gpt54"])
 
 
-def test_map_is_transparent_grid_free_and_exports(tmp_path):
+def test_equal_earth_projection_reference_points():
+    x, y = RUNNER["equal_earth"](np.array([0.0, 180.0, 0.0]), np.array([0.0, 0.0, 90.0]))
+    assert x[0] == pytest.approx(0.0) and y[0] == pytest.approx(0.0)
+    assert x[1] == pytest.approx(2.70663, abs=1e-4)
+    assert y[2] == pytest.approx(1.3173, abs=1e-4)
+
+
+def test_combined_map_is_transparent_grid_free_and_exports(tmp_path):
     factors, models = originals()
     results = RUNNER["build_counterfactuals"](models, factors)
     boundaries = RUNNER["read_boundaries"](BOUNDARIES)
-    fig, matched = RUNNER["make_map"](
-        results, boundaries, model_key="ollama_qwen36_35b"
-    )
-    assert len(matched) >= 160
-    assert not fig.axes[0].get_title()
-    assert all(not spine.get_visible() for spine in fig.axes[0].spines.values())
-    assert not any(line.get_visible() for line in fig.axes[0].get_xgridlines())
-    assert not any(line.get_visible() for line in fig.axes[0].get_ygridlines())
-    caption = RUNNER["caption_for"](
-        results[results["model_key"] == "ollama_qwen36_35b"],
-        len(matched),
-    )
-    assert "counterfactual" in caption.lower()
-    assert "per 1,000" in caption
-    stem = tmp_path / "local_carbon_country_ollama_qwen36_35b"
-    RUNNER["write_map"](fig, stem, caption)
+    keys = list(RUNNER["LOCAL_MODELS"])
+    fig, matched = RUNNER["make_maps"](results, boundaries, model_keys=keys)
+    assert set(matched) == set(keys)
+    assert all(count >= 160 for count in matched.values())
+    assert ps.paper_problems(fig) == []
+    assert fig.get_figwidth() == ps.PRINT_WIDTH_IN
+    maps = [axes for axes in fig.axes if axes.get_title()]
+    assert [axes.get_title() for axes in maps] == [RUNNER["PANEL_TITLES"][k] for k in keys]
+    for axes in maps:
+        assert all(not spine.get_visible() for spine in axes.spines.values())
+        assert not axes.axison
+    assert [t.get_text() for t in fig.legends[0].get_texts()] == ["No data"]
+    caption = RUNNER["caption_for"](results, max(matched.values()))
+    title, note = caption.split("\n\n", 1)
+    assert "counterfactual" in title.lower()
+    assert note.startswith("Note.")
+    assert "per 1,000" in note
+    stem = tmp_path / "local_carbon_country_ollama"
+    RUNNER["write_maps"](fig, stem, caption)
     for suffix in (".png", ".svg", ".pdf", ".txt"):
         assert stem.with_suffix(suffix).exists()
         assert stem.with_suffix(suffix).stat().st_size > 0
