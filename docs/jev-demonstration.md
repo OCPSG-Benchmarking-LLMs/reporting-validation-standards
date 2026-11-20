@@ -4,8 +4,8 @@ This experiment is **separate from the frozen seven-model stability panel**.
 Its purpose is to examine native probabilistic measurement, calibration,
 selective classification and downstream aggregation. It is not an eighth
 directly comparable P0 model. In particular, TypeSafe's native `choice`
-contract differs from the CapBench JSON-only prompt; retain this distinction
-in every manuscript table.
+contract differs from the CapBench JSON-only prompt, and any table that
+reports JEV alongside the panel should keep this distinction.
 
 ## Preflight
 
@@ -44,60 +44,46 @@ producing any figure. There are **no** JEV API calls, retries or data repairs.
 
 Run scripts 15 and 16 in order:
 
-```cmd
+```bash
 pipenv run python code/15_analyze_jev_calibration.py
 pipenv run python code/16_generate_jev_figures.py
 ```
 
 Script 16 defaults to the **same 2,000 Rao–Wu rescaled bootstrap draws and
-seed** recorded by script 15. It writes publication-ready, **transparent-background**
-300-dpi PNG, vector PDF and text-preserving SVG, with standalone `.txt`
-captions, under `outputs/figures/`:
+seed** recorded by script 15. It writes transparent 300-dpi PNG, vector PDF
+and SVG files, each with a `.txt` caption (a title line, then a "Note." line),
+under `outputs/figures/`:
 
-- `jev_calibration.[png|pdf|svg|txt]` — observed bin accuracy and design-based
+- `jev_calibration.[png|pdf|svg|txt]`: observed bin accuracy and design-based
   95% bootstrap intervals against mean native top-class probability, plus
-  a weighted-mass histogram. The standalone caption now includes the
-  unweighted `n` for every nonempty confidence bin; raw bin counts also
-  remain in the CSV, not as annotations crowding the figure.
-- `jev_risk_coverage.[png|pdf|svg|txt]` — weighted error versus automated
-  coverage, pointwise 95% bootstrap interval, and the expected constant error
-  benchmark under random selection. A small annotation identifies any
-  initial error-free coverage region where the empirical bootstrap interval
-  collapses to zero. This **cannot** establish that the underlying true
-  error probability is zero.
+  the weighted share of each bin. The caption reports the unweighted `n` for
+  every nonempty confidence bin; the counts are also in the CSV.
+- `jev_risk_coverage.[png|pdf|svg|txt]`: weighted error against automated
+  coverage, its pointwise 95% bootstrap interval, and the expected error under
+  random selection with its interval. The caption identifies any initial
+  error-free coverage region where the empirical bootstrap interval collapses
+  to zero, which **cannot** establish that the underlying true error
+  probability is zero.
 
-### Established manuscript plotting standard
-
-These plots follow the visual conventions in `code/13_generate_manuscript_plot.py`
-and the supplied Eval4SD stage 2/4 plotting scripts. The figure style uses:
-
-- softened Oxford blue (`#5F7A9D`) for the empirical series, pastel terracotta
-  (`#E6A57E`) for reference lines, Oxford aqua (`#3A8995`) for the
-  calibration histogram, and pastel mauve (`#D9B8D0`) for the risk interval;
-- **no embedded chart titles**, frameless legends below the axes, **no
-  gridlines**, no visible spines or tick marks, and decimal [0, 1]
-  probability axes;
-- **transparent** PNG/PDF/SVG exports with 300-dpi raster output, alongside
-  full source notes in separate text captions (not overlaid on the chart).
-
-The statistical calculations, confidence estimands and raw records are
-unchanged. These revisions remove the gridlines, describe bin support in the
-caption, and flag a statistical limitation of the zero-error region; they do
-not create an unsupported upper confidence bound.
+Both figures use the shared style in
+`src/reporting_validation_standards/plot_style.py`: they are drawn at their
+printed width (6.3 in), with no titles, gridlines, spines or text on the
+canvas, one frameless legend below the axes, the empirical series in blue,
+uncertainty in light grey and reference lines dashed in coral.
 
 The underlying tables are `outputs/jev/calibration_figure_data.csv`
 and `outputs/jev/risk_coverage_figure_data.csv`.
 `outputs/jev/figure_manifest.json` records the source hashes, bootstrap
 specification and confidence-tie policy.
 
-**Coverage estimand:** The new curve **averages over random selection within
+**Coverage estimand:** The curve **averages over random selection within
 groups of exactly equal top-class probabilities**. This makes risk
 independent of arbitrary observation order, even if many probabilities
-are exactly 1.0. Earlier point estimates under `risk_75` / `risk_90`
+are exactly 1.0. The point estimates under `risk_75` / `risk_90`
 in script 15 rely on stable record-order tie breaking; the figure's
-tie-averaged estimates are an explicitly different, more defensible
-publication estimand and must not silently be identified with those earlier
-numbers. At 100% valid-output coverage the estimates coincide.
+tie-averaged estimates are a different, more defensible estimand and
+should not be identified with those numbers. At 100% valid-output coverage
+the estimates coincide.
 
 Both plots **condition on the original 983 valid first-pass outputs**,
 exclude the 17 original failures (and all diagnostic reruns), and assess
@@ -146,7 +132,7 @@ human review. The horizontal axis is this **conditional automated
 coverage**, not the share of all originally attempted speeches. The
 vertical axis is the design-weighted disagreement rate within the
 retained subset, measured against the automated silver reference.
-The blue line is the error observed under this ranking; the orange line
+The blue line is the error observed under this ranking; the coral dashed line
 is the expected error if an equally large subset were selected at random.
 No actual reviewer outcomes were observed, and the plot does not assume
 that human adjudication would be perfect.
@@ -156,8 +142,8 @@ have no disagreements with silver among the highest-ranked cases. The
 resampled bootstrap then also finds zero errors and its percentile interval
 can collapse to exactly zero. This is **a limitation of the empirical
 bootstrap with no observed failures**, not a scientific claim that
-unobserved failures are impossible. The figure marks this region and
-its standalone caption states the limitation. We do not add an ad hoc
+unobserved failures are impossible. The figure's caption identifies this
+region and states the limitation. We do not add an ad hoc
 binomial or pseudo-count upper bound because it would not automatically
 respect the original label-stratified sampling design. The existing
 bootstrap intervals are pointwise (not simultaneous) and conditional
@@ -218,7 +204,7 @@ An optional, separate diagnostic runner repeats only the original 17
 probability-sum failures using the exact saved request specification. These
 are explicitly **new inference realisations**, not recovered original responses:
 
-```cmd
+```bash
 pipenv run python code/14b_audit_jev_probability_failures.py --plan-only
 pipenv run python code/14b_audit_jev_probability_failures.py --max-decisions 1
 pipenv run python code/14b_audit_jev_probability_failures.py --max-decisions 0
@@ -231,7 +217,7 @@ under `runs/jev/probability_sum_audit.jsonl` (gitignored). It never changes
 observation is audited at most once by this runner. It is not a scientific basis
 for selecting a favourable acceptance tolerance after observing accuracy.
 
-Script 15 now additionally reports **operational accuracy**, counting an
+Script 15 also reports **operational accuracy**, counting an
 invalid response as an incorrect measurement, with a separate design-based
 bootstrap interval. Its pre-existing Brier, log-loss, calibration and
 risk–coverage estimates remain **conditional on valid probability vectors**.
@@ -244,7 +230,7 @@ exactly `1.0` (maximum absolute deviation `0.0`). This documents
 **non-reproduction on a subsequent request**, not the original sums or
 the cause of their initial rejection. Do not overwrite the first pass.
 
-For future first-pass experiments, script 14 now retains raw class
+For future first-pass experiments, script 14 retains raw class
 probabilities, totals, signed sum deviation, returned choice, confidence,
 model and usage when an API response is received but parsing rejects it.
 This change does not alter the original 1,000-record run.

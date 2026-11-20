@@ -2,19 +2,19 @@
 
 Documentation uses British English. Existing source-code identifiers and machine-readable provenance retain their original American-English spellings for compatibility and reproducibility.
 
-This file records methodological decisions that should later be reflected in the working paper and reproducibility documentation. Runtime manifests remain the authoritative source for the exact environment used in each completed run.
+This file records methodological decisions that inform the working paper and reproducibility documentation. Runtime manifests remain the authoritative source for the exact environment used in each completed run.
 
 ## 2026-09-23 — Local inference environment
 
 - NVIDIA GeForce driver updated to version 617.14 (2026-09-22 release).
 - Ollama updated from 0.12.3 to 0.34.3 before the local-model smoke tests.
-- Run manifests capture the driver reported by `nvidia-smi`, the Ollama version, the local model tag, digest, parameter size, quantization, and other registry metadata.
+- Run manifests capture the driver reported by `nvidia-smi`, the Ollama version, the local model tag, digest, parameter size, quantisation, and other registry metadata.
 
 ## 2026-09-23 — Retaining Qwen3.6 rather than switching to Qwen3.8
 
 The frozen local panel retains `qwen3.6:35b` (Qwen3.6-35B-A3B) rather than replacing it with the newer Qwen3.8 family before substantive evaluation.
 
-The rationale is methodological rather than a claim that Qwen3.6 is generally superior. First, the model panel had already been frozen before substantive evaluation, so retaining the specified model avoids post-specification model chasing under mutable model infrastructure. Second, Qwen3.6-35B-A3B provides a useful sparse Mixture-of-Experts contrast with the 31B Gemma model in the local-compute demonstration. Third, nominal parameter count is not directly comparable across sparse and dense architectures, making the Qwen/Gemma comparison useful for showing why computational performance, energy use, quantization, and deployment details should be measured rather than inferred from model size alone.
+The rationale is methodological rather than a claim that Qwen3.6 is generally superior. First, the model panel had already been frozen before substantive evaluation, so retaining the specified model avoids post-specification model chasing under mutable model infrastructure. Second, Qwen3.6-35B-A3B provides a useful sparse Mixture-of-Experts contrast with the 31B Gemma model in the local-compute demonstration. Third, nominal parameter count is not directly comparable across sparse and dense architectures, making the Qwen/Gemma comparison useful for showing why computational performance, energy use, quantisation, and deployment details should be measured rather than inferred from model size alone.
 
 The local Qwen artefact used in the first smoke tests was:
 
@@ -22,7 +22,7 @@ The local Qwen artefact used in the first smoke tests was:
 - digest: `096fdbd02fe620fc10cbeb6537e080f8041aece851e5d696aed024d4f70f2e47`
 - family: `qwen35moe`
 - parameter size: 35.5B
-- quantization: Q4_K_M
+- quantisation: Q4_K_M
 - parent model: `qwen3.6-source:35b-a3b-mtp-q4_K_M-20260824`
 
 The corresponding Gemma smoke-test artefact was:
@@ -31,7 +31,7 @@ The corresponding Gemma smoke-test artefact was:
 - digest: `6316f0629137b426c9d9b853ffc4c8209589f30ee39aebede6285096c0ff47e7`
 - family: `gemma4`
 - parameter size: 31.3B
-- quantization: Q4_K_M
+- quantisation: Q4_K_M
 
 ## 2026-09-23 — Local timing decomposition
 
@@ -72,7 +72,7 @@ The 4,096-token runtime context should be checked against the full frozen 1,000-
 
 The initial Ollama smoke tests used the runtime default of 4,096 tokens. A full-sample preflight over the frozen 1,000-speech sample showed that the longest rendered prompts were estimated at approximately 4,018–4,035 input tokens under a conservative empirical token/word ratio calibrated from the successful Ollama smoke records. No case was estimated to exceed 4,096 input tokens, but one or two cases per prompt/model condition reached at least 90% of that context.
 
-Because the estimate is a diagnostic proxy rather than an exact tokenizer count, and because the context must also leave room for the 40-token structured output budget and implementation overhead, 4,096 provides insufficient safety margin. The production local-model configuration therefore explicitly freezes `num_ctx=8192` for both Qwen3.6-35B-A3B and Gemma 4 31B.
+Because the estimate is a diagnostic proxy rather than an exact tokeniser count, and because the context must also leave room for the 40-token structured output budget and implementation overhead, 4,096 provides insufficient safety margin. The production local-model configuration therefore explicitly freezes `num_ctx=8192` for both Qwen3.6-35B-A3B and Gemma 4 31B.
 
 This is a pre-analysis infrastructure decision based on the frozen sample's length distribution, not on classification outcomes. The chosen context remains far below the models' advertised maximum context length while providing substantial headroom for the longest sampled parliamentary speech. A targeted longest-case smoke test is used to confirm the setting before production inference.
 
@@ -89,7 +89,7 @@ Increasing the runtime context from 4,096 to 8,192 had negligible observed effec
 
 The production prompt-stability experiment uses the same deterministic randomised decision schedule for every model. The base design contains 1,000 frozen observations × four frozen prompts × three repetitions = 12,000 cells per model. Cells are permuted with NumPy PCG64 using seed 20260923 under schedule algorithm `randomized_cells_pcg64_v1`.
 
-Randomizing cells rather than running complete prompt or repetition blocks reduces the alignment between prompt condition and elapsed run time, and separates repeated classifications of the same observation. The schedule seed, algorithm, and SHA-256 are recorded in every model's production manifest.
+Randomising cells rather than running complete prompt or repetition blocks reduces the alignment between prompt condition and elapsed run time, and separates repeated classifications of the same observation. The schedule seed, algorithm, and SHA-256 are recorded in every model's production manifest.
 
 Production output is append-only and resumable. A completed decision cell is never silently rerun after interruption, regardless of whether its parse status is successful or an observed failure; provider-level retries remain governed by the frozen adapter retry policy. This preserves failures as measurement outcomes rather than replacing them through undocumented recovery attempts.
 
@@ -131,7 +131,7 @@ The first post-production analysis is implemented in `code/07_analyze_stability.
 
 The analysis separates operational reliability from classification stability. API or parse failures remain observed outcomes and are not converted into substantive policy labels. Stability statistics are therefore reported in two forms where relevant: an unconditional quantity in which a missing/invalid classification prevents the cell from being counted as stable, and a conditional quantity restricted to cells for which all classifications required by that comparison are valid. This distinction is particularly important for Mistral Large 3, which completed the scheduled design but retained observed failed classifications under the frozen no-silent-rerun policy.
 
-Repeated-inference stability is measured within model × prompt × observation triads across the three repetitions. Prompt stability compares P0 with each perturbation at matched observation × repetition cells and also examines unanimity across all four prompt conditions. Observation-level stability summarizes all 12 model-specific decisions (four prompts × three repetitions) using complete-case unanimity, the number of distinct valid labels, modal share, and Shannon entropy in bits. Model-family dependence is summarised through pairwise exact agreement for matched decisions, with P0 reported separately from all-prompt agreement. Panel-level unanimity is reported both for the original six-model panel and for all seven models including the post-production Mistral extension.
+Repeated-inference stability is measured within model × prompt × observation triads across the three repetitions. Prompt stability compares P0 with each perturbation at matched observation × repetition cells and also examines unanimity across all four prompt conditions. Observation-level stability summarises all 12 model-specific decisions (four prompts × three repetitions) using complete-case unanimity, the number of distinct valid labels, modal share, and Shannon entropy in bits. Model-family dependence is summarised through pairwise exact agreement for matched decisions, with P0 reported separately from all-prompt agreement. Panel-level unanimity is reported both for the original six-model panel and for all seven models including the post-production Mistral extension.
 
 Because the frozen sample deliberately oversamples rare reference labels, primary aggregate stability quantities use inverse-inclusion sampling weights. Unweighted counterparts are retained as descriptive sample diagnostics. Confidence intervals are not mixed into this diagnostic stage; uncertainty estimation is reserved for the subsequent design-based validation analysis.
 
@@ -169,22 +169,22 @@ The full-population run is append-only and resumable. Persistent provider/API fa
 
 The prevalence-propagation demonstration uses the finalised GPT-5.4 Mini P0 census deployment together with the design-based P0 validation sample. The classifier can output all 23 benchmark labels, whereas the GB silver-reference population has positive support on 17 labels. Consequently, the estimated forward misclassification operator is 23 × 17 and is not suitable for direct matrix inversion.
 
-The primary correction therefore estimates the 17-dimensional reference prevalence vector by simplex-constrained least squares: minimize `||M^T pi - q||_2^2` subject to non-negativity and unit sum. Here `M` is the 17 × 23 conditional misclassification matrix estimated from the validation sample and `q` is the observed 23-label full-deployment prevalence vector. The constrained estimator respects prevalence geometry and remains well-defined when unconstrained least squares would yield negative components or non-unit total mass. The unconstrained solution is retained only as a conditioning/diagnostic comparison.
+The primary correction therefore estimates the 17-dimensional reference prevalence vector by simplex-constrained least squares: minimise `||M^T pi - q||_2^2` subject to non-negativity and unit sum. Here `M` is the 17 × 23 conditional misclassification matrix estimated from the validation sample and `q` is the observed 23-label full-deployment prevalence vector. The constrained estimator respects prevalence geometry and remains well-defined when unconstrained least squares would yield negative components or non-unit total mass. The unconstrained solution is retained only as a conditioning/diagnostic comparison.
 
-The point misclassification matrix averages the three P0 validation repetitions within each sampled observation through one-third decision weights, preserving one inverse-inclusion population weight per speech. Sampling uncertainty is propagated with the same 2,000-replicate Rao-Wu rescaled bootstrap design used for Section 4.3: each bootstrap replicate produces a new misclassification matrix, the constrained prevalence problem is solved again, and percentile intervals are computed from the resulting prevalence distribution.
+The point misclassification matrix averages the three P0 validation repetitions within each sampled observation through one-third decision weights, preserving one inverse-inclusion population weight per speech. Sampling uncertainty is propagated with the same 2,000-replicate Rao-Wu rescaled bootstrap design used for the design-based validation analysis: each bootstrap replicate produces a new misclassification matrix, the constrained prevalence problem is solved again, and percentile intervals are computed from the resulting prevalence distribution.
 
 The correction does use one piece of information from the frozen benchmark sampling frame: the target population is known to have positive silver-reference support on 17 of the 23 official labels. The estimator is therefore support-conditioned and constrains the six unsupported labels to zero true prevalence. This is not equivalent to using the full target prevalence vector, but it means that zero corrected mass on those six labels is imposed by design and must not be presented as empirical evidence of successful correction. The numerical prevalence values of the 17 supported labels are not supplied to the correction algorithm; they are used only ex post to compare naive and corrected prevalence. In an application where true class support is unknown, additional validation information for the unsupported classes would be necessary before applying the same correction.
 
 
 ## 2026-09-27 — Computational and environmental reporting scope
 
-Section 4.5 separates request-level computational accounting from infrastructure-level environmental measurement.
+The computational and environmental analysis separates request-level computational accounting from infrastructure-level environmental measurement.
 
 Across all seven production models, request-level records support reporting of end-to-end latency, provider/runtime token accounting, explicit adapter retries, structured-output failures, and monetary cost where a dated price table and provider token usage were available. These quantities can be summarised directly from the finalised inference records.
 
 Environmental claims depend on infrastructure observability. Hosted API providers do not expose the server hardware, utilisation, power draw, PUE, regional execution location, or contemporaneous electricity mix required for a defensible run-level energy/carbon estimate. Consequently, the analysis records hosted-provider energy and carbon as unobserved and does not infer them from latency, tokens, model size, or monetary price.
 
-The two local Ollama models were measured with CodeCarbon in tracking mode `machine` for every production session. Section 4.5 therefore reports session/run-level CPU, GPU, RAM, total energy, and estimated emissions for those models, alongside the recorded country assumption, CodeCarbon version, hardware, driver, Ollama version, exact model digest, quantisation, runtime context length, and observed CPU/GPU residency. Session summaries are summed because the 12,000-decision production run for each model was completed across multiple resumable sessions. The initial staged five-decision session is included because those five records are part of the finalised production schedule.
+The two local Ollama models were measured with CodeCarbon in tracking mode `machine` for every production session. The analysis therefore reports session/run-level CPU, GPU, RAM, total energy, and estimated emissions for those models, alongside the recorded country assumption, CodeCarbon version, hardware, driver, Ollama version, exact model digest, quantisation, runtime context length, and observed CPU/GPU residency. Session summaries are summed because the 12,000-decision production run for each model was completed across multiple resumable sessions. The initial staged five-decision session is included because those five records are part of the finalised production schedule.
 
 Energy or emissions per 1,000 decisions are permitted only as transparent normalisations of the complete measured session totals. They are not described as directly measured per-request carbon footprints. Likewise, the first request after a production session starts is reported as a session-start model-load observation rather than a strict cold start, because lower-level caches may survive between sessions.
 
@@ -210,4 +210,15 @@ The source is `outputs/validation/condition_performance.csv`. Rows with `aggrega
 
 ### Figure rendering convention
 
-The plot follows the restrained comparison style used in the related Eval4SD scripts: shared model labels, no visible spines, no background grid, transparent PNG/PDF export, and a legend below the plotting field. The four prompt conditions use softened Oxford-inspired colours. Metric axes use the original 0–1 scale (for example 0.8, 0.9, 1.0), not percentage labels. The figure caption is stored separately in a same-basename UTF-8 TXT file.
+The plot follows a restrained comparison style: shared model labels, no visible spines, no background grid, transparent PNG/PDF export, and a legend below the plotting field. The four prompt conditions use softened Oxford-inspired colours. Metric axes use the original 0–1 scale (for example 0.8, 0.9, 1.0), not percentage labels. The figure caption is stored separately in a same-basename UTF-8 TXT file.
+
+
+## 2026-11-20 — Figures drawn at their printed width
+
+The manuscript sets every figure at 0.95 of a 6.5-inch text block (about 6.3 in). The earlier figures were drawn at 8.5–14.5 in, so their text printed at roughly 4–9 pt. All manuscript figures are now drawn at 6.3 in with the shared style in `src/reporting_validation_standards/plot_style.py`, which also refuses text under 7 pt, gridlines and text on the canvas, and writes the caption as a title line followed by a "Note." line.
+
+- The validation profile uses a 2 × 2 panel layout (Accuracy and Macro-Precision above, Macro-Recall and Macro-F1 below) instead of a single 1 × 4 strip.
+- The palette is the colour-vision-deficiency-safe set blue `#5F7A9D`, terracotta `#E6A57E`, light sage `#ACE0B8` and deep plum `#5E4161`, with dark-grey marker edges. Uncertainty ribbons and the calibration bars are light grey, and reference lines are dashed coral `#FE615A` and named in the legend.
+- The two country-counterfactual maps are combined into one figure with an Equal Earth projection, a single-hue sequential scale shared across both models and hatched, labelled missing data.
+
+The statistics, plotted tables and source data are unchanged.
