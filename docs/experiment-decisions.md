@@ -222,3 +222,14 @@ The manuscript sets every figure at 0.95 of a 6.5-inch text block (about 6.3 in)
 - The two country-counterfactual maps are combined into one figure with an Equal Earth projection, a single-hue sequential scale shared across both models and hatched, labelled missing data.
 
 The statistics, plotted tables and source data are unchanged.
+
+
+## 2026-11-21 — Per-prompt intervals in the validation figure
+
+The validation profile now shows sampling uncertainty for every model × prompt. Script `code/08b_analyze_prompt_intervals.py` applies the primary estimator to each prompt (the three repetitions of a speech averaged, so it carries its inverse-inclusion weight once) and reuses the same 2,000 Rao–Wu rescaled bootstrap replicates and seed as the primary analysis. Its P0 intervals reproduce `primary_model_performance.csv` exactly, and its point estimates equal the repetition-averaged rows of `condition_performance.csv`; the script refuses to write otherwise. The P1–P3 intervals are new descriptive outputs (`outputs/validation/prompt_performance_intervals.csv`) and change no committed estimate. They are pointwise and are not used for formal prompt comparisons.
+
+In the figure, each prompt row shows the repetition-averaged estimate and its 95% interval. Marks for the three single repetitions proved too noisy and mostly hid behind the averaged estimate (median spread 0.006, maximum 0.059), so the caption reports the spread instead. Models are ordered by their primary P0 macro-F1 estimate rather than in the experimental order; the caption states that the order is not a ranking. Prompt P2 now uses sky aqua `#4FB3D1` instead of light sage `#ACE0B8`, which gives the four prompts a more even visual weight and raises the worst colour-vision-deficiency separation from 9.1 to 12.1 (CIEDE2000).
+
+The working paper sets the validation profile and both JEV figures at 0.8 of the text width and the country map at 0.88, the widest at which the map, its caption and its Note fit on one page. `plot_style.print_width(fraction)` returns the matching width (5.2 in and 5.7 in), and each script draws its figure at that size, so the 8–9 pt text and the 7 pt minimum hold on the printed page. The map uses a warm sequential scale in the house tones (pale terracotta, terracotta `#E6A57E`, Oxford coral `#FE615A`, deep plum `#5E4161`; lightness falls monotonically), which keeps emissions visually distinct from the blue used for performance, and 0.5 pt grey borders.
+
+Every figure PDF is also saved at exactly its print width: `plot_style.save(..., target_width=...)` scales the canvas until the tight-cropped PDF matches, so LaTeX places it at scale 1 and fonts and lines print at their designed sizes. The map's colour bar is drawn as vector cells rather than an embedded image, so the figure PDFs contain no raster content. The separate PNG files (for slides and the web; the paper uses the PDFs) are saved at 1200 dpi.

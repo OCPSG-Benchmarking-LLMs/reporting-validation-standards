@@ -22,6 +22,9 @@ from reporting_validation_standards.jev_figure_analysis import plot_data_with_un
 from reporting_validation_standards.stability_analysis import sha256_file
 from reporting_validation_standards.validation_analysis import rao_wu_rescaled_bootstrap_weights
 
+# The manuscript sets both JEV figures at 0.8\linewidth.
+FIGURE_WIDTH = ps.print_width(0.8)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -98,9 +101,16 @@ def load_frozen_inputs(args):
     return design, valid, confidence, correct, weights, metrics, manifest, raw_hash
 
 
+def fixed_ticks(ax, step: float) -> None:
+    """Fixed y ticks, so the label set (and the figure's cropped width) cannot jump
+    when the canvas is scaled to its print width."""
+    ticks = np.arange(0, ax.get_ylim()[1] + 1e-9, step)
+    ax.set_yticks(ticks, [f"{tick:.2f}" for tick in ticks])
+
+
 def save_with_caption(fig, stem: Path, caption: str):
-    """Transparent PNG, PDF and SVG at 300 dpi plus the .txt caption."""
-    ps.save(fig, stem, caption)
+    """Vector PDF and SVG, a transparent 600-dpi PNG and the .txt caption."""
+    ps.save(fig, stem, caption, target_width=FIGURE_WIDTH)
     plt.close(fig)
 
 
@@ -109,7 +119,7 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int,
     """Calibration points with the weighted mass of each confidence bin below."""
     ps.use_style()
     fig, (ax, bx) = plt.subplots(
-        2, 1, figsize=(ps.PRINT_WIDTH_IN, 5.4), sharex=True,
+        2, 1, figsize=(FIGURE_WIDTH, 4.6), sharex=True,
         gridspec_kw={"height_ratios": [3.2, 1.1]},
     )
     reference, = ax.plot(
@@ -137,6 +147,7 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int,
         color=ps.LIGHT_GREY, edgecolor=ps.EDGE, linewidth=.5, zorder=3,
     )
     bx.set_ylim(0, max(.1, float(data["estimated_population_mass"].max()) * 1.17))
+    fixed_ticks(bx, step=.25 if bx.get_ylim()[1] > .5 else .05)
     bx.set_ylabel("Weighted share")
     bx.set_xlabel("Predicted top-class probability")
     bx.set_xticks(np.arange(0, 1.01, .2))
@@ -191,7 +202,7 @@ def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
                          stem: Path, reps: int, n_attempted: int = 1000):
     """Selective error by automated coverage against a random-selection benchmark."""
     ps.use_style()
-    fig, ax = plt.subplots(figsize=(ps.PRINT_WIDTH_IN, 3.9))
+    fig, ax = plt.subplots(figsize=(FIGURE_WIDTH, 3.4))
     coverage = data["coverage"].to_numpy(dtype=float)
     random_band = ax.axhspan(
         baseline["random_review_ci_low"], baseline["random_review_ci_high"],
@@ -209,6 +220,7 @@ def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
     ax.set_xlim(.1, 1.01)
     upper = max(float(data["ci_high"].max()), baseline["random_review_ci_high"]) * 1.1
     ax.set_ylim(0, min(1., max(upper, .02)))
+    fixed_ticks(ax, step=.02 if ax.get_ylim()[1] <= .12 else .05)
     ax.set_xticks(np.arange(.1, 1.01, .1))
     ax.set_xlabel("Automated coverage among valid outputs")
     ax.set_ylabel("Classification error rate")

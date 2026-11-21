@@ -50,7 +50,7 @@ pipenv run python code/16_generate_jev_figures.py
 ```
 
 Script 16 defaults to the **same 2,000 Rao–Wu rescaled bootstrap draws and
-seed** recorded by script 15. It writes transparent 300-dpi PNG, vector PDF
+seed** recorded by script 15. It writes transparent 1200-dpi PNG, vector PDF
 and SVG files, each with a `.txt` caption (a title line, then a "Note." line),
 under `outputs/figures/`:
 
@@ -67,7 +67,7 @@ under `outputs/figures/`:
 
 Both figures use the shared style in
 `src/reporting_validation_standards/plot_style.py`: they are drawn at their
-printed width (6.3 in), with no titles, gridlines, spines or text on the
+printed width (5.2 in, as the paper sets them at 0.8 of the text width), with no titles, gridlines, spines or text on the
 canvas, one frameless legend below the axes, the empirical series in blue,
 uncertainty in light grey and reference lines dashed in coral.
 

@@ -98,12 +98,12 @@ The script creates:
 - `outputs/compute_environment/local_country_emissions_manifest.json`
   (source hashes and scope).
 - `outputs/figures/local_carbon_country_ollama.{png,pdf,svg,txt}`
-  (transparent 300-dpi PNG, vector PDF and SVG, and a separate caption).
+  (vector PDF and SVG at exactly the print width, a transparent 1200-dpi PNG, and a separate caption).
 
 The figure stacks one Equal Earth map per model (Qwen above Gemma), drawn at
-its printed width with the shared style in
-`src/reporting_validation_standards/plot_style.py`: a single-hue sequential
-blue scale, grey country borders, no gridlines or embedded title, and one
+its printed width (5.7 in, as the paper sets it at 0.88 of the text width) with the shared style in
+`src/reporting_validation_standards/plot_style.py`: a warm sequential scale
+(pale terracotta, terracotta `#E6A57E`, Oxford coral `#FE615A`, deep plum `#5E4161`), grey country borders, no gridlines or embedded title, and one
 horizontal colour bar below both panels. Countries in the boundary snapshot
 without a matching factor are hatched grey and named "No data" in the legend;
 the CSV retains the full factor table. The colour scale refers to **absolute
