@@ -96,7 +96,7 @@ def test_combined_map_is_transparent_grid_free_and_exports(tmp_path):
     assert set(matched) == set(keys)
     assert all(count >= 160 for count in matched.values())
     assert ps.paper_problems(fig) == []
-    assert fig.get_figwidth() == ps.PRINT_WIDTH_IN
+    assert fig.get_figwidth() == RUNNER["FIGURE_WIDTH"]
     maps = [axes for axes in fig.axes if axes.get_title()]
     assert [axes.get_title() for axes in maps] == [RUNNER["PANEL_TITLES"][k] for k in keys]
     for axes in maps:

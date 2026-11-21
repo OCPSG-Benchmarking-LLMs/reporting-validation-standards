@@ -21,7 +21,7 @@ def test_figures_export_pdf_svg_png_and_caption(tmp_path):
         # Every manuscript plot is title-free, visually restrained and frameless,
         # and is drawn at the width at which it is printed.
         assert ps.paper_problems(fig) == []
-        assert fig.get_figwidth() == ps.PRINT_WIDTH_IN
+        assert fig.get_figwidth() == ps.print_width(0.8)
         assert all(not axes.get_title() for axes in fig.axes)
         assert all(not spine.get_visible() for axes in fig.axes
                    for spine in axes.spines.values())

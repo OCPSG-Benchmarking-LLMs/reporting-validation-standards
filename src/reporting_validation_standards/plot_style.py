@@ -1,6 +1,7 @@
 """Shared matplotlib style for the manuscript figures.
 
-Every figure is drawn at the width at which it is printed (``PRINT_WIDTH_IN``), so the
+Every figure is drawn at the width at which the manuscript prints it
+(``print_width(fraction)`` for ``\\includegraphics[width=<fraction>\\linewidth]``), so the
 font sizes set here are the sizes a reader sees on the page. The conventions are:
 
 - no spines, tick marks or gridlines, and one frameless legend below the panels;
@@ -19,8 +20,16 @@ from pathlib import Path
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 
-PRINT_WIDTH_IN = 6.3      # 0.95 of a 6.5-inch text block
+TEXT_WIDTH_IN = 6.5       # the manuscript's text block (US Letter, 1-inch margins)
 MIN_FONT = 7.0
+
+
+def print_width(fraction: float) -> float:
+    """Width in inches of a figure set at ``fraction`` of the text width."""
+    if not 0 < fraction <= 1:
+        raise ValueError("fraction is the share of \\linewidth, in (0, 1]")
+    return round(TEXT_WIDTH_IN * fraction, 4)
+
 
 EDGE = "#4D4D4D"          # marker and bar edges
 TEXT = "#211D1C"
@@ -41,7 +50,7 @@ SEQUENTIAL = LinearSegmentedColormap.from_list(
 
 
 def use_style() -> None:
-    """Set the house rcParams (sizes are print sizes at PRINT_WIDTH_IN)."""
+    """Set the house rcParams (sizes are print sizes, given figures drawn at print width)."""
     mpl.rcParams.update({
         "font.family": "DejaVu Sans", "font.size": 9,
         "axes.titlesize": 9.5, "axes.labelsize": 9, "xtick.labelsize": 8, "ytick.labelsize": 8,

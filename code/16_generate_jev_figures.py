@@ -22,6 +22,9 @@ from reporting_validation_standards.jev_figure_analysis import plot_data_with_un
 from reporting_validation_standards.stability_analysis import sha256_file
 from reporting_validation_standards.validation_analysis import rao_wu_rescaled_bootstrap_weights
 
+# The manuscript sets both JEV figures at 0.8\linewidth.
+FIGURE_WIDTH = ps.print_width(0.8)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -109,7 +112,7 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int,
     """Calibration points with the weighted mass of each confidence bin below."""
     ps.use_style()
     fig, (ax, bx) = plt.subplots(
-        2, 1, figsize=(ps.PRINT_WIDTH_IN, 5.4), sharex=True,
+        2, 1, figsize=(FIGURE_WIDTH, 4.6), sharex=True,
         gridspec_kw={"height_ratios": [3.2, 1.1]},
     )
     reference, = ax.plot(
@@ -191,7 +194,7 @@ def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
                          stem: Path, reps: int, n_attempted: int = 1000):
     """Selective error by automated coverage against a random-selection benchmark."""
     ps.use_style()
-    fig, ax = plt.subplots(figsize=(ps.PRINT_WIDTH_IN, 3.9))
+    fig, ax = plt.subplots(figsize=(FIGURE_WIDTH, 3.4))
     coverage = data["coverage"].to_numpy(dtype=float)
     random_band = ax.axhspan(
         baseline["random_review_ci_low"], baseline["random_review_ci_high"],

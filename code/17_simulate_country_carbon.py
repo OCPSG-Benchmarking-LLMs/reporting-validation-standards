@@ -50,6 +50,8 @@ PANEL_TITLES = {
     "ollama_gemma4_31b": "Gemma 4 (31B)",
 }
 FIGURE_STEM = "local_carbon_country_ollama"
+# The manuscript sets the map at 0.7\linewidth.
+FIGURE_WIDTH = ps.print_width(0.7)
 
 def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -221,7 +223,7 @@ def make_maps(
     _, y_bounds = equal_earth(np.zeros(2), np.array([-58.0, 84.0]))
 
     fig, axes = plt.subplots(
-        len(model_keys), 1, figsize=(ps.PRINT_WIDTH_IN, 1.0 + 2.6 * len(model_keys)),
+        len(model_keys), 1, figsize=(FIGURE_WIDTH, 0.9 + 2.05 * len(model_keys)),
         squeeze=False,
     )
     mapped: dict[str, int] = {}
@@ -245,10 +247,10 @@ def make_maps(
             filled.extend(rings)
             fills.extend([cmap(norm(value))] * len(rings))
         ax.add_collection(PatchCollection(
-            filled, facecolor=fills, edgecolor=ps.BORDER, linewidth=0.25,
+            filled, facecolor=fills, edgecolor=ps.BORDER, linewidth=0.3,
         ))
         ax.add_collection(PatchCollection(
-            missing, facecolor=ps.NO_DATA, edgecolor=ps.BORDER, linewidth=0.25,
+            missing, facecolor=ps.NO_DATA, edgecolor=ps.BORDER, linewidth=0.3,
             hatch="//////",
         ))
         ax.set_xlim(-x_edge[0] * 1.01, x_edge[0] * 1.01)
@@ -258,17 +260,17 @@ def make_maps(
         ax.set_title(PANEL_TITLES[model_key])
         mapped[model_key] = len(matched)
 
-    fig.tight_layout(rect=(0, 0.13, 1, 1), h_pad=0.8)
-    colorbar_ax = fig.add_axes((0.2, 0.085, 0.48, 0.022))
+    fig.tight_layout(rect=(0, 0.1, 1, 1), h_pad=0.8)
+    colorbar_ax = fig.add_axes((0.2, 0.08, 0.48, 0.022))
     colorbar = fig.colorbar(
         ScalarMappable(norm=norm, cmap=cmap), cax=colorbar_ax, orientation="horizontal"
     )
     colorbar.outline.set_visible(False)
     colorbar.ax.tick_params(length=0, pad=3)
     colorbar.set_label("Counterfactual g CO₂e per 1,000 classifications", labelpad=5)
-    no_data = Patch(facecolor=ps.NO_DATA, edgecolor=ps.BORDER, linewidth=0.25,
+    no_data = Patch(facecolor=ps.NO_DATA, edgecolor=ps.BORDER, linewidth=0.3,
                     hatch="//////", label="No data")
-    fig.legend(handles=[no_data], loc="center left", bbox_to_anchor=(0.71, 0.096),
+    fig.legend(handles=[no_data], loc="center left", bbox_to_anchor=(0.71, 0.091),
                frameon=False, handlelength=1.6, handleheight=1.1)
     return fig, mapped
 

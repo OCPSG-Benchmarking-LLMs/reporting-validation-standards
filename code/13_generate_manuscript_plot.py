@@ -4,8 +4,8 @@ Reads the committed outputs/validation/condition_performance.csv (single-repetit
 estimates) and outputs/validation/prompt_performance_intervals.csv (repetition-averaged
 estimates with 95% Rao-Wu bootstrap intervals, from script 08b) and draws a 2 x 2 figure
 (Accuracy, Macro-Precision, Macro-Recall, Macro-F1). Each model x prompt row shows the
-interval as a line, the averaged estimate as a circle and the three single-repetition
-estimates as ticks.
+interval as a thin line, the range of the three single-repetition estimates as a thicker
+bar and the averaged estimate as a circle.
 """
 
 from __future__ import annotations
@@ -64,10 +64,12 @@ METRICS = {
 
 X_LIMITS = (0.7, 1.0)
 X_TICKS = (0.7, 0.8, 0.9, 1.0)
-FIGSIZE = (ps.PRINT_WIDTH_IN, 7.6)
-POINT_AREA = 24
-CI_WIDTH = 1.4
-TICK_SIZE = 7.0
+LINEWIDTH_FRACTION = 0.8     # the manuscript sets this figure at 0.8\linewidth
+FIGSIZE = (ps.print_width(LINEWIDTH_FRACTION), 6.0)
+POINT_AREA = 20
+CI_WIDTH = 1.0
+RANGE_WIDTH = 4.5
+RANGE_ALPHA = 0.45
 
 CAPTION = (
     "Validation Performance across Prompt Specifications and Repeated Inference\n\n"
@@ -78,7 +80,8 @@ CAPTION = (
     "repetitions of a speech are averaged so that the speech carries its sampling weight "
     "once, and the line through it is the pointwise 95% percentile interval from 2,000 "
     "stratified Rao–Wu rescaled bootstrap replicates (the same replicates as the primary P0 "
-    "analysis). The three vertical ticks on each line mark the single-repetition estimates. "
+    "analysis). The thicker bar on each line spans the lowest to the highest of the three "
+    "single-repetition estimates. "
     "Models are shown in the fixed experimental order rather than sorted by performance, "
     "and the x-axis keeps the original 0–1 metric scale."
 )
@@ -174,26 +177,39 @@ def prepare_intervals(intervals: pd.DataFrame, source: Path = INTERVAL_FILE) -> 
     return intervals
 
 
+def repetition_ranges(data: pd.DataFrame) -> pd.DataFrame:
+    """Lowest and highest single-repetition estimate per model x prompt and metric."""
+    grouped = data.groupby(["model_key", "prompt_id"], sort=False)[list(METRICS.values())]
+    ranges = grouped.min().add_suffix("_rep_min").join(grouped.max().add_suffix("_rep_max"))
+    if (grouped.size() != 3).any():
+        raise ValueError("Each model x prompt needs exactly three single-repetition estimates.")
+    ranges = ranges.reset_index()
+    ranges["y"] = _y_positions(ranges)
+    return ranges
+
+
 def build_figure(data: pd.DataFrame, intervals: pd.DataFrame):
     ps.use_style()
+    ranges = repetition_ranges(data)
     fig, axes = plt.subplots(2, 2, figsize=FIGSIZE, sharex=True, sharey=True)
 
     for ax, (title, column) in zip(axes.flat, METRICS.items(), strict=True):
         for prompt in PROMPT_ORDER:
             colour = PROMPT_COLOURS[prompt]
             cell = intervals.loc[intervals["prompt_id"].eq(prompt)]
+            spread = ranges.loc[ranges["prompt_id"].eq(prompt)]
             ax.hlines(
                 cell["y"], cell[f"{column}_ci_low"], cell[f"{column}_ci_high"],
                 color=colour, linewidth=CI_WIDTH, zorder=2,
             )
+            ax.hlines(
+                spread["y"], spread[f"{column}_rep_min"], spread[f"{column}_rep_max"],
+                color=colour, linewidth=RANGE_WIDTH, alpha=RANGE_ALPHA, zorder=3,
+                capstyle="butt",
+            )
             ax.scatter(
                 cell[column], cell["y"], s=POINT_AREA, color=colour,
-                edgecolors=ps.EDGE, linewidths=0.5, zorder=3,
-            )
-            repetitions = data.loc[data["prompt_id"].eq(prompt)]
-            ax.plot(
-                repetitions[column], repetitions["y"], linestyle="none", marker="|",
-                markersize=TICK_SIZE, markeredgewidth=0.8, color=ps.EDGE, zorder=4,
+                edgecolors=ps.EDGE, linewidths=0.5, zorder=4,
             )
         ax.set_title(title)
         ax.set_xlim(X_LIMITS[0] - 0.01, X_LIMITS[1] + 0.01)
@@ -211,11 +227,11 @@ def build_figure(data: pd.DataFrame, intervals: pd.DataFrame):
     ]
     handles += [
         Line2D([], [], color=ps.EDGE, linewidth=CI_WIDTH, label="95% CI"),
-        Line2D([], [], linestyle="", marker="|", markersize=TICK_SIZE,
-               markeredgewidth=0.8, color=ps.EDGE, label="Single repetition"),
+        Line2D([], [], color=ps.EDGE, linewidth=RANGE_WIDTH, alpha=RANGE_ALPHA,
+               solid_capstyle="butt", label="Range of 3 repetitions"),
     ]
-    fig.tight_layout(rect=(0, 0.07, 1, 1), h_pad=1.6, w_pad=3.0)
-    ps.bottom_legend(fig, handles, ncol=3, y=0.065)
+    fig.tight_layout(rect=(0, 0.11, 1, 1), h_pad=1.2, w_pad=2.0)
+    ps.bottom_legend(fig, handles, ncol=2, y=0.105)
     return fig
 
 

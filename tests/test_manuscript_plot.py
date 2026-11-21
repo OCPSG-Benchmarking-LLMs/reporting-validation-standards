@@ -51,11 +51,11 @@ def test_figure_has_four_panels_at_print_size(tmp_path):
     fig = RUNNER["build_figure"](data, intervals)
     panels = [axes for axes in fig.axes if axes.get_title()]
     assert [axes.get_title() for axes in panels] == list(RUNNER["METRICS"])
-    assert fig.get_figwidth() == ps.PRINT_WIDTH_IN
+    assert fig.get_figwidth() == ps.print_width(0.8)
     assert ps.paper_problems(fig) == []
     assert ps.min_font_size(fig) >= ps.MIN_FONT
     labels = [text.get_text() for text in fig.legends[0].get_texts()]
-    assert labels[-2:] == ["95% CI", "Single repetition"] and len(labels) == 6
+    assert labels[-2:] == ["95% CI", "Range of 3 repetitions"] and len(labels) == 6
     paths = ps.save(fig, tmp_path / "profile", RUNNER["CAPTION"])
     assert {path.suffix for path in paths} == {".png", ".pdf", ".svg", ".txt"}
 
@@ -90,3 +90,16 @@ def test_prompt_intervals_must_reproduce_committed_estimates():
     moved.loc[3, "weighted_operational_macro_recall"] += 1e-6
     with pytest.raises(ValueError, match="condition_performance"):
         INTERVALS["check_against_committed"](moved, conditions, primary)
+
+
+def test_repetition_ranges_span_the_three_estimates():
+    data = RUNNER["prepare"](synthetic_conditions())
+    ranges = RUNNER["repetition_ranges"](data)
+    assert len(ranges) == 7 * 4
+    column = "weighted_operational_macro_f1"
+    cell = data.loc[data["model_key"].eq("openai_gpt54") & data["prompt_id"].eq(P0), column]
+    row = ranges.loc[ranges["model_key"].eq("openai_gpt54") & ranges["prompt_id"].eq(P0)]
+    assert row[f"{column}_rep_min"].item() == cell.min()
+    assert row[f"{column}_rep_max"].item() == cell.max()
+    with pytest.raises(ValueError, match="exactly three"):
+        RUNNER["repetition_ranges"](data.iloc[1:])

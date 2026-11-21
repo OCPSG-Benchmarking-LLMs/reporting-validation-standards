@@ -101,7 +101,7 @@ The script creates:
   (transparent 300-dpi PNG, vector PDF and SVG, and a separate caption).
 
 The figure stacks one Equal Earth map per model (Qwen above Gemma), drawn at
-its printed width with the shared style in
+its printed width (4.55 in, as the paper sets it at 0.7 of the text width) with the shared style in
 `src/reporting_validation_standards/plot_style.py`: a single-hue sequential
 blue scale, grey country borders, no gridlines or embedded title, and one
 horizontal colour bar below both panels. Countries in the boundary snapshot

@@ -67,7 +67,7 @@ under `outputs/figures/`:
 
 Both figures use the shared style in
 `src/reporting_validation_standards/plot_style.py`: they are drawn at their
-printed width (6.3 in), with no titles, gridlines, spines or text on the
+printed width (5.2 in, as the paper sets them at 0.8 of the text width), with no titles, gridlines, spines or text on the
 canvas, one frameless legend below the axes, the empirical series in blue,
 uncertainty in light grey and reference lines dashed in coral.
 

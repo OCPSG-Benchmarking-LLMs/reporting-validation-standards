@@ -311,13 +311,13 @@ Outputs in `outputs/compute_environment/`: `production_compute_summary.csv`, `de
 
 ## 10. Manuscript figures
 
-All figures are drawn at their printed width (6.3 in) with the shared style in `src/reporting_validation_standards/plot_style.py`: no titles, gridlines, spines or text on the canvas, one frameless legend below the panels, a palette that stays distinguishable under the common forms of colour-vision deficiency, and dashed coral reference lines named in the legend. Each figure is saved as a transparent 300-dpi PNG plus vector PDF and SVG, with a same-basename `.txt` caption (a title line, a blank line, then "Note. …").
+All figures are drawn at the width at which the working paper prints them (5.2 in for the figures set at 0.8 of the text width and 4.55 in for the map at 0.7), so their 8–9 pt text keeps that size on the page. They use the shared style in `src/reporting_validation_standards/plot_style.py`: no titles, gridlines, spines or text on the canvas, one frameless legend below the panels, a palette that stays distinguishable under the common forms of colour-vision deficiency, and dashed coral reference lines named in the legend. Each figure is saved as a transparent 300-dpi PNG plus vector PDF and SVG, with a same-basename `.txt` caption (a title line, a blank line, then "Note. …").
 
 ```bash
 pipenv run python code/13_generate_manuscript_plot.py
 ```
 
-`validation_prompt_repetition_profile` shows design-weighted operational Accuracy, Macro-Precision, Macro-Recall and Macro-F1 in a 2 × 2 layout. For each of the seven models, each panel has four prompt rows coloured by prompt (P0 blue `#5F7A9D`, P1 terracotta `#E6A57E`, P2 sky aqua `#4FB3D1`, P3 deep plum `#5E4161`). On each row, the circle is the repetition-averaged estimate and the line its 95% interval (both from script 08b), and three dark-grey ticks mark the single-repetition estimates from `condition_performance.csv`. Models keep the fixed experimental order, and the figure complements the full numerical tables rather than replacing them.
+`validation_prompt_repetition_profile` shows design-weighted operational Accuracy, Macro-Precision, Macro-Recall and Macro-F1 in a 2 × 2 layout. For each of the seven models, each panel has four prompt rows coloured by prompt (P0 blue `#5F7A9D`, P1 terracotta `#E6A57E`, P2 sky aqua `#4FB3D1`, P3 deep plum `#5E4161`). On each row, the circle is the repetition-averaged estimate and the thin line its 95% interval (both from script 08b), and a thicker translucent bar spans the lowest to the highest of the three single-repetition estimates in `condition_performance.csv`. Models keep the fixed experimental order, and the figure complements the full numerical tables rather than replacing them.
 
 Figures for the extensions are described in their notes: `jev_calibration` and `jev_risk_coverage` (script 16) and `local_carbon_country_ollama` (script 17).
 
