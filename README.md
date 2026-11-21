@@ -66,7 +66,7 @@ The OCPSG Silver Standard dataset is gated on Hugging Face: accept its access co
 | Context preflight | `04_preflight_stability_experiment.py` | `outputs/preflight/` |
 | Stability production runs | `05_run_stability_experiment.py`, `06_check_and_finalize_production.py` | `runs/production/`, `results/production/` |
 | Stability analysis | `07_analyze_stability.py` | `outputs/stability/` |
-| Design-based validation | `08_analyze_validation.py` | `outputs/validation/` |
+| Design-based validation | `08_analyze_validation.py`, `08b_analyze_prompt_intervals.py` | `outputs/validation/` |
 | Full-population deployment | `09_run_population_deployment.py`, `10_check_and_finalize_deployment.py` | `runs/deployment/`, `results/deployment/` |
 | Prevalence error propagation | `11_analyze_error_propagation.py` | `outputs/propagation/` |
 | Compute and environment | `12_analyze_compute_environment.py` | `outputs/compute_environment/` |
@@ -257,6 +257,14 @@ Outputs in `outputs/validation/`:
 
 These are **silver-reference performance estimates**, not human-gold validation.
 
+### Per-prompt intervals
+
+```bash
+pipenv run python code/08b_analyze_prompt_intervals.py
+```
+
+Script 08b applies the same estimator to each model × prompt: the three repetitions of a speech are averaged so that it carries its sampling weight once, and 95% percentile intervals come from the same 2,000 Rao–Wu replicates (seed and replicate count are read from `analysis_manifest.json`). It fails closed unless every point estimate equals the repetition-averaged row of `condition_performance.csv` and every P0 interval equals `primary_model_performance.csv`, and it rewrites no existing output. It writes `prompt_performance_intervals.csv` and `prompt_intervals_manifest.json` to `outputs/validation/`; the P1–P3 intervals are descriptive and change no committed estimate.
+
 ## 7. Full-population deployment
 
 The prevalence-propagation demonstration uses one frozen deployment over the complete GB silver-reference test population, specified in `config/deployment.yaml`: the pinned GPT-5.4 Mini snapshot (`gpt-5.4-mini-2026-03-17`), the canonical P0 prompt, the same `text_en` input rule and one classification per speech. The model was selected after the validation stage because its API cost is substantially lower than GPT-5.4's while the paired bootstrap interval for their macro-F1 difference included zero; this is not an equivalence claim.
@@ -309,7 +317,7 @@ All figures are drawn at their printed width (6.3 in) with the shared style in `
 pipenv run python code/13_generate_manuscript_plot.py
 ```
 
-`validation_prompt_repetition_profile` shows design-weighted operational Accuracy, Macro-Precision, Macro-Recall and Macro-F1 in a 2 × 2 layout. For each of the seven models, each panel has 12 points: four prompt rows, coloured by prompt, with the three single-repetition estimates on each row. The `repetition = 0` rows of `condition_performance.csv` are expected-over-repetitions aggregates and are not drawn. Models keep the fixed experimental order, and the figure complements the full numerical tables rather than replacing them.
+`validation_prompt_repetition_profile` shows design-weighted operational Accuracy, Macro-Precision, Macro-Recall and Macro-F1 in a 2 × 2 layout. For each of the seven models, each panel has four prompt rows coloured by prompt (P0 blue `#5F7A9D`, P1 terracotta `#E6A57E`, P2 sky aqua `#4FB3D1`, P3 deep plum `#5E4161`). On each row, the circle is the repetition-averaged estimate and the line its 95% interval (both from script 08b), and three dark-grey ticks mark the single-repetition estimates from `condition_performance.csv`. Models keep the fixed experimental order, and the figure complements the full numerical tables rather than replacing them.
 
 Figures for the extensions are described in their notes: `jev_calibration` and `jev_risk_coverage` (script 16) and `local_carbon_country_ollama` (script 17).
 

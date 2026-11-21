@@ -222,3 +222,10 @@ The manuscript sets every figure at 0.95 of a 6.5-inch text block (about 6.3 in)
 - The two country-counterfactual maps are combined into one figure with an Equal Earth projection, a single-hue sequential scale shared across both models and hatched, labelled missing data.
 
 The statistics, plotted tables and source data are unchanged.
+
+
+## 2026-11-21 — Per-prompt intervals in the validation figure
+
+The validation profile now shows sampling uncertainty for every model × prompt. Script `code/08b_analyze_prompt_intervals.py` applies the primary estimator to each prompt (the three repetitions of a speech averaged, so it carries its inverse-inclusion weight once) and reuses the same 2,000 Rao–Wu rescaled bootstrap replicates and seed as the primary analysis. Its P0 intervals reproduce `primary_model_performance.csv` exactly, and its point estimates equal the repetition-averaged rows of `condition_performance.csv`; the script refuses to write otherwise. The P1–P3 intervals are new descriptive outputs (`outputs/validation/prompt_performance_intervals.csv`) and change no committed estimate. They are pointwise and are not used for formal prompt comparisons.
+
+In the figure, each prompt row shows the repetition-averaged estimate, its 95% interval and the three single-repetition estimates as ticks. Prompt P2 now uses sky aqua `#4FB3D1` instead of light sage `#ACE0B8`, which gives the four prompts a more even visual weight and raises the worst colour-vision-deficiency separation from 9.1 to 12.1 (CIEDE2000).
