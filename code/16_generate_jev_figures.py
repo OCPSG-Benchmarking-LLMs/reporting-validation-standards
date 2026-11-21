@@ -101,9 +101,16 @@ def load_frozen_inputs(args):
     return design, valid, confidence, correct, weights, metrics, manifest, raw_hash
 
 
+def fixed_ticks(ax, step: float) -> None:
+    """Fixed y ticks, so the label set (and the figure's cropped width) cannot jump
+    when the canvas is scaled to its print width."""
+    ticks = np.arange(0, ax.get_ylim()[1] + 1e-9, step)
+    ax.set_yticks(ticks, [f"{tick:.2f}" for tick in ticks])
+
+
 def save_with_caption(fig, stem: Path, caption: str):
-    """Transparent PNG, PDF and SVG at 300 dpi plus the .txt caption."""
-    ps.save(fig, stem, caption)
+    """Vector PDF and SVG, a transparent 600-dpi PNG and the .txt caption."""
+    ps.save(fig, stem, caption, target_width=FIGURE_WIDTH)
     plt.close(fig)
 
 
@@ -140,6 +147,7 @@ def calibration_figure(data: pd.DataFrame, n_valid: int, stem: Path, reps: int,
         color=ps.LIGHT_GREY, edgecolor=ps.EDGE, linewidth=.5, zorder=3,
     )
     bx.set_ylim(0, max(.1, float(data["estimated_population_mass"].max()) * 1.17))
+    fixed_ticks(bx, step=.25 if bx.get_ylim()[1] > .5 else .05)
     bx.set_ylabel("Weighted share")
     bx.set_xlabel("Predicted top-class probability")
     bx.set_xticks(np.arange(0, 1.01, .2))
@@ -212,6 +220,7 @@ def risk_coverage_figure(data: pd.DataFrame, baseline: dict, n_valid: int,
     ax.set_xlim(.1, 1.01)
     upper = max(float(data["ci_high"].max()), baseline["random_review_ci_high"]) * 1.1
     ax.set_ylim(0, min(1., max(upper, .02)))
+    fixed_ticks(ax, step=.02 if ax.get_ylim()[1] <= .12 else .05)
     ax.set_xticks(np.arange(.1, 1.01, .1))
     ax.set_xlabel("Automated coverage among valid outputs")
     ax.set_ylabel("Classification error rate")

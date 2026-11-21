@@ -10,11 +10,14 @@ font sizes set here are the sizes a reader sees on the page. The conventions are
 - dashed coral reference lines, always named in the legend;
 - no figure title and no text on the canvas: the title and the explanatory note go in a
   same-basename ``.txt`` caption file ("Title", a blank line, then "Note. ...");
-- transparent PNG at 300 dpi plus vector PDF and SVG with editable text.
+- vector PDF and SVG with embedded, editable text, saved at exactly their print width,
+  plus a transparent PNG at 1200 dpi.
 """
 
 from __future__ import annotations
 
+import io
+import re
 from pathlib import Path
 
 import matplotlib as mpl
@@ -44,6 +47,11 @@ SERIES = ["#5F7A9D", "#E6A57E", "#ACE0B8", "#5E4161", "#4FB3D1"]
 SERIES_NAMES = ["blue", "terracotta", "light sage", "deep plum", "sky aqua"]
 BLUE, TERRACOTTA, SAGE, PLUM, SKY_AQUA = SERIES
 
+# Warm sequential scale in the house tones (pale terracotta wash, terracotta, Oxford coral,
+# deep plum); OKLab lightness falls monotonically 0.96 -> 0.78 -> 0.70 -> 0.42.
+SEQUENTIAL_WARM = LinearSegmentedColormap.from_list(
+    "rvs_sequential_warm", ["#FBF1EA", "#E6A57E", "#FE615A", "#5E4161"], N=256
+)
 SEQUENTIAL = LinearSegmentedColormap.from_list(
     "rvs_sequential", ["#EDF2F7", "#B9D6F2", "#5F7A9D", "#002147"], N=256
 )
@@ -62,7 +70,7 @@ def use_style() -> None:
         "xtick.minor.size": 0, "ytick.minor.size": 0, "axes.grid": False,
         "axes.prop_cycle": mpl.cycler(color=SERIES),
         "legend.frameon": False, "figure.facecolor": "white", "axes.facecolor": "white",
-        "savefig.dpi": 300, "savefig.bbox": "tight",
+        "savefig.dpi": 1200, "savefig.bbox": "tight",
         "pdf.fonttype": 42, "ps.fonttype": 42, "svg.fonttype": "none",
         "patch.edgecolor": EDGE, "lines.markeredgecolor": EDGE,
         "hatch.color": BORDER, "hatch.linewidth": 0.5,
@@ -127,14 +135,64 @@ def paper_problems(fig) -> list[str]:
     return out
 
 
-def save(fig, stem, caption: str, svg: bool = True) -> list[Path]:
-    """Write transparent PNG, PDF (and SVG) plus the ``.txt`` caption; lay out first."""
+def pdf_size(data: bytes) -> tuple[float, float]:
+    """Page width and height in inches from the MediaBox of a one-page PDF."""
+    match = re.search(
+        rb"/MediaBox\s*\[\s*([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s*\]", data
+    )
+    if match is None:
+        raise ValueError("no MediaBox in PDF")
+    x0, y0, x1, y1 = (float(value) for value in match.groups())
+    return (x1 - x0) / 72, (y1 - y0) / 72
+
+
+def saved_width(fig) -> float:
+    """Width in inches of the PDF that ``savefig`` writes (tight crop and padding)."""
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="pdf", transparent=True)
+    return pdf_size(buffer.getvalue())[0]
+
+
+def fit_width(fig, target: float, tolerance: float = 0.002, max_steps: int = 12) -> float:
+    """Scale the canvas until the saved PDF is ``target`` inches wide.
+
+    The tight crop otherwise leaves the file slightly narrower than the width the paper
+    sets, and LaTeX would rescale it, shifting every font and line off its designed size.
+    Width and height scale together, so aspect-locked axes (maps) grow as well; text and
+    line widths are in points and do not change. The width is measured on the real PDF and
+    the scale is found by the secant method. Fixed tick positions keep the relation smooth.
+    """
+    base = fig.get_size_inches().copy()
+    scales, widths = [1.0], [saved_width(fig)]
+    if abs(widths[0] - target) <= tolerance:
+        return widths[0]
+    scales.append(target / widths[0])
+    for _ in range(max_steps):
+        fig.set_size_inches(*(base * scales[-1]))
+        widths.append(saved_width(fig))
+        if abs(widths[-1] - target) <= tolerance:
+            return widths[-1]
+        slope = (widths[-1] - widths[-2]) / (scales[-1] - scales[-2])
+        step = (target - widths[-1]) / slope if slope > 0 else target / widths[-1] - 1
+        scales.append(scales[-1] + step)
+    raise RuntimeError(f"could not fit the figure to {target} in (reached {widths[-1]:.4f} in)")
+
+
+def save(fig, stem, caption: str, svg: bool = True,
+         target_width: float | None = None) -> list[Path]:
+    """Write transparent PNG, PDF (and SVG) plus the ``.txt`` caption; lay out first.
+
+    With ``target_width`` (inches), the saved files are exactly that wide, so the paper's
+    ``\\includegraphics[width=...]`` places them at scale 1.
+    """
     problems = paper_problems(fig)
     if problems:
         raise ValueError("manuscript figure: " + "; ".join(problems))
     parts = caption.strip().split("\n\n", 1)
     if len(parts) != 2 or not parts[1].startswith("Note."):
         raise ValueError("caption must be 'Title', a blank line, then 'Note. ...'")
+    if target_width is not None:
+        fit_width(fig, target_width)
     stem = Path(stem)
     stem.parent.mkdir(parents=True, exist_ok=True)
     paths = []

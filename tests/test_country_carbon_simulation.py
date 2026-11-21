@@ -97,8 +97,8 @@ def test_combined_map_is_transparent_grid_free_and_exports(tmp_path):
     assert all(count >= 160 for count in matched.values())
     assert ps.paper_problems(fig) == []
     assert fig.get_figwidth() == RUNNER["FIGURE_WIDTH"]
-    maps = [axes for axes in fig.axes if axes.get_title()]
-    assert [axes.get_title() for axes in maps] == [RUNNER["PANEL_TITLES"][k] for k in keys]
+    maps = [axes for axes in fig.axes if axes.get_title(loc="left")]
+    assert [axes.get_title(loc="left") for axes in maps] == [RUNNER["PANEL_TITLES"][k] for k in keys]
     for axes in maps:
         assert all(not spine.get_visible() for spine in axes.spines.values())
         assert not axes.axison
@@ -113,6 +113,9 @@ def test_combined_map_is_transparent_grid_free_and_exports(tmp_path):
     for suffix in (".png", ".svg", ".pdf", ".txt"):
         assert stem.with_suffix(suffix).exists()
         assert stem.with_suffix(suffix).stat().st_size > 0
+    assert b"/Subtype /Image" not in stem.with_suffix(".pdf").read_bytes()
+    width, _ = ps.pdf_size(stem.with_suffix(".pdf").read_bytes())
+    assert width == pytest.approx(RUNNER["FIGURE_WIDTH"], abs=0.01)
     png = mpimg.imread(stem.with_suffix(".png"))
     assert png.shape[-1] == 4
     assert png[:, :, 3].min() == 0.0

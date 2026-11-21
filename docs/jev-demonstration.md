@@ -50,7 +50,7 @@ pipenv run python code/16_generate_jev_figures.py
 ```
 
 Script 16 defaults to the **same 2,000 Rao–Wu rescaled bootstrap draws and
-seed** recorded by script 15. It writes transparent 300-dpi PNG, vector PDF
+seed** recorded by script 15. It writes transparent 1200-dpi PNG, vector PDF
 and SVG files, each with a `.txt` caption (a title line, then a "Note." line),
 under `outputs/figures/`:
 
