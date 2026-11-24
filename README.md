@@ -103,9 +103,9 @@ The sample is frozen and must not be redrawn. A change to the design should crea
 
 ## 2. Frozen prompt-stability specification
 
-The experiment specification is stored separately from provider code:
+The demonstration specification is stored separately from provider code:
 
-- `config/models.yaml`: the seven evaluated models; machine-readable stage fields preserve the chronology and reproducibility status of the original experiment;
+- `config/models.yaml`: the seven evaluated models; machine-readable stage fields preserve the chronology and reproducibility status of the original demonstrations;
 - `config/prompts.yaml`: the canonical CapBench prompt and three semantically equivalent perturbations;
 - `schemas/inference_record.schema.json`: the provider-neutral per-observation inference contract;
 - `src/reporting_validation_standards/experiment_specs.py`: configuration validation and prompt rendering;
@@ -118,7 +118,7 @@ The four frozen prompt conditions are:
 3. `p2_label_order_permutation`: a fixed permutation of the official label order;
 4. `p3_structural_format`: a layout and format perturbation with unchanged substantive instructions.
 
-Seven models are evaluated: GPT-5.4, GPT-5.4 Mini, DeepSeek V4.1 Flash, Qwen3.6 35B, Gemma 4 31B, GPT-6 Luna and Mistral Large 3. The machine-readable stage labels (`core`, `secondary`, `supplementary`) record experimental chronology rather than scientific importance: GPT-6 Luna was part of the original six-model panel but used a moving alias, while Mistral Large 3 was added after that panel had been completed to broaden provider and model-family coverage. The working paper presents all seven together as evaluated models.
+Seven models are evaluated: GPT-5.4, GPT-5.4 Mini, DeepSeek V4.1 Flash, Qwen3.6 35B, Gemma 4 31B, GPT-6 Luna and Mistral Large 3. The machine-readable stage labels (`core`, `secondary`, `supplementary`) record the chronology of the demonstrations rather than scientific importance: GPT-6 Luna was part of the original six-model panel but used a moving alias, while Mistral Large 3 was added after that panel had been completed to broaden provider and model-family coverage. The working paper presents all seven together as evaluated models.
 
 Validate the frozen specifications with:
 
@@ -172,7 +172,7 @@ The run directory then contains `codecarbon_emissions.csv` and a compact `carbon
 
 ## 4. Production stability runs
 
-Before the full 1,000-case × four-prompt × three-repetition experiment, a length and context preflight reports text and rendered-prompt length distributions, lists the longest sampled speeches, confirms the planned 12,000 decisions per model, and uses successful Ollama smoke records to build an empirical prompt-token proxy:
+Before the full 1,000-case × four-prompt × three-repetition demonstration, a length and context preflight reports text and rendered-prompt length distributions, lists the longest sampled speeches, confirms the planned 12,000 decisions per model, and uses successful Ollama smoke records to build an empirical prompt-token proxy:
 
 ```bash
 pipenv run python code/04_preflight_stability_experiment.py
@@ -190,7 +190,7 @@ Each model is then run on its own:
 pipenv run python code/05_run_stability_experiment.py --model-key <MODEL_KEY>
 ```
 
-The runner uses the same deterministic randomised 12,000-cell schedule for every model (1,000 observations × four prompts × three repetitions), appends each completed inference record immediately, validates the frozen experiment manifest on resume and skips every cell already present. `--plan-only` inspects a run without sending requests, and `--max-decisions N` stages a launch; rerunning the same command resumes the identical schedule. Local Ollama production runs require energy tracking (`--track-carbon --country-iso-code NLD`). Each invocation creates a session manifest, so interrupted local runs resume while keeping separate CodeCarbon segments. Local models, Ollama, the GPU driver and the Python environment were not changed between production sessions; any such change would have to be documented and the affected run restarted.
+The runner uses the same deterministic randomised 12,000-cell schedule for every model (1,000 observations × four prompts × three repetitions), appends each completed inference record immediately, validates the frozen run manifest (`experiment_manifest.json`) on resume and skips every cell already present. `--plan-only` inspects a run without sending requests, and `--max-decisions N` stages a launch; rerunning the same command resumes the identical schedule. Local Ollama production runs require energy tracking (`--track-carbon --country-iso-code NLD`). Each invocation creates a session manifest, so interrupted local runs resume while keeping separate CodeCarbon segments. Local models, Ollama, the GPU driver and the Python environment were not changed between production sessions; any such change would have to be documented and the affected run restarted.
 
 Mistral Large 3 was added after the original six-model panel had been completed. It was chosen for additional provider and model-family coverage and feasible API access, not after observing its classifications. The original panel contributes 72,000 decisions and Mistral adds 12,000, for 84,000 in total.
 

@@ -468,18 +468,18 @@ def print_summary(
     if summary["completion_qa_pass"]:
         if summary["parse_status"].get("error", 0):
             print(
-                "  The scheduled experiment is structurally complete. Observed "
+                "  The scheduled demonstration is structurally complete. Observed "
                 "inference/parse errors are retained as outcomes rather than "
                 "silently rerun."
             )
         else:
             print(
-                "  The scheduled experiment is complete and structurally valid."
+                "  The scheduled demonstration is complete and structurally valid."
             )
     elif summary["structural_qa_pass"]:
         print(
             "  The existing records are structurally valid but the scheduled "
-            "experiment is not yet complete."
+            "demonstration is not yet complete."
         )
     else:
         print(

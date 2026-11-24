@@ -61,7 +61,7 @@ class OpenAIClassifier:
         if not key:
             raise EnvironmentError("OPENAI_API_KEY is not set.")
 
-        # Disable SDK retries so every retry is visible in the experiment record.
+        # Disable SDK retries so every retry is visible in the inference record.
         self.client = OpenAI(
             api_key=key,
             timeout=timeout_seconds,

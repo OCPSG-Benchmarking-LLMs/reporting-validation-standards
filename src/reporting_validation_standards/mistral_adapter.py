@@ -56,7 +56,7 @@ def _retryable_exception(exc: Exception) -> bool:
 class MistralClassifier:
     """Mistral Chat Completions adapter using the documented OpenAI-compatible API.
 
-    The experiment already depends on the OpenAI Python client. Mistral documents
+    This repository already depends on the OpenAI Python client. Mistral documents
     https://api.mistral.ai/v1 as an OpenAI-compatible base URL, so this adapter
     avoids adding a second SDK while retaining provider-specific configuration,
     identity, pricing, and telemetry.

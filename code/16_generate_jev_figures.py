@@ -46,7 +46,7 @@ def load_frozen_inputs(args):
     if digest(spec) != manifest["sha256"]:
         raise ValueError("Frozen JEV manifest specification has changed")
     if manifest["sha256"] != metrics["manifest_sha256"]:
-        raise ValueError("Manuscript metrics do not match the original experiment manifest")
+        raise ValueError("Manuscript metrics do not match the original run manifest")
     records_path = args.run_dir / "inference_records.jsonl"
     raw_hash = sha256_file(records_path)
     if raw_hash != metrics["raw_inference_sha256"]:

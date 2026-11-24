@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Resumable JEV native-choice experiment, separate from the frozen seven-model panel."""
+"""Resumable JEV native-choice demonstration, separate from the frozen seven-model panel."""
 import argparse
 import json
 import os

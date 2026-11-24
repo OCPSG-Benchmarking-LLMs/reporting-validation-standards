@@ -1,4 +1,4 @@
-# Experiment decisions and environment notes
+# Demonstration decisions and environment notes
 
 Documentation uses British English. Existing source-code identifiers and machine-readable provenance retain their original American-English spellings for compatibility and reproducibility.
 
@@ -87,7 +87,7 @@ Increasing the runtime context from 4,096 to 8,192 had negligible observed effec
 
 ## 2026-09-23 — Production decision ordering and resumability
 
-The production prompt-stability experiment uses the same deterministic randomised decision schedule for every model. The base design contains 1,000 frozen observations × four frozen prompts × three repetitions = 12,000 cells per model. Cells are permuted with NumPy PCG64 using seed 20260923 under schedule algorithm `randomized_cells_pcg64_v1`.
+The production prompt-stability demonstration uses the same deterministic randomised decision schedule for every model. The base design contains 1,000 frozen observations × four frozen prompts × three repetitions = 12,000 cells per model. Cells are permuted with NumPy PCG64 using seed 20260923 under schedule algorithm `randomized_cells_pcg64_v1`.
 
 Randomising cells rather than running complete prompt or repetition blocks reduces the alignment between prompt condition and elapsed run time, and separates repeated classifications of the same observation. The schedule seed, algorithm, and SHA-256 are recorded in every model's production manifest.
 
@@ -100,7 +100,7 @@ For local production runs, CodeCarbon tracking is mandatory for every session. I
 
 Raw production inference records and local CodeCarbon artefacts remain under the gitignored `runs/` tree rather than being committed to ordinary Git history. Completed model runs are checked and finalised with a single script, `code/06_check_and_finalize_production.py`.
 
-The script operates in check-only mode by default so it can be used safely on partial runs. Explicit `--finalize` is allowed only when both structural QA and completion QA pass. Finalisation records SHA-256 hashes for every raw run file and copies only lightweight provenance into `results/production/<model_key>/`: the frozen experiment manifest, a machine-readable QA summary, a raw-file hash inventory, and session manifests.
+The script operates in check-only mode by default so it can be used safely on partial runs. Explicit `--finalize` is allowed only when both structural QA and completion QA pass. Finalisation records SHA-256 hashes for every raw run file and copies only lightweight provenance into `results/production/<model_key>/`: the frozen run manifest (`experiment_manifest.json`), a machine-readable QA summary, a raw-file hash inventory, and session manifests.
 
 Finalised provenance is immutable: a repeated finalisation with identical source data is a no-op, while changed source data or changed archival content causes the script to refuse a silent overwrite. The eventual full raw inference corpus can therefore be deposited as a separate versioned research-data release while remaining cryptographically linked to the Git repository.
 
@@ -113,16 +113,16 @@ This addition does not retrospectively alter the chronology of the original pane
 
 Mistral documents Large 3 v25.12 as an open-weight, general-purpose Mixture-of-Experts model with 41B active parameters, 675B total parameters, and a 256k context window. The exact versioned model identifier `mistral-large-2512` is used instead of the moving `mistral-large-latest` alias.
 
-For API inference, the project uses Mistral's documented OpenAI-compatible base URL (`https://api.mistral.ai/v1`) through the already-frozen OpenAI Python SDK dependency. This avoids changing the Python environment solely to add the Mistral SDK. The adapter preserves the common experiment contract: frozen system/user prompts, `temperature=0`, a 40-token output cap, JSON-schema structured output, explicit retries, returned model identity, token accounting, latency, and dated cost accounting. Mistral's current reasoning documentation identifies adjustable `reasoning_effort` support for Mistral Small and Mistral Medium 3.5, but not Mistral Large 3; therefore the Large 3 adapter omits that request parameter and records the model-level setting as `not_exposed_for_model` rather than falsely claiming that reasoning was explicitly disabled.
+For API inference, the project uses Mistral's documented OpenAI-compatible base URL (`https://api.mistral.ai/v1`) through the already-frozen OpenAI Python SDK dependency. This avoids changing the Python environment solely to add the Mistral SDK. The adapter preserves the common inference contract: frozen system/user prompts, `temperature=0`, a 40-token output cap, JSON-schema structured output, explicit retries, returned model identity, token accounting, latency, and dated cost accounting. Mistral's current reasoning documentation identifies adjustable `reasoning_effort` support for Mistral Small and Mistral Medium 3.5, but not Mistral Large 3; therefore the Large 3 adapter omits that request parameter and records the model-level setting as `not_exposed_for_model` rather than falsely claiming that reasoning was explicitly disabled.
 
 The dated standard-tier pricing configuration is `config/pricing/mistral_2026-09-26.yaml`, recording $0.50 per million ordinary input tokens, $0.05 per million cached input tokens, and $1.50 per million output tokens. As with other hosted providers, no provider-side energy or carbon estimate is inferred from API latency or token usage.
 
-The extension reuses the identical frozen 1,000-observation × four-prompt × three-repetition randomised schedule. The original six-model experiment therefore remains 72,000 decisions; Mistral contributes a separate additional 12,000 decisions.
+The extension reuses the identical frozen 1,000-observation × four-prompt × three-repetition randomised schedule. The original six-model demonstration therefore remains 72,000 decisions; Mistral contributes a separate additional 12,000 decisions.
 
 
 ### Initial Mistral smoke-test correction
 
-The first one-case connectivity test failed before returning token usage or a model response. Before any Mistral production cell was run, the provider-specific specification was rechecked against current Mistral documentation. The initial adapter had sent `reasoning_effort="none"` by analogy with other models, but adjustable reasoning is not documented for Mistral Large 3. The parameter was therefore removed and the configuration changed to `reasoning_setting: not_exposed_for_model`. This is an adapter/configuration correction made during smoke testing, before production inference; it does not alter any completed experimental observations.
+The first one-case connectivity test failed before returning token usage or a model response. Before any Mistral production cell was run, the provider-specific specification was rechecked against current Mistral documentation. The initial adapter had sent `reasoning_effort="none"` by analogy with other models, but adjustable reasoning is not documented for Mistral Large 3. The parameter was therefore removed and the configuration changed to `reasoning_setting: not_exposed_for_model`. This is an adapter/configuration correction made during smoke testing, before production inference; it does not alter any completed production observations.
 
 
 ## 2026-09-26 — Stability analysis estimands and failure handling
@@ -193,18 +193,18 @@ The analysis is implemented in `code/12_analyze_compute_environment.py`. Its gov
 
 ## 2026-09-27 — Model-panel provenance versus manuscript presentation
 
-The existing machine-readable stage labels are retained unchanged for reproducibility. They encode the chronology and technical status of the experiment rather than a ranking of scientific importance. In particular, GPT-6 Luna is recorded as `stage: secondary` because it was included in the original six-model panel through a moving alias rather than a pinned snapshot. Mistral Large 3 is recorded as `stage: supplementary` with `extension_status: post_production_robustness` because it was added only after the original six-model panel had been completed, in order to broaden provider and model-family coverage.
+The existing machine-readable stage labels are retained unchanged for reproducibility. They encode the chronology and technical status of the demonstrations rather than a ranking of scientific importance. In particular, GPT-6 Luna is recorded as `stage: secondary` because it was included in the original six-model panel through a moving alias rather than a pinned snapshot. Mistral Large 3 is recorded as `stage: supplementary` with `extension_status: post_production_robustness` because it was added only after the original six-model panel had been completed, in order to broaden provider and model-family coverage.
 
 These provenance labels must not be interpreted as making GPT-6 Luna or Mistral Large 3 second-class comparison models. In the working paper, all seven completed models are treated as evaluated models and should normally appear together in the principal tables, figures, and substantive discussion. The chronology should be explained once in the research-design description and then separated from the interpretation of model results.
 
-The original-six versus all-seven panel distinction remains useful for analyses that depend on the pre-existing experimental boundary, especially panel-level unanimity. It is therefore preserved in analytical metadata and outputs without being used as a substantive hierarchy.
+The original-six versus all-seven panel distinction remains useful for analyses that depend on the pre-existing panel boundary, especially panel-level unanimity. It is therefore preserved in analytical metadata and outputs without being used as a substantive hierarchy.
 
 
 ## 2026-09-27 — Manuscript figure design
 
 The manuscript keeps the full stability, validation, propagation, and computational tables. The empirical figure is used as a visual complement rather than as a replacement for the numerical record.
 
-The selected companion figure is generated by `code/13_generate_manuscript_plot.py` and shows design-weighted operational validation performance across the complete prompt × repetition experiment. It contains four aligned panels: Accuracy, Macro-Precision, Macro-Recall, and Macro-F1. Within each of the seven model groups, the four frozen prompt specifications occupy separate horizontal lines. Colour identifies prompt, and the three equally sized points on each prompt line show the three single-repetition estimates.
+The selected companion figure is generated by `code/13_generate_manuscript_plot.py` and shows design-weighted operational validation performance across the complete prompt × repetition demonstration. It contains four aligned panels: Accuracy, Macro-Precision, Macro-Recall, and Macro-F1. Within each of the seven model groups, the four frozen prompt specifications occupy separate horizontal lines. Colour identifies prompt, and the three equally sized points on each prompt line show the three single-repetition estimates.
 
 The source is `outputs/validation/condition_performance.csv`. Rows with `aggregation = single_repetition` and repetitions 1–3 provide the 12 displayed observations per model. The `repetition = 0` rows are expected-over-repetitions aggregates and are excluded from the point display.
 
@@ -228,7 +228,7 @@ The statistics, plotted tables and source data are unchanged.
 
 The validation profile now shows sampling uncertainty for every model × prompt. Script `code/08b_analyze_prompt_intervals.py` applies the primary estimator to each prompt (the three repetitions of a speech averaged, so it carries its inverse-inclusion weight once) and reuses the same 2,000 Rao–Wu rescaled bootstrap replicates and seed as the primary analysis. Its P0 intervals reproduce `primary_model_performance.csv` exactly, and its point estimates equal the repetition-averaged rows of `condition_performance.csv`; the script refuses to write otherwise. The P1–P3 intervals are new descriptive outputs (`outputs/validation/prompt_performance_intervals.csv`) and change no committed estimate. They are pointwise and are not used for formal prompt comparisons.
 
-In the figure, each prompt row shows the repetition-averaged estimate and its 95% interval. Marks for the three single repetitions proved too noisy and mostly hid behind the averaged estimate (median spread 0.006, maximum 0.059), so the caption reports the spread instead. Models are ordered by their primary P0 macro-F1 estimate rather than in the experimental order; the caption states that the order is not a ranking. Prompt P2 now uses sky aqua `#4FB3D1` instead of light sage `#ACE0B8`, which gives the four prompts a more even visual weight and raises the worst colour-vision-deficiency separation from 9.1 to 12.1 (CIEDE2000).
+In the figure, each prompt row shows the repetition-averaged estimate and its 95% interval. Marks for the three single repetitions proved too noisy and mostly hid behind the averaged estimate (median spread 0.006, maximum 0.059), so the caption reports the spread instead. Models are ordered by their primary P0 macro-F1 estimate rather than in the fixed panel order; the caption states that the order is not a ranking. Prompt P2 now uses sky aqua `#4FB3D1` instead of light sage `#ACE0B8`, which gives the four prompts a more even visual weight and raises the worst colour-vision-deficiency separation from 9.1 to 12.1 (CIEDE2000).
 
 The working paper sets the validation profile and both JEV figures at 0.8 of the text width and the country map at 0.88, the widest at which the map, its caption and its Note fit on one page. `plot_style.print_width(fraction)` returns the matching width (5.2 in and 5.7 in), and each script draws its figure at that size, so the 8–9 pt text and the 7 pt minimum hold on the printed page. The map uses a warm sequential scale in the house tones (pale terracotta, terracotta `#E6A57E`, Oxford coral `#FE615A`, deep plum `#5E4161`; lightness falls monotonically), which keeps emissions visually distinct from the blue used for performance, and 0.5 pt grey borders.
 
