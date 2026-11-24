@@ -1,6 +1,6 @@
 # JEV native probability demonstration (post hoc extension)
 
-This experiment is **separate from the frozen seven-model stability panel**.
+This demonstration is **separate from the frozen seven-model stability panel**.
 Its purpose is to examine native probabilistic measurement, calibration,
 selective classification and downstream aggregation. It is not an eighth
 directly comparable P0 model. In particular, TypeSafe's native `choice`
@@ -24,7 +24,7 @@ pipenv run python code/15_analyze_jev_calibration.py
 
 The frozen source remains the 1,000-case label-stratified GB sample,
 with `text_en` as input and 23 official prediction labels. Scripts do not
-alter the sampling manifest or the seven-model experiment. The single-choice
+alter the sampling manifest or the seven-model demonstration. The single-choice
 instructions and criteria are hashed in `runs/jev/calibration/experiment_manifest.json`.
 The single-pass runner writes an append-only record for each attempted speech
 including failures, actual returned model, usage, latency and probability
@@ -39,7 +39,7 @@ an independently dated provider tariff or energy measurement.
 
 The plotting step reads the **original** 1,000-row inference file and the
 frozen probability-sample design. It verifies the original inference SHA-256
-and experiment-specification hash against `outputs/jev/metrics.json` before
+and run-specification hash against `outputs/jev/metrics.json` before
 producing any figure. There are **no** JEV API calls, retries or data repairs.
 
 Run scripts 15 and 16 in order:
@@ -182,7 +182,7 @@ model-version drift, or stochastic reruns.
 
 Inspect whether confidence ranks errors sensibly before proposing human-review
 thresholds. Do not claim that Brier/log-loss are externally calibrated merely
-because the provider calls probabilities 'calibrated'. Treat post hoc experiment
+because the provider calls probabilities 'calibrated'. Treat post hoc demonstration
 selection and the difference between API-native criteria and the P0 prompt
 as explicit limitations. Store the API pricing date separately if a cost
 comparison is subsequently added.
@@ -230,7 +230,7 @@ exactly `1.0` (maximum absolute deviation `0.0`). This documents
 **non-reproduction on a subsequent request**, not the original sums or
 the cause of their initial rejection. Do not overwrite the first pass.
 
-For future first-pass experiments, script 14 retains raw class
+For future first-pass runs, script 14 retains raw class
 probabilities, totals, signed sum deviation, returned choice, confidence,
 model and usage when an API response is received but parsing rejects it.
 This change does not alter the original 1,000-record run.

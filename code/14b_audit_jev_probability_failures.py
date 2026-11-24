@@ -77,7 +77,7 @@ def audit():
     manifest = json.loads((args.run_dir / "experiment_manifest.json").read_text(encoding="utf-8"))
     spec = manifest["specification"]
     if digest(spec) != manifest["sha256"]:
-        raise ValueError("Original experiment specification hash mismatch")
+        raise ValueError("Original JEV run specification hash mismatch")
     original_path = args.run_dir / "inference_records.jsonl"
     originals = [
         json.loads(line) for line in original_path.read_text(encoding="utf-8").splitlines()
